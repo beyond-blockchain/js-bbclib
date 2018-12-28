@@ -1,6 +1,7 @@
 Name
 =====
 BBc-1(Beyond Block-chain One) Library, written in Javascript. 
+This reposigory is originally from https://github.com/t-hashimoto249/js-bbclib
 
 # Overview
 The library is implemented bbclib and bbc-app-rest-api functions on platform of BBc-1.
@@ -22,7 +23,7 @@ $ yarn add js-bbclib
 
 ・From GitHub:
 ```$xslt
-$ git clone https://github.com/t-hashimoto249/js-bbclib.git
+$ git clone https://github.com/beyond-blockchain/bbc1.git
 ```
 
 # Feature in js-bbclib 
