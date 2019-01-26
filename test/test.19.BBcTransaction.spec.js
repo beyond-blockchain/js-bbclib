@@ -168,8 +168,36 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
   });
 
+  it('test sign transaction', async () => {
+
+    let keypair = await get_key_pair();
+    const user_id = await jscu.random.getRandomBytes(32);
+    const bbctransaction = new bbclib.BBcTransaction(0);
+
+    const witness = new bbclib.BBcWitness();
+    bbctransaction.add_witness(witness);
+    witness.add_witness(user_id);
+
+    let sig = await bbctransaction.sign(null,null,keypair);
+    let ret = bbctransaction.add_signature(user_id, sig);
+    expect(ret).to.be.eq(true);
+
+    witness.add_signature(user_id, sig);
+
+    const packed_transaction = await bbctransaction.pack()
+
+  });
+
+
 });
 
 function expect_uint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }
+
+async function get_key_pair(){
+  let keypair = new bbclib.KeyPair();
+  await keypair.generate();
+  return keypair;
+};
+

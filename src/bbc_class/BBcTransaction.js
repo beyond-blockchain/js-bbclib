@@ -448,7 +448,7 @@ export class BBcTransaction{
       return null;
     }
 
-    await sig.add(s, key_pair.public_key);
+    await sig.add(s, key_pair.public_key._jwk);
     return sig;
   }
 
