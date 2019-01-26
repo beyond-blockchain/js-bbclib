@@ -72,7 +72,7 @@ export async function create_pubkey_byte(pubkey) {
   const byte_x = await jseu.encoder.decodeBase64Url(pubkey['x']);
   const byte_y = await jseu.encoder.decodeBase64Url(pubkey['y']);
 
-  const public_key= new Buffer(65);
+  const public_key= new Uint8Array(65);
   public_key[0] = 0x04;
   for (let i = 0; i < 32; i++) {
     public_key[i + 1] = byte_x[i];
