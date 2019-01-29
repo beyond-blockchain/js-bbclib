@@ -1,18 +1,17 @@
-import * as para from '../parameter.js';
-import { Buffer } from 'buffer';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcPointer{
-  constructor(transaction_id, asset_id) {
-    this.id_length = para.DefaultLength.BBcOne;
+  constructor(transaction_id, asset_id, id_length =32) {
+    this.id_length = cloneDeep(id_length);
     if (transaction_id != null) {
-      this.transaction_id = transaction_id;
+      this.transaction_id = cloneDeep(transaction_id);
     } else {
       this.transaction_id = new Uint8Array( this.id_length );
     }
 
-    this.asset_id = asset_id;
+    this.asset_id = cloneDeep(asset_id);
     this.asset_id_existence = 0;
     if (asset_id != null) {
       this.asset_id_existence = 1;
@@ -29,11 +28,11 @@ export class BBcPointer{
   }
 
   set_transaction_id(transaction_id) {
-    this.transaction_id = transaction_id;
+    this.transaction_id = cloneDeep(transaction_id);
   }
 
   set_asset_id(asset_id) {
-    this.asset_id = asset_id;
+    this.asset_id = cloneDeep(asset_id);
     if(asset_id != null) {
       this.asset_id_existence = 1;
     } else {

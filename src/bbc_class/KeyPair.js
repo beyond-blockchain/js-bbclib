@@ -1,6 +1,6 @@
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
-import { Buffer } from 'buffer';
+import cloneDeep from "lodash.clonedeep";
 
 export class KeyPair{
   constructor() {
@@ -17,10 +17,10 @@ export class KeyPair{
 
   set_key_pair(private_key, public_key) {
     if (private_key != null) {
-      this.private_key = private_key;
+      this.private_key = cloneDeep(private_key);
     }
     if (public_key != null) {
-      this.public_key = public_key;
+      this.public_key = cloneDeep(public_key);
     }
   }
 
@@ -36,7 +36,7 @@ export class KeyPair{
     const byte_x = await jseu.encoder.decodeBase64Url(public_key['x']);
     const byte_y = await jseu.encoder.decodeBase64Url(public_key['y']);
 
-    const public_key_byte = new Buffer(65);
+    const public_key_byte = new Uint8Array(65);
     public_key_byte[0] = 0x04;
     for (let i = 0; i < 32; i++) {
       public_key_byte[i + 1] = byte_x[i];

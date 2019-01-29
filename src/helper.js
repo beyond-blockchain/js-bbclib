@@ -3,7 +3,6 @@ import { BBcAsset } from './bbc_class/BBcAsset';
 import { BBcTransaction } from './bbc_class/BBcTransaction';
 import { BBcWitness } from './bbc_class/BBcWitness';
 import { BBcRelation } from './bbc_class/BBcRelation';
-import { Buffer } from 'buffer';
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 
@@ -26,33 +25,33 @@ export async function sign_and_add_signature(transaction, key_pair) {
 }
 
 export async function get_new_transaction(user_id, event_num, relation_num, witness) {
-  const transaction = new BBcTransaction(0);
+  const transaction = new BBcTransaction(1.0,32);
   if (event_num > 0) {
     for (let i = 0; i < event_num; i++) {
-      const evt = new BBcEvent(null);
-      const ast = new BBcAsset(null);
+      const evt = new BBcEvent(null,32);
+      const ast = new BBcAsset(null,32);
       ast.add_user_id(user_id);
       await ast.digest();
       evt.add_asset(ast);
-      evt.add_asset_group_id(new Buffer(8));
+      evt.add_asset_group_id(new Uint8Array(8));
       transaction.add_event(evt);
     }
   }
 
   if (relation_num > 0) {
     for (let i = 0; i < relation_num; i++) {
-      transaction.add(new BBcRelation());
+      transaction.add(new BBcRelation(new Uint8Array(0),32));
     }
   }
   if (witness) {
-    transaction.add_witness(new BBcWitness());
+    transaction.add_witness(new BBcWitness(32));
   }
   return transaction;
 }
 
 function hexStringToByte(str) {
   if (!str) {
-    return new Buffer(0);
+    return new Uint8Array(0);
   }
 
   const a = [];
@@ -60,7 +59,7 @@ function hexStringToByte(str) {
     a.push(parseInt(str.substr(i, 2), 16));
   }
 
-  return new Buffer(a);
+  return new Uint8Array(a);
 }
 
 export async function get_random_value(length) {
@@ -84,7 +83,7 @@ export async function create_pubkey_byte(pubkey) {
 
 export async function create_asset(user_id) {
 
-  const bbcAsset = new BBcAsset(user_id);
+  const bbcAsset = new BBcAsset(user_id, 32);
   await bbcAsset.set_random_nonce();
 
   const asset_file = new Uint8Array(32);
@@ -102,7 +101,7 @@ export async function create_asset(user_id) {
 
 export async function create_asset_without_file(user_id) {
 
-  const bbcAsset = new BBcAsset(user_id);
+  const bbcAsset = new BBcAsset(user_id, 32);
   await bbcAsset.set_random_nonce();
 
   const asset_body = new Uint8Array(32);
@@ -112,18 +111,6 @@ export async function create_asset_without_file(user_id) {
   await bbcAsset.add_asset(null, asset_body);
 
   return bbcAsset;
-}
-
-export function buffer_to_uint8array(buf) {
-  if (!buf) return undefined;
-  if (buf.constructor.name === 'Uint8Array'
-    || buf.constructor === Uint8Array) {
-    return buf;
-  }
-  if (typeof buf === 'string') buf = Buffer.from(buf);
-  const a = new Uint8Array(buf.length);
-  for (let i = 0; i < buf.length; i++) a[i] = buf[i];
-  return a;
 }
 
 export function hbo(num, len){
@@ -150,8 +137,7 @@ export function hboToInt64(bin){
 }
 
 export function hboToInt32(bin){
-  //console.log("bin:", bin);
-  //console.log("bin32:", jseu.encoder.arrayBufferToHexString(bin));
+
   let num = 0;
   num = num + (bin[0]);
   num = num + (bin[1] * 256 );

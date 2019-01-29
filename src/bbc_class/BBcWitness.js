@@ -1,10 +1,10 @@
-import * as para from '../parameter.js';
 import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcWitness{
-  constructor() {
-    this.id_length = para.DefaultLength.BBcOne;
+  constructor(id_length = 32) {
+    this.id_length = cloneDeep(id_length);
     this.transaction = null;
     this.user_ids = [];
     this.sig_indices = [];
@@ -23,20 +23,20 @@ export class BBcWitness{
     }
   }
 
-  add_witness(user_id) {
+  add_witness(user_id, keyType) {
     if (this.user_ids.indexOf(user_id) === -1) {
-      this.user_ids.push(user_id);
-      this.sig_indices.push(this.transaction.get_sig_index(user_id));
+      this.user_ids.push(cloneDeep(user_id));
+      this.sig_indices.push(this.transaction.get_sig_index(user_id, keyType));
     }
   }
 
   add_signature(user_id, signature) {
-    this.transaction.add_signature(user_id, signature);
+    this.transaction.add_signature(cloneDeep(user_id), cloneDeep(signature));
   }
 
   add_user(user) {
     if (user != null) {
-      this.user_ids.push(user);
+      this.user_ids.push(cloneDeep(user));
       return true;
     }
     return false;
@@ -44,7 +44,7 @@ export class BBcWitness{
 
   add_sig_indices(index) {
     if (index != null) {
-      this.sig_indices.push(index);
+      this.sig_indices.push(cloneDeep(index));
       return true;
     }
     return false;

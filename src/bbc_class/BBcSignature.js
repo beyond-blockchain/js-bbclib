@@ -1,8 +1,8 @@
 import { KeyPair } from './KeyPair.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
-
-import { Buffer } from 'buffer';
+import * as para from '../parameter.js';
+import cloneDeep from "lodash.clonedeep";
 
 export class BBcSignature{
   constructor(key_type) {
@@ -30,14 +30,14 @@ export class BBcSignature{
   async add(signature, pub_key) {
     if (signature != null) {
       this.not_initialized = false;
-      this.signature = signature;
+      this.signature = cloneDeep(signature);
     }
 
     if (pub_key != null) {
-      this.pubkey = pub_key;
-      this.pubkey_byte = await helper.create_pubkey_byte(pub_key);
+      this.pubkey = cloneDeep(pub_key);
+      this.pubkey_byte = await helper.create_pubkey_byte(cloneDeep(pub_key));
       this.keypair = new KeyPair();
-      this.keypair.set_key_pair(null, pub_key);
+      this.keypair.set_key_pair(null, cloneDeep(pub_key));
     }
 
     return true;
@@ -51,19 +51,30 @@ export class BBcSignature{
 
     let binary_data = [];
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.key_type,4)));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.pubkey_byte.length * 8, 4)));
-    binary_data = binary_data.concat(Array.from(this.pubkey_byte));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
-    binary_data = binary_data.concat(Array.from(this.signature));
+    if (this.key_type === para.KeyType.NOT_INITIALIZED){
+      binary_data = binary_data.concat(Array.from(helper.hbo(this.key_type, 4)));
 
+    }else {
+
+      binary_data = binary_data.concat(Array.from(helper.hbo(this.key_type, 4)));
+      binary_data = binary_data.concat(Array.from(helper.hbo(this.pubkey_byte.length * 8, 4)));
+      binary_data = binary_data.concat(Array.from(this.pubkey_byte));
+      binary_data = binary_data.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
+      binary_data = binary_data.concat(Array.from(this.signature));
+    }
     return new Uint8Array(binary_data);
   }
 
   async unpack(data) {
+
     let pos_s = 0;
     let pos_e = 4; // uint32
+
     this.key_type =  helper.hboToInt32(data.slice(pos_s,pos_e));
+
+    if (this.key_type === para.KeyType.NOT_INITIALIZED){
+      return true;
+    }
 
     pos_s = pos_e;
     pos_e = pos_e + 4; // uint32
@@ -85,8 +96,11 @@ export class BBcSignature{
       this.signature = data.slice(pos_s, pos_e);
     }
 
-    //65byteの鍵形式からJwkへ変換してinput
-    await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkey_byte, 'P-256'));
+    if (this.pubkey_byte.length > 0 && this.signature.length > 0){
+      //65byteの鍵形式からJwkへ変換してinput
+      await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkey_byte, 'P-256'));
+    }
+
     return true;
   }
 

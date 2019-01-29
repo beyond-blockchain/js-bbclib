@@ -1,14 +1,14 @@
-import * as para from '../parameter.js';
 import * as helper from '../helper.js';
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcReference{
-  constructor(asset_group_id, transaction, ref_transaction, event_index_in_ref) {
-    this.id_length = para.DefaultLength.BBcOne;
-    this.asset_group_id = asset_group_id;
+  constructor(asset_group_id, transaction, ref_transaction, event_index_in_ref, id_length=32) {
+    this.id_length = cloneDeep(id_length);
+    this.asset_group_id = cloneDeep(asset_group_id);
     this.transaction_id = new Uint8Array(this.id_length);
-    this.transaction = transaction;
-    this.ref_transaction = ref_transaction;
-    this.event_index_in_ref = event_index_in_ref;
+    this.transaction = cloneDeep(transaction);
+    this.ref_transaction = cloneDeep(ref_transaction);
+    this.event_index_in_ref = cloneDeep(event_index_in_ref);
     this.sig_indices = [];
     this.mandatory_approvers = null;
     this.option_approvers = null;
@@ -20,7 +20,7 @@ export class BBcReference{
   }
 
   prepare_reference(ref_transaction) {
-    this.ref_transaction = ref_transaction;
+    this.ref_transaction = cloneDeep( ref_transaction );
     try {
 
       const evt = ref_transaction.events[this.event_index_in_ref];
@@ -51,7 +51,7 @@ export class BBcReference{
       //user_id = this.option_sig_ids.pop(0);
 
     }
-    this.transaction.add_signature(user_id, signature);
+    this.transaction.add_signature(cloneDeep(user_id), cloneDeep(signature));
   }
 
   get_referred_transaction() {

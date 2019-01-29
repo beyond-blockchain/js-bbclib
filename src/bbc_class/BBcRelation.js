@@ -1,14 +1,14 @@
 import { BBcAsset } from './BBcAsset.js';
 import { BBcPointer } from './BBcPointer.js';
-import * as para from '../parameter.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcRelation{
-  constructor(asset_group_id) {
-    this.id_length = para.DefaultLength.BBcOne;
-    if (asset_group_id != null) {
-      this.asset_group_id = asset_group_id;
+  constructor(asset_group_id, id_length=32) {
+    this.id_length = cloneDeep(id_length);
+    if (asset_group_id !== null) {
+      this.asset_group_id = cloneDeep(asset_group_id);
     } else {
       this.asset_group_id = new Uint8Array(this.id_length);
     }
@@ -34,17 +34,17 @@ export class BBcRelation{
 
   add_asset_group_id(asset_group_id) {
     if (asset_group_id != null) {
-      this.asset_group_id = asset_group_id;
+      this.asset_group_id = cloneDeep(asset_group_id);
     }
   }
 
   set_asset(asset) {
-    this.asset = asset;
+    this.asset = cloneDeep(asset);
   }
 
   add_pointer(pointer) {
     if (pointer != null) {
-      this.pointers.push(pointer);
+      this.pointers.push(cloneDeep(pointer));
     }
   }
 
@@ -95,7 +95,7 @@ export class BBcRelation{
         pos_e = pos_e + pointer_length;
 
         const pointer_bin = data.slice(pos_s, pos_e);
-        const ptr = new BBcPointer(null, null);
+        const ptr = new BBcPointer(null, null, this.id_length);
 
         ptr.unpack(pointer_bin);
         this.pointers.push(ptr);
@@ -110,7 +110,7 @@ export class BBcRelation{
       pos_s = pos_e;
       pos_e = pos_e + value_length; // uint32
       const asset_bin = data.slice(pos_s, pos_e);
-      this.asset = new BBcAsset(null);
+      this.asset = new BBcAsset(null, this.id_length);
       this.asset.unpack(asset_bin);
     }
   }

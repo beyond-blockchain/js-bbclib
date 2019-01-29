@@ -19,7 +19,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     console.log('***********************');
     console.log('Test for BBcTransaction Class.');
 
-    const bbctransaction = new bbclib.BBcTransaction(0);
+    const bbctransaction = new bbclib.BBcTransaction(1.0, 32);
     const refs = [];
     for (let i = 0; i < 2; i++) {
       const asset_group_id = await jscu.random.getRandomBytes(32);
@@ -31,14 +31,14 @@ describe(`${envName}: Test BBcTransaction`, () => {
       refs.push(bbcReference);
     }
 
-    const witness = new bbclib.BBcWitness();
+    const witness = new bbclib.BBcWitness(32);
     witness.add_sig_indices(0);
     witness.add_user(new Uint8Array(2));
     bbctransaction.add_parts([], refs, [], witness, null);
     //event reference relation witness cross_ref
 
     const packed_transaction = await bbctransaction.pack();
-    const unpacked_transaction = new bbclib.BBcTransaction(0);
+    const unpacked_transaction = new bbclib.BBcTransaction(1.0, 32);
     await unpacked_transaction.unpack(packed_transaction);
 
     expect(bbctransaction.version).to.be.eq(unpacked_transaction.version);
@@ -84,7 +84,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
   it('load transaction with event', async () => {
     const signature_hex_string = '01000000204f8c64bcf7711520000100140100002000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f130000020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502200089da422bbd6e85cdf6f8941ad4fdc905429da3a658ca00af4078489894b8115101000100200099ce84bb678d89e057840e5c4b90f1ee8fdc59e52889e4c4b9da8ab48ba259188000000020004f306a23a0c1a41f9aa1a56802bb8c21229ae6978e18b651a072a455ad55c34b20005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000898aa28f3dcdf9790b6047af18accd537db061138111df62d27d55c0546ba952000000000000120074657374537472696e67313233343558585800000000010026000000010020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765020000010044000000200016347198acdeed2b6e90715e6f50ba6e8e2728135c7af36aa9903a2b8b834c33200052acc5c800d9c3e8dbd81d0e4bdb233ce238953f762c409a2097e7e3451888ad01008d0000000200000008020000045c0d6779546f198e8e4454263a0279bc8cd2df0607da638fd934020fa383c3c8c67065affc5395523e84e121287b7f2628c7762c817853192fe3fe08cce2756b0002000096e1ed7b4c17720b683ba03fd2f1824f52c1cea921b3c1aac2894a8869f5380b58fb9c2dabcdca352013bb302df3aabb24647684ffa13931094d79c8d661ad8a';
     const transaction_data = helper.fromHexString(signature_hex_string);
-    const transaction_unpack = new bbclib.BBcTransaction(0);
+    const transaction_unpack = new bbclib.BBcTransaction(1.0, 32);
 
     await transaction_unpack.unpack(transaction_data);
 
@@ -129,7 +129,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
   it('load transaction with relations ', async () => {
     const signature_hex_string = '01000000e00c7d64bcf771152000000000000100160100002000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f130200460020003eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9010020008c2f9fd27c0044c83e64bc66162be45810cadb85e774fb9ab5eaf26ea68f7fa8240020003a77784128c045f171984af534a3ff40af3499ea4b170ec9adaa87329b3626d5000080000000200051c515dcb465283ebd179ede9b538c512525b56bd08937a4e70617d9e93ac92a20005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650220001c556e050b1ede536257d1d0d0e87d9ac0f96f8477877f552d0d2fc8d52a0d46000000000000120074657374537472696e67313233343558585801004a000000020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502000020005d122c5f03ce34c998a5c90eae9b336e9563b860f405c3e34b7438d8915f17b50100010044000000200016347198acdeed2b6e90715e6f50ba6e8e2728135c7af36aa9903a2b8b834c33200071a70662cee85ab655e7a602720690033364b24a12d5b7a889b184efa670fc0f02008d0000000200000008020000048d6ba60d212be64213662a08f7b2fe2ec70226b468e3bb1bfa22b6470ef041c1651e4d010a0f9139b06c775901d2cc41786029bd15e362dbe5ea6b7761aca2eb0002000046c820b3f758bea877f108e7efda0ba76d1e4a4ac021dd8357dfe423537033f7172f35e23005d51c6011cd93c7d2100cc7cf713e05da3c41df96f1ebe957238c8d0000000200000008020000048d6ba60d212be64213662a08f7b2fe2ec70226b468e3bb1bfa22b6470ef041c1651e4d010a0f9139b06c775901d2cc41786029bd15e362dbe5ea6b7761aca2eb000200007b8157b97564a960df4f26b876b19a83a8f707f05398defa7ee844327e48d015f42ee9827d68ee77ad1617a55b90281037aa9104089a856c34cc6d45d8974748';
     const transaction_data = helper.fromHexString(signature_hex_string);
-    const transaction_unpack = new bbclib.BBcTransaction(0);
+    const transaction_unpack = new bbclib.BBcTransaction(1.0, 32);
 
     await transaction_unpack.unpack(transaction_data);
 
@@ -168,14 +168,30 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
   });
 
+
+  it('load transaction with KeyType == 0 ', async () => {
+    const signature_hex_string = '01000000157e472e4c6849802000000000000200b00000002000b01269bde4f5422dcd19346a51472a063174584227eb27cc905c449c0bc64eee010004000000000082000000200008d36ba72b8c152b2a028b7a7587f7bd262a0cb0d3fafc99ab460f3b92c6910520006dbd0f28d0d97656768b7b4ed96255e67fd11740a44b1c4b575191b06e9e3a3520003247f901d1ecb848673f3fa7bb28393822042c3b2b458d97eeb8adcfad4648bb00000000000014007b22706f77223a33302c22756e6974223a32357daf0000002000b01269bde4f5422dcd19346a51472a063174584227eb27cc905c449c0bc64eee0100040000000000810000002000c6e4d83e5ca74512fa2aa73da70d2aef4ab13f7b558cd4f498537baf065221ac2000a4279eae47aaa7417da62434795a011ccb0ec870f7f56646d181b5500a892a9a2000667c3e8b2f84e55eacd012841998da5ce240d13dd93480703826a819dc26fa9100000000000013007b22706f77223a352c22756e6974223a32357d01004a000000020020006dbd0f28d0d97656768b7b4ed96255e67fd11740a44b1c4b575191b06e9e3a3500002000a4279eae47aaa7417da62434795a011ccb0ec870f7f56646d181b5500a892a9a0100000002000c0000000000000000000000000000000c000000000000000000000000000000';
+    const transaction_data = helper.fromHexString(signature_hex_string);
+    const transaction_unpack = new bbclib.BBcTransaction(1.0, 32);
+    await transaction_unpack.unpack(transaction_data);
+
+    //transaction_unpack.show_str();
+
+    await transaction_unpack.set_transaction_id();
+
+
+
+  });
+
+
   it('test sign transaction', async () => {
 
     let keypair = await get_key_pair();
     const user_id = await jscu.random.getRandomBytes(32);
-    const bbctransaction = new bbclib.BBcTransaction(0);
+    const bbctransaction = new bbclib.BBcTransaction(1.0, 32);
 
     const witness = new bbclib.BBcWitness();
-    bbctransaction.add_witness(witness);
+    bbctransaction.set_witness(witness);
     witness.add_witness(user_id);
 
     let sig = await bbctransaction.sign(null,null,keypair);
@@ -183,7 +199,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(ret).to.be.eq(true);
 
     witness.add_signature(user_id, sig);
-
     const packed_transaction = await bbctransaction.pack()
 
   });
@@ -195,9 +210,20 @@ function expect_uint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }
 
+
+
 async function get_key_pair(){
   let keypair = new bbclib.KeyPair();
   await keypair.generate();
+
+
+  const aaaa = { kty: 'EC',
+    crv: 'P-256',
+    x: 'jlsDo-_OrvUI_RMWo7vvpw2JQ7HEfMxOK3LMas6ZmHY',
+    y: 'kZcDSfPI6XYJQzIy7NA7M1JUAhcGPLXfDAUKa6s8_RA' }
+  let key_obj = new jscu.Key("jwk", aaaa);
+
+
   return keypair;
 };
 

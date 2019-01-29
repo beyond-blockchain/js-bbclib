@@ -1,12 +1,12 @@
 import { BBcAsset } from './BBcAsset.js';
-import * as para from '../parameter.js';
+import cloneDeep from 'lodash.clonedeep';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 
 export class BBcEvent{
-  constructor(asset_group_id) {
-    this.id_length = para.DefaultLength.BBcOne;
-    this.asset_group_id = asset_group_id;
+  constructor(asset_group_id, id_length=32) {
+    this.id_length = cloneDeep(id_length);
+    this.asset_group_id = cloneDeep(asset_group_id);
     this.reference_indices = [];
     this.mandatory_approvers = [];
     this.option_approver_num_numerator = 0;
@@ -49,31 +49,31 @@ export class BBcEvent{
   }
 
   add_asset_group_id(asset_group_id) {
-    this.asset_group_id = asset_group_id;
+    this.asset_group_id = cloneDeep(asset_group_id);
   }
 
   add_reference_indices(reference_indices) {
-    this.reference_indices.push(reference_indices);
+    this.reference_indices.push(cloneDeep(reference_indices));
   }
 
   add_mandatory_approver(mandatory_approver) {
-    this.mandatory_approvers.push(mandatory_approver);
+    this.mandatory_approvers.push(cloneDeep(mandatory_approver));
   }
 
   add_option_approver_num_numerator(option_approver_num_numerator) {
-    this.option_approver_num_numerator = option_approver_num_numerator;
+    this.option_approver_num_numerator = cloneDeep(option_approver_num_numerator);
   }
 
   add_option_approver_num_denominator(option_approver_num_denominator) {
-    this.option_approver_num_denominator = option_approver_num_denominator;
+    this.option_approver_num_denominator = cloneDeep(option_approver_num_denominator);
   }
 
   add_option_approver(option_approver) {
-    this.option_approver = option_approver;
+    this.option_approver = cloneDeep(option_approver);
   }
 
   add_asset(asset) {
-    this.asset = asset;
+    this.asset = cloneDeep(asset);
   }
 
   pack() {
@@ -124,7 +124,6 @@ export class BBcEvent{
       pos_s = pos_e;
       pos_e = pos_e + value_length;
       this.asset_group_id = data.slice(pos_s,pos_e);
-
     }
 
     pos_s = pos_e;
@@ -184,7 +183,7 @@ export class BBcEvent{
 
       const asset_bin = data.slice(pos_s, pos_e);
 
-      this.asset = new BBcAsset(new Uint8Array(0));
+      this.asset = new BBcAsset(new Uint8Array(0, this.id_length));
       this.asset.unpack(asset_bin);
     }
 

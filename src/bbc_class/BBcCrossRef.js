@@ -1,5 +1,6 @@
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcCrossRef{
   constructor(domain_id, transaction_id) {
@@ -15,11 +16,11 @@ export class BBcCrossRef{
   }
 
   set_domain_id(domain_id) {
-    this.domain_id = domain_id;
+    this.domain_id = cloneDeep(domain_id);
   }
 
   set_transaction_id(transaction_id) {
-    this.transaction_id = transaction_id;
+    this.transaction_id = cloneDeep(transaction_id);
   }
 
   pack() {

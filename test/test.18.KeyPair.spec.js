@@ -1,8 +1,7 @@
 import chai from 'chai';
 
 const expect = chai.expect;
-import jscu from 'js-crypto-utils';
-import {Buffer} from 'buffer';
+
 
 import {getTestEnv} from './prepare.js';
 
@@ -21,7 +20,7 @@ describe(`${envName}: Test KeyPair`, () => {
     expect(keypair.public_key).to.not.equal(null);
     expect(keypair.private_key).to.not.equal(null);
 
-    const msg = new Buffer(32);
+    const msg = new Uint8Array(32);
     for (let i = 0; i < 32; i++) msg[i] = 0xFF & i;
 
     const sig = await keypair.sign(msg);

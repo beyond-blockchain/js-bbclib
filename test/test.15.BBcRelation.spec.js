@@ -17,11 +17,11 @@ describe(`${envName}: Test BBcRelation`, () => {
     console.log('Test for BBcRelation Class');
     const asset_id = await jscu.random.getRandomBytes(32);
 
-    const bbcRelation = new bbclib.BBcRelation(asset_id);
+    const bbcRelation = new bbclib.BBcRelation(asset_id, 32);
     bbcRelation.add_asset_group_id(new Uint8Array(8));
 
     const user_id = await jscu.random.getRandomBytes(32);
-    const bbcAsset = new bbclib.BBcAsset(user_id);
+    const bbcAsset = new bbclib.BBcAsset(user_id, 32);
 
     await bbcAsset.set_random_nonce();
 
@@ -42,11 +42,11 @@ describe(`${envName}: Test BBcRelation`, () => {
     const transaction_id = await jscu.random.getRandomBytes(32);
 
     bbcRelation.set_asset(bbcAsset);
-    bbcRelation.add_pointer(new bbclib.BBcPointer(transaction_id, asset_id));
+    bbcRelation.add_pointer(new bbclib.BBcPointer(transaction_id, asset_id, 32));
 
     const packed_bbcrelation = bbcRelation.pack();
 
-    const unpack_bbcRelation = new bbclib.BBcRelation(null);
+    const unpack_bbcRelation = new bbclib.BBcRelation(null, 32);
     unpack_bbcRelation.unpack(packed_bbcrelation);
 
     //bbcRelation.show_relation();
@@ -69,7 +69,7 @@ describe(`${envName}: Test BBcRelation`, () => {
     const relation_data = helper.fromHexString(relation_hex_string);
     const asset_id = await jscu.random.getRandomBytes(32);
 
-    const bbcRelation_unpack = new bbclib.BBcRelation(asset_id);
+    const bbcRelation_unpack = new bbclib.BBcRelation(asset_id, 32);
     await bbcRelation_unpack.unpack(relation_data);
 
     expect( jseu.encoder.arrayBufferToHexString(bbcRelation_unpack.asset_group_id)).to.be.eq("c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13");

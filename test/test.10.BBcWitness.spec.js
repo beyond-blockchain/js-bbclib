@@ -15,9 +15,9 @@ describe(`${envName}: Test BBcWitness`, () => {
     // eslint-disable-next-line no-console
     console.log('Test for BBcWitness Class');
 
-    const witness = new bbclib.BBcWitness();
+    const witness = new bbclib.BBcWitness(32);
 
-    const witness_load = new bbclib.BBcWitness();
+    const witness_load = new bbclib.BBcWitness(32);
 
     witness.add_sig_indices(0);
 
@@ -43,7 +43,7 @@ describe(`${envName}: Test BBcWitness`, () => {
   it('load witness hex string ', async () => {
     const witness_hex_string = '020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650200002000d7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e7850100';
     const witness_data = helper.fromHexString(witness_hex_string);
-    const bbcWitness_deserialize = new bbclib.BBcWitness();
+    const bbcWitness_deserialize = new bbclib.BBcWitness(32);
     await bbcWitness_deserialize.unpack(witness_data);
 
     expect(bbcWitness_deserialize.sig_indices[0]).to.be.eq(0);

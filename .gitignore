@@ -6,3 +6,6 @@ obsolete/
 thumbs.db
 yarn-error.log
 .idea/
+test/html/*.html
+test/html/*.bundle.js
+dist/*.js

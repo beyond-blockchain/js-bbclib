@@ -19,10 +19,10 @@ describe(`${envName}: Test BBcPointer`, () => {
     const transaction_id = await jscu.random.getRandomBytes(32);
     const asset_id = await jscu.random.getRandomBytes(32);
 
-    const bbcPointer = new bbclib.BBcPointer(transaction_id, asset_id);
+    const bbcPointer = new bbclib.BBcPointer(transaction_id, asset_id, 32);
 
     const pack_bbcPointer = bbcPointer.pack();
-    const bbcPointer_unpack = new bbclib.BBcPointer(null, null);
+    const bbcPointer_unpack = new bbclib.BBcPointer(null, null, 32);
     bbcPointer_unpack.unpack(pack_bbcPointer);
 
     expect_uint8Array(bbcPointer.transaction_id,bbcPointer_unpack.transaction_id);
@@ -31,16 +31,16 @@ describe(`${envName}: Test BBcPointer`, () => {
 
   });
 
-  it('pack and unpack have not asset id', async () => {
+  it('pack and unpack without asset id', async () => {
     console.log('***********************');
     console.log('Test for BBcPointer Class');
 
     const transaction_id = await jscu.random.getRandomBytes(32);
 
-    const bbcPointer = new bbclib.BBcPointer(transaction_id, null);
+    const bbcPointer = new bbclib.BBcPointer(transaction_id, null, 32);
 
     const pack_bbcPointer = bbcPointer.pack();
-    const bbcPointer_unpack = new bbclib.BBcPointer(null, null);
+    const bbcPointer_unpack = new bbclib.BBcPointer(null, null, 32);
     bbcPointer_unpack.unpack(pack_bbcPointer);
 
     expect_uint8Array(bbcPointer.transaction_id,bbcPointer_unpack.transaction_id);
@@ -52,7 +52,7 @@ describe(`${envName}: Test BBcPointer`, () => {
     const pointer_hex_string = '20003eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9010020008c2f9fd27c0044c83e64bc66162be45810cadb85e774fb9ab5eaf26ea68f7fa8';
     const pointer_data = helper.fromHexString(pointer_hex_string);
 
-    const bbcPointer_unpack = new bbclib.BBcPointer(null, null);
+    const bbcPointer_unpack = new bbclib.BBcPointer(null, null, 32);
     await bbcPointer_unpack.unpack(pointer_data);
 
     expect(jseu.encoder.arrayBufferToHexString(bbcPointer_unpack.asset_id)).to.be.eq( "8c2f9fd27c0044c83e64bc66162be45810cadb85e774fb9ab5eaf26ea68f7fa8" );

@@ -1,12 +1,11 @@
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
-
-import * as para from '../parameter.js';
+import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 
 export class BBcAsset{
-  constructor(user_id) {
-    this.set_length(para.DefaultLength.BBcOne); // int
+  constructor(user_id, id_length=32) {
+    this.set_length(id_length); // int
     this.add_user_id (user_id); // Uint8Array
     this.asset_id = new Uint8Array(this.id_length); // Uint8Array
     this.nonce = new Uint8Array(this.id_length); // Uint8Array
@@ -18,7 +17,7 @@ export class BBcAsset{
   }
 
   set_length(id_length){
-    this.id_length = id_length;
+    this.id_length = cloneDeep(id_length);
   }
 
   show_asset() {
@@ -44,7 +43,7 @@ export class BBcAsset{
 
   add_user_id(user_id) {
     if (user_id != null) {
-      this.user_id = user_id;
+      this.user_id = cloneDeep(user_id);
     }
   }
 

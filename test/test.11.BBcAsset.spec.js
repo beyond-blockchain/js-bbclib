@@ -18,7 +18,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     const user_id = await jscu.random.getRandomBytes(32);
     const bbcAsset = await helper.create_asset(user_id);
     const asset_pack = await bbcAsset.pack();
-    const asset_unpack = new bbclib.BBcAsset(user_id);
+    const asset_unpack = new bbclib.BBcAsset(user_id,32);
     await asset_unpack.unpack(asset_pack);
 
     //console.log("----------");
@@ -41,7 +41,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     const user_id = await jscu.random.getRandomBytes(32);
     const bbcAsset = await helper.create_asset_without_file(user_id);
     const asset_pack = await bbcAsset.pack();
-    const asset_unpack = new bbclib.BBcAsset(user_id);
+    const asset_unpack = new bbclib.BBcAsset(user_id,32);
     await asset_unpack.unpack(asset_pack);
 
     expect_uint8Array(bbcAsset.asset_id,asset_unpack.asset_id);
@@ -68,7 +68,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     }
     asset_body[0] = 0x00;
 
-    const bbcAsset = new bbclib.BBcAsset(user_id);
+    const bbcAsset = new bbclib.BBcAsset(user_id, 32);
 
     const nonce = new Uint8Array(8);
     for (let i = 0; i < 8; i++) {
@@ -87,7 +87,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     const asset_hex_string = '200036335a38ca83d7594d96d00f50288644cc180c47d870eae291185bf8a111dbba20005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000a3bc8fa47aed0ab75817e516a52a17df27c1233c0eab5a97bc1049b8285481b7000000000000120074657374537472696e673132333435585858';
     const asset_data = helper.fromHexString(asset_hex_string);
     const user_id = await jscu.random.getRandomBytes(32);
-    const asset_unpack = new bbclib.BBcAsset(user_id);
+    const asset_unpack = new bbclib.BBcAsset(user_id, 32);
     await asset_unpack.unpack(asset_data);
 
     const digest = await asset_unpack.digest();

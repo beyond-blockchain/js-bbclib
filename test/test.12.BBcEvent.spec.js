@@ -17,9 +17,9 @@ describe(`${envName}: Test BBcEvent`, () => {
     console.log('Test for BBcEvent Class.');
 
     const asset_group_id = await jscu.random.getRandomBytes(32);
-    const bbcEvent = new bbclib.BBcEvent(asset_group_id);
+    const bbcEvent = new bbclib.BBcEvent(asset_group_id,32);
     const user_id = await jscu.random.getRandomBytes(32);
-    const bbcAsset = new bbclib.BBcAsset(user_id);
+    const bbcAsset = new bbclib.BBcAsset(user_id, 32);
     await bbcAsset.set_random_nonce();
     const asset_file = new Uint8Array(32);
 
@@ -40,7 +40,7 @@ describe(`${envName}: Test BBcEvent`, () => {
 
     const packed_event = bbcEvent.pack();
 
-    const unpacked_event = new bbclib.BBcEvent(asset_group_id);
+    const unpacked_event = new bbclib.BBcEvent(asset_group_id,32);
     unpacked_event.unpack(packed_event);
 
     //bbcEvent.show_event();
@@ -80,7 +80,7 @@ describe(`${envName}: Test BBcEvent`, () => {
   it('load event hex string ', async () => {
     const event_hex_string = '2000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13020001000200020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000b7e70c482105bbbe7182f25e18cc7c363f55420f5e2b9519f598c8d436251c2c0100020020008c10c27d57f94f12ee2aa9599fcefa050626346fcf46276c2c8de6ca76c4fa0e20004d99a455dd570aecaa30672f38c63601788f8f79e5215bb0a80665a00741bf8e8000000020002ce7f058d4ed412453ff193ff2dc453a55cc2e4e3a7a1bd7e3dcbb7913e12e2620005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650220008068d7c1f994f17830b8f477aa25c1147c8b09f96b94613a2a6bdd8b8c37dbee000000000000120074657374537472696e673132333435585858';
     const event_data = helper.fromHexString(event_hex_string);
-    const unpacked_event = new bbclib.BBcEvent(new Uint8Array(0));
+    const unpacked_event = new bbclib.BBcEvent(new Uint8Array(0), 32);
     unpacked_event.unpack(event_data);
 
     //unpacked_event.show_event();
