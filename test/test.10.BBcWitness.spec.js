@@ -16,22 +16,17 @@ describe(`${envName}: Test BBcWitness`, () => {
     console.log('Test for BBcWitness Class');
 
     const witness = new bbclib.BBcWitness(32);
-
     const witness_load = new bbclib.BBcWitness(32);
 
     witness.add_sig_indices(0);
-
     const user_id_0 = await jscu.random.getRandomBytes(32);
-
     witness.add_user(user_id_0);
 
     witness.add_sig_indices(1);
-
     const user_id_1 = await jscu.random.getRandomBytes(32);
-
     witness.add_user(user_id_1);
-    const s_witness = witness.pack();
 
+    const s_witness = witness.pack();
     await witness_load.unpack(s_witness);
 
     expect(witness_load.sig_indices[0]).to.be.eq(0);
@@ -39,6 +34,7 @@ describe(`${envName}: Test BBcWitness`, () => {
     expect(witness_load.sig_indices[1]).to.be.eq(1);
     expect(witness_load.user_ids[1]).to.be.eql(user_id_1);
   });
+
 
   it('load witness hex string ', async () => {
     const witness_hex_string = '020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650200002000d7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e7850100';

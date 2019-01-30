@@ -59,6 +59,8 @@ export class BBcTransaction {
     console.log('cross_ref :', this.cross_ref);
     console.log('signatures :', this.signatures);
 
+    console.log('signatures length :', this.signatures.length);
+
     if (this.signatures != null && this.signatures.length > 0) {
       console.log('signatures length :', this.signatures.length);
       console.log(this.signatures[0].show_sig());
@@ -110,14 +112,14 @@ export class BBcTransaction {
   }
 
   set_witness(witness) {
-    if (witness != null) {
-      witness.transaction = this;
+    if (witness !== null) {
       this.witness = cloneDeep(witness);
+      this.witness.transaction = this;
     }
   }
 
   add_event(event) {
-    if (event != null){
+    if (event !== null){
       this.events.push(cloneDeep(event));
     }
   }
@@ -158,13 +160,17 @@ export class BBcTransaction {
 
 
   set_cross_ref(cross_ref) {
-    if (cross_ref != null) {
+    if (cross_ref !== null) {
       this.cross_ref = cloneDeep(cross_ref);
     }
   }
 
+  set_sig_index(user_id, index){
+    this.userid_sigidx_mapping[user_id] = index;
+  }
+
   get_sig_index(user_id) {
-    if (this.userid_sigidx_mapping[user_id] == null) {
+    if (!(user_id in this.userid_sigidx_mapping)) {
       const sig_index_obj = Object.keys(this.userid_sigidx_mapping);
       this.userid_sigidx_mapping[user_id] = sig_index_obj.length;
       this.signatures.push(new BBcSignature(para.KeyType.NOT_INITIALIZED));
@@ -180,6 +186,10 @@ export class BBcTransaction {
     } else {
       return false;
     }
+  }
+
+  add_signature_using_index(index, signature) {
+    this.signatures[index] = cloneDeep(signature);
   }
 
   async digest() {
@@ -394,9 +404,10 @@ export class BBcTransaction {
         pos_e = pos_e + witness_length; // uint16
 
         const witness_bin = data.slice(pos_s, pos_e);
-        this.witness = new BBcWitness(this.id_length);
-        this.witness.unpack(witness_bin);
-        this.witness.transaction = this;
+        const witness = new BBcWitness(this.id_length);
+        witness.unpack(witness_bin);
+        this.set_witness(witness);
+        this.witness.set_sig_index();
       }
     }
 

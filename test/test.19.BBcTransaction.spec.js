@@ -8,6 +8,7 @@ import {getTestEnv} from './prepare.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../src/helper';
 import * as para from '../src/parameter';
+import {BBcSignature} from "../src";
 
 const env = getTestEnv();
 const bbclib = env.library;
@@ -78,6 +79,73 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     expect(bbctransaction.cross_ref).to.be.eq(unpacked_transaction.cross_ref);
     //expect(bbctransaction.signatures).to.be.eq(transaction_deserialize.signatures);
+
+  });
+
+
+  it('transaction add signature', async () => {
+    const bbctransaction = new bbclib.BBcTransaction(1.0, 32);
+
+    const user_id_0 = await jscu.random.getRandomBytes(32);
+    const user_id_1 = await jscu.random.getRandomBytes(32);
+    const user_id_2 = await jscu.random.getRandomBytes(32);
+    const user_id_3 = await jscu.random.getRandomBytes(32);
+
+    const witness = new bbclib.BBcWitness(32);
+    bbctransaction.set_witness(witness);
+    bbctransaction.witness.add_witness(user_id_0);
+    bbctransaction.witness.add_witness(user_id_1);
+    bbctransaction.witness.add_witness(user_id_2);
+    bbctransaction.witness.add_witness(user_id_3);
+
+    const sig_0 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_1 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_2 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_3 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+
+    bbctransaction.witness.add_signature_using_index(user_id_0, sig_0);
+    expect( bbctransaction.signatures[0].key_type).to.be.eq( 2 );
+    bbctransaction.witness.add_signature_using_index(user_id_3, sig_3);
+    expect( bbctransaction.signatures[3].key_type).to.be.eq( 2 );
+    bbctransaction.witness.add_signature_using_index(user_id_1, sig_1);
+    expect( bbctransaction.signatures[1].key_type).to.be.eq( 2 );
+    bbctransaction.witness.add_signature_using_index(user_id_2, sig_2);
+    expect( bbctransaction.signatures[2].key_type).to.be.eq( 2 );
+
+  });
+
+  it('transaction add signature after unpack', async () => {
+    const bbctransaction = new bbclib.BBcTransaction(1, 32);
+    const unpacked_bbctransaction = new bbclib.BBcTransaction(1, 32);
+
+    const user_id_0 = await jscu.random.getRandomBytes(32);
+    const user_id_1 = await jscu.random.getRandomBytes(32);
+    const user_id_2 = await jscu.random.getRandomBytes(32);
+    const user_id_3 = await jscu.random.getRandomBytes(32);
+
+    const witness = new bbclib.BBcWitness(32);
+    bbctransaction.set_witness(witness);
+    bbctransaction.witness.add_witness(user_id_0);
+    bbctransaction.witness.add_witness(user_id_1);
+    bbctransaction.witness.add_witness(user_id_2);
+    bbctransaction.witness.add_witness(user_id_3);
+
+    const packed_bbc_transaction = await bbctransaction.pack();
+    await unpacked_bbctransaction.unpack(packed_bbc_transaction);
+
+    const sig_0 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_1 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_2 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+    const sig_3 = new BBcSignature(para.KeyType.ECDSA_P256v1);
+
+    unpacked_bbctransaction.witness.add_signature(user_id_0, sig_0);
+    expect( unpacked_bbctransaction.signatures[0].key_type).to.be.eq( 2 );
+    unpacked_bbctransaction.witness.add_signature(user_id_3, sig_3);
+    expect( unpacked_bbctransaction.signatures[3].key_type).to.be.eq( 2 );
+    unpacked_bbctransaction.witness.add_signature(user_id_1, sig_1);
+    expect( unpacked_bbctransaction.signatures[1].key_type).to.be.eq( 2 );
+    unpacked_bbctransaction.witness.add_signature(user_id_2, sig_2);
+    expect( unpacked_bbctransaction.signatures[2].key_type).to.be.eq( 2 );
 
   });
 
@@ -179,8 +247,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     await transaction_unpack.set_transaction_id();
 
-
-
   });
 
 
@@ -192,13 +258,13 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     const witness = new bbclib.BBcWitness();
     bbctransaction.set_witness(witness);
-    witness.add_witness(user_id);
+    bbctransaction.witness.add_witness(user_id);
 
     let sig = await bbctransaction.sign(null,null,keypair);
     let ret = bbctransaction.add_signature(user_id, sig);
     expect(ret).to.be.eq(true);
 
-    witness.add_signature(user_id, sig);
+    bbctransaction.witness.add_signature(user_id, sig);
     const packed_transaction = await bbctransaction.pack()
 
   });

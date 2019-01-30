@@ -47,7 +47,7 @@ export class BBcReference{
       if (this.option_sig_ids.length === 0) {
         return;
       }
-      // TODO: ここの動作をきく
+      // TODO:
       //user_id = this.option_sig_ids.pop(0);
 
     }
@@ -69,7 +69,6 @@ export class BBcReference{
     binary_data = binary_data.concat(Array.from(this.asset_group_id));
     binary_data = binary_data.concat(Array.from(helper.hbo(this.transaction_id.length, 2)));
     binary_data = binary_data.concat(Array.from(this.transaction_id));
-
     binary_data = binary_data.concat(Array.from(helper.hbo(this.event_index_in_ref, 2)));
     binary_data = binary_data.concat(Array.from(helper.hbo(this.sig_indices.length, 2)));
 

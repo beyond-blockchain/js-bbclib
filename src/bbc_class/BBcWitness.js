@@ -23,8 +23,15 @@ export class BBcWitness{
     }
   }
 
-  add_witness(user_id, keyType) {
-    if (this.user_ids.indexOf(user_id) === -1) {
+  add_witness(user_id, keyType=0) {
+    let flag = false;
+    for (let i = 0; i < this.user_ids.length; i++){
+      if(user_id.toString() === this.user_ids[i].toString()) {
+        flag = true;
+        break;
+      }
+    }
+    if (flag === false){
       this.user_ids.push(cloneDeep(user_id));
       this.sig_indices.push(this.transaction.get_sig_index(user_id, keyType));
     }
@@ -32,6 +39,29 @@ export class BBcWitness{
 
   add_signature(user_id, signature) {
     this.transaction.add_signature(cloneDeep(user_id), cloneDeep(signature));
+  }
+
+  add_signature_using_index(user_id, signature){
+
+    for (let i = 0; i < this.user_ids.length; i++){
+      if(user_id.toString() === this.user_ids[i].toString()){
+        this.transaction.add_signature_using_index(this.sig_indices[i], signature);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  set_sig_index(){
+    if(this.transaction === null || this.user_ids.length === 0){
+      return ;
+    }
+
+    for (let i = 0; i < this.user_ids.length; i++){
+      this.transaction.set_sig_index(this.user_ids[i], this.sig_indices[i]);
+    }
+
   }
 
   add_user(user) {
