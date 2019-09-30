@@ -1,11 +1,14 @@
 import { BBcAsset } from './BBcAsset.js';
+import { BBcAssetRaw } from './BBcAssetRaw.js';
+import { BBcAssetHash } from './BBcAssetHash.js';
 import { BBcPointer } from './BBcPointer.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcRelation{
-  constructor(asset_group_id, id_length=32) {
+  constructor(asset_group_id, id_length=32, version=1) {
+    this.version = version;
     this.id_length = cloneDeep(id_length);
     if (asset_group_id !== null) {
       this.asset_group_id = cloneDeep(asset_group_id);
@@ -15,6 +18,12 @@ export class BBcRelation{
 
     this.pointers = [];
     this.asset = null;
+    this.asset_raw = null;
+    this.asset_hash = null;
+  }
+
+  set_version(ver) {
+    this.version = ver;
   }
 
   show_relation() {
@@ -23,7 +32,7 @@ export class BBcRelation{
     if (this.pointers.length > 0) {
       for (let i = 0; i < this.pointers.length; i++) {
         console.log('pointers[',i,'] :');
-        this.pointers[i].show_pointer()
+        this.pointers[i].show_pointer();
       }
     }
 
@@ -65,6 +74,14 @@ export class BBcRelation{
 
     if(this.asset.pack().length > 0){
       binary_data = binary_data.concat(Array.from(this.asset.pack()));
+    }
+    if (this.version >= 2) {
+      if(this.asset_raw !== null && this.asset.pack().length > 0){
+        binary_data = binary_data.concat(Array.from(this.asset_raw.pack()));
+      }
+      if(this.asset_hash !== null && this.asset.pack().length > 0){
+        binary_data = binary_data.concat(Array.from(this.asset_hash.pack()));
+      }
     }
 
     return new Uint8Array(binary_data);
@@ -112,6 +129,30 @@ export class BBcRelation{
       const asset_bin = data.slice(pos_s, pos_e);
       this.asset = new BBcAsset(null, this.id_length);
       this.asset.unpack(asset_bin);
+    }
+
+    if (this.version >= 2) {
+      pos_s = pos_e;
+      pos_e = pos_e + 4; // uint32
+      value_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+      if (value_length > 0) {
+        pos_s = pos_e;
+        pos_e = pos_e + value_length; // uint32
+        const asset_raw_bin = data.slice(pos_s, pos_e);
+        this.asset_raw = new BBcAssetRaw(this.id_length);
+        this.asset_raw.unpack(asset_raw_bin);
+      }
+
+      pos_s = pos_e;
+      pos_e = pos_e + 4; // uint32
+      value_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+      if (value_length > 0) {
+        pos_s = pos_e;
+        pos_e = pos_e + value_length; // uint32
+        const asset_hash_bin = data.slice(pos_s, pos_e);
+        this.asset_hash = new BBcAssetHash(this.id_length);
+        this.asset_raw.unpack(asset_hash_bin);
+      }
     }
   }
 }

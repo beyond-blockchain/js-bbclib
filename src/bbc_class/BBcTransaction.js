@@ -95,6 +95,7 @@ export class BBcTransaction {
     if (Array.isArray(_relation)) {
       if (_relation.length > 0) {
         for (let i = 0; i < _relation.length; i++) {
+          _relation[i].set_version(this.version);
           this.relations.push(cloneDeep(_relation[i]));
         }
       }
@@ -384,7 +385,7 @@ export class BBcTransaction {
         pos_s = pos_e;
         pos_e = pos_e + relation_length; // uint16
         const relation_bin = data.slice(pos_s, pos_e);
-        const rtn = new BBcRelation( null, this.id_length);
+        const rtn = new BBcRelation( null, this.id_length, this.version);
         rtn.unpack(relation_bin);
         this.relations.push(rtn);
       }
