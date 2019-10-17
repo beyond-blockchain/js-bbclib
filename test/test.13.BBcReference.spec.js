@@ -16,44 +16,44 @@ describe(`${envName}: Test BBcReference`, () => {
     console.log('***********************');
     console.log('Test for BBcReference Class.');
 
-    const asset_group_id = await jscu.random.getRandomBytes(32);
+    const assetGroupId = await jscu.random.getRandomBytes(32);
     const transaction = await jscu.random.getRandomBytes(32);
-    const ref_transaction  = await jscu.random.getRandomBytes(32);
-    const event_index_in_ref  = await jscu.random.getRandomBytes(32);
+    const refTransaction  = await jscu.random.getRandomBytes(32);
+    const eventIndexInRef  = await jscu.random.getRandomBytes(32);
 
-    const bbcReference = new bbclib.BBcReference(asset_group_id, transaction, null, 3, 32);
-    const unpacked_bbcReference = new bbclib.BBcReference(null, null, null, null, 32);
+    const reference = new bbclib.BBcReference(assetGroupId, transaction, null, 3, 32);
+    const referenceUnpack = new bbclib.BBcReference(null, null, null, null, 32);
 
-    const packed_bbcreference = bbcReference.pack();
-    unpacked_bbcReference.unpack(packed_bbcreference);
+    const referenceBin = reference.pack();
+    referenceUnpack.unpack(referenceBin);
 
-    expect_uint8Array(bbcReference.asset_group_id, unpacked_bbcReference.asset_group_id);
-    expect_uint8Array(bbcReference.transaction_id, unpacked_bbcReference.transaction_id);
-    expect( bbcReference.event_index_in_ref).to.be.eq(unpacked_bbcReference.event_index_in_ref);
+    expectUint8Array(reference.assetGroupId, referenceUnpack.assetGroupId);
+    expectUint8Array(reference.transactionId, referenceUnpack.transactionId);
+    expect( reference.eventIndexInRef).to.be.eq(referenceUnpack.eventIndexInRef);
 
-    for (let i = 0 ; i < bbcReference.sig_indices.length; i++){
-      expect( bbcReference.sig_indices[i]).to.be.eq(unpacked_bbcReference.sig_indices[i]);
+    for (let i = 0 ; i < reference.sigIndices.length; i++){
+      expect( reference.sigIndices[i]).to.be.eq(referenceUnpack.sigIndices[i]);
     }
   });
 
   it('load reference hex string ', async () => {
-    const reference_hex_string = '2000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13200078a07ce9ee51c3454e9a71c5b0930a85ed091389970f0804b110204c5ec8bdfe0000020000000100';
-    const reference_data = helper.fromHexString(reference_hex_string);
+    const referenceHexString = '2000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13200078a07ce9ee51c3454e9a71c5b0930a85ed091389970f0804b110204c5ec8bdfe0000020000000100';
+    const referenceData = helper.fromHexString(referenceHexString);
 
-    const unpacked_bbcReference = new bbclib.BBcReference(null, null, null, null, 32);
-    await unpacked_bbcReference.unpack(reference_data);
+    const referenceUnpack = new bbclib.BBcReference(null, null, null, null, 32);
+    await referenceUnpack.unpack(referenceData);
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_bbcReference.asset_group_id)).to.be.eq( "c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13" );
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_bbcReference.transaction_id)).to.be.eq( "78a07ce9ee51c3454e9a71c5b0930a85ed091389970f0804b110204c5ec8bdfe" );
+    expect(jseu.encoder.arrayBufferToHexString(referenceUnpack.assetGroupId)).to.be.eq( "c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13" );
+    expect(jseu.encoder.arrayBufferToHexString(referenceUnpack.transactionId)).to.be.eq( "78a07ce9ee51c3454e9a71c5b0930a85ed091389970f0804b110204c5ec8bdfe" );
 
-    expect( unpacked_bbcReference.event_index_in_ref).to.be.eq(0);
-    expect( unpacked_bbcReference.sig_indices[0]).to.be.eq(0);
-    expect( unpacked_bbcReference.sig_indices[1]).to.be.eq(1);
+    expect( referenceUnpack.eventIndexInRef).to.be.eq(0);
+    expect( referenceUnpack.sigIndices[0]).to.be.eq(0);
+    expect( referenceUnpack.sigIndices[1]).to.be.eq(1);
   });
 
 });
 
-function expect_uint8Array(bin1, bin2){
+function expectUint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }
 

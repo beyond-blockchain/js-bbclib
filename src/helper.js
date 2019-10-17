@@ -1,50 +1,51 @@
-import { BBcEvent } from './bbc_class/BBcEvent';
-import { BBcAsset } from './bbc_class/BBcAsset';
-import { BBcTransaction } from './bbc_class/BBcTransaction';
-import { BBcWitness } from './bbc_class/BBcWitness';
-import { BBcRelation } from './bbc_class/BBcRelation';
+import { BBcEvent } from './bbcClass/BBcEvent';
+import { BBcAsset } from './bbcClass/BBcAsset';
+import { BBcTransaction } from './bbcClass/BBcTransaction';
+import { BBcWitness } from './bbcClass/BBcWitness';
+import { BBcRelation } from './bbcClass/BBcRelation';
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 
-export async function make_transaction(user_id, event_num, ref_num, witness) {
-  const txobj = await get_new_transaction(user_id, event_num, ref_num, witness);
-  if (event_num > 0) {
-    for (let i = 0; i < event_num; i++) {
-      txobj.events[i].add_reference_indices(i);
-      txobj.events[i].add_mandatory_approver(hexStringToByte('0'));
+export async function makeTransaction(userId, eventNum, refNum, witness) {
+  const txObj = await getNewTransaction(userId, eventNum, refNum, witness);
+  if (eventNum > 0) {
+    for (let i = 0; i < eventNum; i++) {
+      txObj.events[i].addReferenceIndices(i);
+      txObj.events[i].addMandatoryApprover(hexStringToByte('0'));
     }
   }
-  txobj.witness.add_witness(user_id);
-  await txobj.set_transaction_id();
-  return txobj;
+  txObj.witness.addWitness(userId);
+  await txObj.setTransactionId();
+  return txObj;
 }
 
-export async function sign_and_add_signature(transaction, key_pair) {
-  const sig = await transaction.sign(null, null, key_pair);
-  transaction.add_signature(transaction.user_id, sig);
+export async function signAndAddSignature(transaction, keyPair) {
+  const sig = await transaction.sign(null, null, keyPair);
+  transaction.addSignature(transaction.userId, sig);
 }
 
-export async function get_new_transaction(user_id, event_num, relation_num, witness) {
+export async function getNewTransaction(userId, eventNum, relatioNum, witness) {
+
   const transaction = new BBcTransaction(1.0,32);
-  if (event_num > 0) {
-    for (let i = 0; i < event_num; i++) {
+  if (eventNum > 0) {
+    for (let i = 0; i < eventNum; i++) {
       const evt = new BBcEvent(null,32);
       const ast = new BBcAsset(null,32);
-      ast.add_user_id(user_id);
+      ast.addUserId(userId);
       await ast.digest();
-      evt.add_asset(ast);
-      evt.add_asset_group_id(new Uint8Array(8));
-      transaction.add_event(evt);
+      evt.addAsset(ast);
+      evt.addAssetGroupId(new Uint8Array(8));
+      transaction.addEvent(evt);
     }
   }
 
-  if (relation_num > 0) {
-    for (let i = 0; i < relation_num; i++) {
+  if (relationNum > 0) {
+    for (let i = 0; i < relationNum; i++) {
       transaction.add(new BBcRelation(new Uint8Array(0),32));
     }
   }
   if (witness) {
-    transaction.add_witness(new BBcWitness(32));
+    transaction.addWitness(new BBcWitness(32));
   }
   return transaction;
 }
@@ -62,53 +63,51 @@ function hexStringToByte(str) {
   return new Uint8Array(a);
 }
 
-export async function get_random_value(length) {
+export async function getRandomValue(length) {
   const msg = await jscu.random.getRandomBytes(length);
   return await jscu.hash.compute(msg, 'SHA-256');
 }
 
-export async function create_pubkey_byte(pubkey) {
-  const byte_x = await jseu.encoder.decodeBase64Url(pubkey['x']);
-  const byte_y = await jseu.encoder.decodeBase64Url(pubkey['y']);
-
-  const public_key= new Uint8Array(65);
-  public_key[0] = 0x04;
+export async function createPubkeyByte(pubkey) {
+  const byteX = await jseu.encoder.decodeBase64Url(pubkey['x']);
+  const byteY = await jseu.encoder.decodeBase64Url(pubkey['y']);
+  const publicKey= new Uint8Array(65);
+  publicKey[0] = 0x04;
   for (let i = 0; i < 32; i++) {
-    public_key[i + 1] = byte_x[i];
-    public_key[i + 1 + 32] = byte_y[i];
+    publicKey[i + 1] = byteX[i];
+    publicKey[i + 1 + 32] = byteY[i];
   }
 
-  return public_key;
+  return publicKey;
 }
 
-export async function create_asset(user_id) {
+export async function createAsset(userId) {
 
-  const bbcAsset = new BBcAsset(user_id, 32);
-  await bbcAsset.set_random_nonce();
-
-  const asset_file = new Uint8Array(32);
+  const bbcAsset = new BBcAsset(userId, 32);
+  await bbcAsset.setRandomNonce();
+  const assetFile = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
-    asset_file[i] = 0xFF & i;
+    assetFile[i] = 0xFF & i;
   }
-  const asset_body = new Uint8Array(32);
+  const assetBody = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
-    asset_body[i] = 0xFF & (i + 32);
+    assetBody[i] = 0xFF & (i + 32);
   }
-  await bbcAsset.add_asset(asset_file, asset_body);
+  await bbcAsset.addAsset(assetFile, assetBody);
 
   return bbcAsset;
 }
 
-export async function create_asset_without_file(user_id) {
+export async function createAssetWithoutFile(userId) {
 
-  const bbcAsset = new BBcAsset(user_id, 32);
-  await bbcAsset.set_random_nonce();
+  const bbcAsset = new BBcAsset(userId, 32);
+  await bbcAsset.setRandomNonce();
 
-  const asset_body = new Uint8Array(32);
+  const assetBody = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
-    asset_body[i] = 0xFF & (i + 32);
+    assetBody[i] = 0xFF & (i + 32);
   }
-  await bbcAsset.add_asset(null, asset_body);
+  await bbcAsset.addAsset(null, assetBody);
 
   return bbcAsset;
 }
@@ -123,27 +122,20 @@ export function hbo(num, len){
 
 export function hboToInt64(bin){
 
-  let num = 0;
-  num = num + (bin[0]);
-  num = num + (bin[1] * 256 );
-  num = num + (bin[2] * 256 * 256);
-  num = num + (bin[3] * 256 * 256 * 256);
+  let num = hboToInt32(bin);
   num = num + (bin[4] * 256 * 256 * 256 * 256);
   num = num + (bin[5] * 256 * 256 * 256 * 256 * 256 );
   num = num + (bin[6] * 256 * 256 * 256 * 256 * 256 * 256);
   num = num + (bin[7] * 256 * 256 * 256 * 256 * 256 * 256 * 256);
-
   return num;
 }
 
 export function hboToInt32(bin){
-
   let num = 0;
   num = num + (bin[0]);
   num = num + (bin[1] * 256 );
   num = num + (bin[2] * 256 * 256);
   num = num + (bin[3] * 256 * 256 * 256);
-
   return num;
 }
 
