@@ -15,27 +15,27 @@ describe(`${envName}: Test BBcAssetRaw`, () => {
   console.log('Test for BBcAssetRaw Class.');
 
   it('pack and unpack', async () => {
-    const id_length = 32;
-    const asset_id = await jscu.random.getRandomBytes(32);
-    const asset_body = await jscu.random.getRandomBytes(512);
-    const asset_raw_for_pack = new bbclib.BBcAssetRaw(id_length);
-    asset_raw_for_pack.set_asset(asset_id, asset_body);
-    const pack_asset_raw = asset_raw_for_pack.pack();
+    const idLength = 32;
+    const assetId = await jscu.random.getRandomBytes(32);
+    const assetBody = await jscu.random.getRandomBytes(512);
+    const assetRaw = new bbclib.BBcAssetRaw(idLength);
+    assetRaw.setAsset(assetId, assetBody);
+    const assetRawBin = assetRaw.pack();
 
-    const asset_raw_for_unpack = new bbclib.BBcAssetRaw(id_length);
-    await asset_raw_for_unpack.unpack(pack_asset_raw);
+    const assetRawUnpack = new bbclib.BBcAssetRaw(idLength);
+    await assetRawUnpack.unpack(assetRawBin);
 
     // console.log("----------");
-    // asset_raw_for_pack.show_asset();
+    // assetRaw.showAsset();
     // console.log("----------");
-    // asset_raw_for_unpack.show_asset();
+    // assetRawUnpack.showAsset();
 
-    expect_uint8Array(asset_raw_for_pack.asset_id,asset_raw_for_unpack.asset_id);
-    expect_uint8Array(asset_raw_for_pack.asset_body,asset_raw_for_unpack.asset_body);
-    expect( asset_raw_for_pack.asset_body_size,asset_raw_for_unpack.asset_body_size);
+    expectUint8Array(assetRaw.assetId,assetRawUnpack.assetId);
+    expectUint8Array(assetRaw.assetBody,assetRawUnpack.assetBody);
+    expect( assetRaw.assetBodySize,assetRawUnpack.assetBodySize);
   });
 });
 
-function expect_uint8Array(bin1, bin2){
+function expectUint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }

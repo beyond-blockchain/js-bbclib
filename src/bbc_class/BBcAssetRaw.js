@@ -4,73 +4,77 @@ import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 
 export class BBcAssetRaw{
-  constructor(id_length=32) {
-    this.set_length(id_length); // int
-    this.asset_id = new Uint8Array(this.id_length); // Uint8Array
-    this.asset_body_size = 0; // int
-    this.asset_body = new Uint8Array(0); // Uint8Array
+  constructor(idLength=32) {
+    this.setLength(idLength); // int
+    this.assetId = new Uint8Array(this.idLength); // Uint8Array
+    this.assetBodySize = 0; // int
+    this.assetBody = new Uint8Array(0); // Uint8Array
   }
 
-  set_length(id_length){
-    this.id_length = cloneDeep(id_length);
+  setLength(idLength){
+    this.idLength = cloneDeep(idLength);
   }
 
-  show_asset() {
-    if (this.asset_id != null) {
+  showAsset() {
+    if (this.assetId != null) {
       // eslint-disable-next-line no-console
-      console.log('this.asset_id :', jseu.encoder.arrayBufferToHexString(this.asset_id));
+      console.log('this.assetId :', jseu.encoder.arrayBufferToHexString(this.assetId));
     }
     // eslint-disable-next-line no-console
-    console.log('this.asset_body_size', this.asset_body_size);
+    console.log('this.assetBodySize', this.assetBodySize);
     // eslint-disable-next-line no-console
-    console.log('this.asset_body :', jseu.encoder.arrayBufferToHexString(this.asset_body));
+    console.log('this.assetBody :', jseu.encoder.arrayBufferToHexString(this.assetBody));
   }
 
-  async set_asset(asset_id, asset_body) {
-    if (asset_body !== null) {
-      this.asset_body = asset_body;
-      this.asset_body_size = asset_body.length;
+  setAsset(assetId, assetBody) {
+    if (assetId !== null) {
+      this.assetId = assetId;
+    }
+
+    if (assetBody !== null) {
+      this.assetBody = assetBody;
+      this.assetBodySize = assetBody.length;
     }
     return true;
   }
 
   async digest() {
-    return this.asset_id;
+    return this.assetId;
   }
 
   pack() {
 
-    let binary_data = [];
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_id.length, 2)));
-    binary_data = binary_data.concat(Array.from(this.asset_id));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_body_size, 2)));
-    if (this.asset_body_size > 0 && this.asset_body != null){
-      binary_data = binary_data.concat(Array.from(this.asset_body));
+    let binaryData = [];
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.assetId.length, 2)));
+    binaryData = binaryData.concat(Array.from(this.assetId));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.assetBodySize, 2)));
+    if (this.assetBodySize > 0 && this.assetBody != null){
+      binaryData = binaryData.concat(Array.from(this.assetBody));
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   unpack(data) {
 
-    let pos_s = 0;
-    let pos_e = 2; // uint16
-    const value_length =  helper.hboToInt16(data.slice(pos_s,pos_e));
+    let posStart = 0;
+    let posEnd = 2; // uint16
+    const valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if (value_length > 0){
-      pos_s = pos_e;
-      pos_e = pos_e + value_length;
-      this.asset_id = data.slice(pos_s,pos_e);
+    if (valueLength > 0){
+      posStart = posEnd;
+      posEnd = posEnd + valueLength;
+      this.assetId = data.slice(posStart,posEnd);
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2;  // uint16
-    this.asset_body_size = helper.hboToInt16(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2;  // uint16
+    this.assetBodySize = helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if (this.asset_body_size > 0) {
-      pos_s = pos_e;
-      pos_e = pos_e + this.asset_body_size;
-      this.asset_body = data.slice(pos_s, pos_e);
+    if (this.assetBodySize > 0) {
+      posStart = posEnd;
+      posEnd = posEnd + this.assetBodySize;
+      this.assetBody = data.slice(posStart, posEnd);
     }
 
     return true;

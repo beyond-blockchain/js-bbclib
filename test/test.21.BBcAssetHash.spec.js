@@ -15,29 +15,29 @@ describe(`${envName}: Test BBcAssetHash`, () => {
   console.log('Test for BBcAssetHash Class.');
 
   it('pack and unpack', async () => {
-    const id_length = 32;
-    const asset_id_1 = await jscu.random.getRandomBytes(32);
-    const asset_id_2 = await jscu.random.getRandomBytes(32);
-    const asset_id_3 = await jscu.random.getRandomBytes(32);
-    const asset_hash_for_pack = new bbclib.BBcAssetHash(id_length);
-    asset_hash_for_pack.add_asset_id(asset_id_1);
-    asset_hash_for_pack.add_asset_id(asset_id_2);
-    asset_hash_for_pack.add_asset_id(asset_id_3);
-    const pack_asset_hash = asset_hash_for_pack.pack();
-    const asset_hash_for_unpack = new bbclib.BBcAssetHash(id_length);
-    await asset_hash_for_unpack.unpack(pack_asset_hash);
+    const idLength = 32;
+    const assetId_1 = await jscu.random.getRandomBytes(32);
+    const assetId_2 = await jscu.random.getRandomBytes(32);
+    const assetId_3 = await jscu.random.getRandomBytes(32);
+    const assetHash = new bbclib.BBcAssetHash(idLength);
+    assetHash.addAssetId(assetId_1);
+    assetHash.addAssetId(assetId_2);
+    assetHash.addAssetId(assetId_3);
+    const assetHashBin = assetHash.pack();
+    const assetHashUnpack = new bbclib.BBcAssetHash(idLength);
+    await assetHashUnpack.unpack(assetHashBin);
 
     // console.log("----------");
-    // asset_hash_for_pack.show_asset();
+    // assetHash.showAsset();
     // console.log("----------");
-    // asset_hash_for_unpack.show_asset();
+    // assetHashUnpack.showAsset();
 
-    expect_uint8Array(asset_hash_for_pack.asset_ids[0],asset_hash_for_unpack.asset_ids[0]);
-    expect_uint8Array(asset_hash_for_pack.asset_ids[1],asset_hash_for_unpack.asset_ids[1]);
-    expect_uint8Array(asset_hash_for_pack.asset_ids[2],asset_hash_for_unpack.asset_ids[2]);
+    expectUint8Array(assetHash.assetIds[0],assetHashUnpack.assetIds[0]);
+    expectUint8Array(assetHash.assetIds[1],assetHashUnpack.assetIds[1]);
+    expectUint8Array(assetHash.assetIds[2],assetHashUnpack.assetIds[2]);
   });
 });
 
-function expect_uint8Array(bin1, bin2){
+function expectUint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }

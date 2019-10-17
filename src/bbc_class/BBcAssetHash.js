@@ -4,50 +4,50 @@ import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 
 export class BBcAssetHash{
-  constructor(id_length=32) {
-    this.set_length(id_length); // int
-    this.asset_ids = [];
+  constructor(idLength=32) {
+    this.setLength(idLength); // int
+    this.assetIds = [];
   }
 
-  set_length(id_length){
-    this.id_length = cloneDeep(id_length);
+  setLength(idLength){
+    this.idLength = cloneDeep(idLength);
   }
 
-  show_asset() {
+  showAsset() {
     // eslint-disable-next-line no-console
-    console.log('this.asset_ids.length :', this.asset_ids.length);
-    for (let i = 0; i < this.asset_ids.length; i++) {
+    console.log('this.assetIds.length :', this.assetIds.length);
+    for (let i = 0; i < this.assetIds.length; i++) {
       // eslint-disable-next-line no-console
-      console.log('asset_ids[',i,'] :', jseu.encoder.arrayBufferToHexString(this.asset_ids[i]));
+      console.log('assetIds[',i,'] :', jseu.encoder.arrayBufferToHexString(this.assetIds[i]));
     }
   }
 
-  add_asset_id(asset_id) {
-    this.asset_ids.push(cloneDeep(asset_id));
+  addAssetId(assetId) {
+    this.assetIds.push(cloneDeep(assetId));
     return true;
   }
 
   pack() {
-    let binary_data = [];
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_ids.length,2)));
-    for (let i = 0; i < this.asset_ids.length; i++ ) {
-      binary_data = binary_data.concat(Array.from(this.asset_ids[i]));
+    let binaryData = [];
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.assetIds.length,2)));
+    for (let i = 0; i < this.assetIds.length; i++ ) {
+      binaryData = binaryData.concat(Array.from(this.assetIds[i]));
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   unpack(data) {
-    this.asset_ids = [];
+    this.assetIds = [];
 
-    let pos_s = 0;
-    let pos_e = 2; // uint16
-    const ids_count =  helper.hboToInt16(data.slice(pos_s,pos_e));
+    let posStart = 0;
+    let posEnd = 2; // uint16
+    const idsCount =  helper.hboToInt16(data.slice(posStart,posEnd));
 
-    for (let i =0; i < ids_count; i++){
-        pos_s = pos_e;
-        pos_e = pos_e + this.id_length;
-        this.asset_ids.push(data.slice(pos_s, pos_e));
+    for (let i =0; i < idsCount; i++){
+        posStart = posEnd;
+        posEnd = posEnd + this.idLength;
+        this.assetIds.push(data.slice(posStart, posEnd));
     }
 
     return true;
