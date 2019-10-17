@@ -7,151 +7,174 @@ import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcRelation{
-  constructor(asset_group_id, id_length=32, version=1) {
+  constructor(assetGroupId, idLength=32, version=1) {
     this.version = version;
-    this.id_length = cloneDeep(id_length);
-    if (asset_group_id !== null) {
-      this.asset_group_id = cloneDeep(asset_group_id);
+    this.idLength = cloneDeep(idLength);
+    if (assetGroupId !== null) {
+      this.assetGroupId = cloneDeep(assetGroupId);
     } else {
-      this.asset_group_id = new Uint8Array(this.id_length);
+      this.assetGroupId = new Uint8Array(this.idLength);
     }
 
     this.pointers = [];
     this.asset = null;
-    this.asset_raw = null;
-    this.asset_hash = null;
+    this.assetRaw = null;
+    this.assetHash = null;
   }
 
-  set_version(ver) {
+  setVersion(ver) {
     this.version = ver;
   }
 
-  show_relation() {
-    console.log('asset_group_id :', jseu.encoder.arrayBufferToHexString(this.asset_group_id));
+  setAsset(asset) {
+    this.asset = cloneDeep(asset);
+  }
+
+  setAssetRaw(assetRaw) {
+    if(this.version >= 2){
+      this.assetRaw = cloneDeep(assetRaw);
+    }
+  }
+
+  setAssetHash(assetHash) {
+    if(this.version >= 2){
+      this.assetHash = cloneDeep(assetHash);
+    }
+  }
+
+  showRelation() {
+    console.log('assetGroupId :', jseu.encoder.arrayBufferToHexString(this.assetGroupId));
     console.log('pointers.length :', this.pointers.length);
     if (this.pointers.length > 0) {
       for (let i = 0; i < this.pointers.length; i++) {
         console.log('pointers[',i,'] :');
-        this.pointers[i].show_pointer();
+        this.pointers[i].showPointer();
       }
     }
 
     if (this.asset != null) {
-      console.log('asset:',this.asset.show_asset());
+      console.log('asset:',this.asset.showAsset());
     }
   }
 
-  add_asset_group_id(asset_group_id) {
-    if (asset_group_id != null) {
-      this.asset_group_id = cloneDeep(asset_group_id);
+  addAssetGroupId(assetGroupId) {
+    if (assetGroupId != null) {
+      this.assetGroupId = cloneDeep(assetGroupId);
     }
   }
 
-  set_asset(asset) {
-    this.asset = cloneDeep(asset);
-  }
-
-  add_pointer(pointer) {
+  addPointer(pointer) {
     if (pointer != null) {
       this.pointers.push(cloneDeep(pointer));
     }
   }
 
   pack() {
-    let binary_data = [];
+    let binaryData = [];
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_group_id.length, 2)));
-    binary_data = binary_data.concat(Array.from(this.asset_group_id));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.pointers.length,2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.assetGroupId.length, 2)));
+    binaryData = binaryData.concat(Array.from(this.assetGroupId));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.pointers.length,2)));
 
     if (this.pointers.length > 0){
       for (let i = 0; i < this.pointers.length; i++ ) {
-        binary_data = binary_data.concat(Array.from(helper.hbo(this.pointers[i].pack().length, 2)));
-        binary_data = binary_data.concat(Array.from(this.pointers[i].pack()));
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.pointers[i].pack().length, 2)));
+        binaryData = binaryData.concat(Array.from(this.pointers[i].pack()));
       }
     }
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset.pack().length, 4)));
-
-    if(this.asset.pack().length > 0){
-      binary_data = binary_data.concat(Array.from(this.asset.pack()));
+    if (this.asset !== null){
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.asset.pack().length, 4)));
+      binaryData = binaryData.concat(Array.from(this.asset.pack()));
+    }else{
+      binaryData = binaryData.concat(Array.from(helper.hbo(0, 4)));
     }
+
     if (this.version >= 2) {
-      if(this.asset_raw !== null && this.asset.pack().length > 0){
-        binary_data = binary_data.concat(Array.from(this.asset_raw.pack()));
+      if(this.assetRaw !== null){
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.assetRaw.pack().length, 4)));
+        binaryData = binaryData.concat(Array.from(this.assetRaw.pack()));
+      }else{
+        binaryData = binaryData.concat(Array.from(helper.hbo(0, 4)));
       }
-      if(this.asset_hash !== null && this.asset.pack().length > 0){
-        binary_data = binary_data.concat(Array.from(this.asset_hash.pack()));
+
+      if(this.assetHash !== null){
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.assetHash.pack().length, 4)));
+        binaryData = binaryData.concat(Array.from(this.assetHash.pack()));
+      }else{
+        binaryData = binaryData.concat(Array.from(helper.hbo(0, 4)));
       }
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
 
   }
 
   unpack(data) {
 
-    let pos_s = 0;
-    let pos_e = 2; // uint16
-    let value_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    let posStart = 0;
+    let posEnd = 2; // uint16
+    let valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + value_length;
-    this.asset_group_id = data.slice(pos_s, pos_e);
+    posStart = posEnd;
+    posEnd = posEnd + valueLength;
+    this.assetGroupId = data.slice(posStart, posEnd);
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    value_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (value_length > 0) {
-      for (let i = 0; i < value_length; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 2;
-        const pointer_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    if (valueLength > 0) {
+      for (let i = 0; i < valueLength; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 2;
+        const pointerLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + pointer_length;
+        posStart = posEnd;
+        posEnd = posEnd + pointerLength;
 
-        const pointer_bin = data.slice(pos_s, pos_e);
-        const ptr = new BBcPointer(null, null, this.id_length);
+        const pointerBin = data.slice(posStart, posEnd);
+        const ptr = new BBcPointer(null, null, this.idLength);
 
-        ptr.unpack(pointer_bin);
+        ptr.unpack(pointerBin);
         this.pointers.push(ptr);
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 4; // uint32
-    value_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 4; // uint32
+    valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-    if (value_length > 0) {
-      pos_s = pos_e;
-      pos_e = pos_e + value_length; // uint32
-      const asset_bin = data.slice(pos_s, pos_e);
-      this.asset = new BBcAsset(null, this.id_length);
-      this.asset.unpack(asset_bin);
+    if (valueLength > 0) {
+      posStart = posEnd;
+      posEnd = posEnd + valueLength; // uint32
+      const assetBin = data.slice(posStart, posEnd);
+      this.asset = new BBcAsset(null, this.idLength);
+      this.asset.unpack(assetBin);
     }
 
     if (this.version >= 2) {
-      pos_s = pos_e;
-      pos_e = pos_e + 4; // uint32
-      value_length = helper.hboToInt32(data.slice(pos_s, pos_e));
-      if (value_length > 0) {
-        pos_s = pos_e;
-        pos_e = pos_e + value_length; // uint32
-        const asset_raw_bin = data.slice(pos_s, pos_e);
-        this.asset_raw = new BBcAssetRaw(this.id_length);
-        this.asset_raw.unpack(asset_raw_bin);
+      posStart = posEnd;
+      posEnd = posEnd + 4; // uint32
+      valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
+
+      if (valueLength > 0) {
+        posStart = posEnd;
+        posEnd = posEnd + valueLength; // uint32
+        const assetRawBin = data.slice(posStart, posEnd);
+        this.assetRaw = new BBcAssetRaw(this.idLength);
+        this.assetRaw.unpack(assetRawBin);
       }
 
-      pos_s = pos_e;
-      pos_e = pos_e + 4; // uint32
-      value_length = helper.hboToInt32(data.slice(pos_s, pos_e));
-      if (value_length > 0) {
-        pos_s = pos_e;
-        pos_e = pos_e + value_length; // uint32
-        const asset_hash_bin = data.slice(pos_s, pos_e);
-        this.asset_hash = new BBcAssetHash(this.id_length);
-        this.asset_raw.unpack(asset_hash_bin);
+      posStart = posEnd;
+      posEnd = posEnd + 4; // uint32
+      valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
+
+      if (valueLength > 0) {
+        posStart = posEnd;
+        posEnd = posEnd + valueLength; // uint32
+        const assetHashBin = data.slice(posStart, posEnd);
+        this.assetHash = new BBcAssetHash(this.idLength);
+        this.assetHash.unpack(assetHashBin);
       }
     }
   }

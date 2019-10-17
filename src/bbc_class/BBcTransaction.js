@@ -16,66 +16,66 @@ const date = new Date();
 
 export class BBcTransaction {
 
-  constructor( version=1.0, id_length=32) {
-    this.id_length = cloneDeep(id_length);
+  constructor( version=1.0, idLength=32) {
+    this.idLength = cloneDeep(idLength);
     this.version = cloneDeep(version);
     this.timestamp = (new BN(date.getTime())).mul(new BN(1000000)); //timestampはミリ秒なので nano秒へ変換
     this.events = [];
     this.references = [];
     this.relations = [];
     this.witness = null;
-    this.cross_ref = null;
+    this.crossRef = null;
     this.signatures = [];
-    this.userid_sigidx_mapping = {};
-    this.transaction_id = new Uint8Array(0);
-    this.transaction_base_digest = new Uint8Array(0);
-    this.transaction_data = null;
-    this.asset_group_ids = {};
-    this.target_serialize = null;
+    this.useridSigidxMapping = {};
+    this.transactionId = new Uint8Array(0);
+    this.transactionBaseDigest = new Uint8Array(0);
+    this.transactionData = null;
+    this.assetGroupIds = {};
+    this.targetSerialize = null;
   }
 
-  show_str() {
-    console.log('**************show_str*************** :');
+  showStr() {
+    console.log('**************showStr*************** :');
 
-    console.log('id_length :', this.id_length);
+    console.log('idLength :', this.idLength);
     console.log('version :', this.version);
     console.log('timestamp :', this.timestamp);
 
     if (this.events.length > 0) {
       console.log('events');
       for (let i = 0; i < this.events.length; i++) {
-        console.log('event[', i, '] :', this.events[i].show_event());
+        console.log('event[', i, '] :', this.events[i].showEvent());
       }
     }
 
     console.log('references :', this.references);
     console.log('relations :', this.relations);
     if (this.witness !== null) {
-      console.log(this.witness.show_str());
+      console.log(this.witness.showStr());
     } else {
       console.log(this.witness);
     }
 
-    console.log('cross_ref :', this.cross_ref);
+    console.log('crossRef :', this.crossRef);
     console.log('signatures :', this.signatures);
 
     console.log('signatures length :', this.signatures.length);
 
     if (this.signatures != null && this.signatures.length > 0) {
       console.log('signatures length :', this.signatures.length);
-      console.log(this.signatures[0].show_sig());
+      console.log(this.signatures[0].showSig());
     } else {
       console.log(this.signatures);
     }
-    console.log('userid_sigidx_mapping :', this.userid_sigidx_mapping);
-    console.log('transaction_id :', jseu.encoder.arrayBufferToHexString(this.transaction_id));
-    console.log('transaction_base_digest :', jseu.encoder.arrayBufferToHexString(this.transaction_base_digest));
-    console.log('transaction_data :', this.transaction_data);
-    console.log('asset_group_ids :', this.asset_group_ids);
+    console.log('useridSigidxMapping :', this.useridSigidxMapping);
+    console.log('transactionId :', jseu.encoder.arrayBufferToHexString(this.transactionId));
+    console.log('transactionBaseDigest :', jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest));
+    console.log('transactionData :', this.transactionData);
+    console.log('assetGroupIds :', this.assetGroupIds);
 
   }
 
-  add_parts(_event, _reference, _relation, _witness, _cross_ref) {
+  addParts(_event, _reference, _relation, _witness, _crossRef) {
     if (Array.isArray(_event)) {
       if (_event.length > 0) {
         for (let i = 0; i < _event.length; i++) {
@@ -95,7 +95,7 @@ export class BBcTransaction {
     if (Array.isArray(_relation)) {
       if (_relation.length > 0) {
         for (let i = 0; i < _relation.length; i++) {
-          _relation[i].set_version(this.version);
+          _relation[i].setVersion(this.version);
           this.relations.push(cloneDeep(_relation[i]));
         }
       }
@@ -105,39 +105,39 @@ export class BBcTransaction {
       this.witness = cloneDeep(_witness);
     }
 
-    if (_cross_ref !== null) {
-      this.cross_ref = cloneDeep(_cross_ref);
+    if (_crossRef !== null) {
+      this.crossRef = cloneDeep(_crossRef);
     }
 
     return true;
   }
 
-  set_witness(witness) {
+  setWitness(witness) {
     if (witness !== null) {
       this.witness = cloneDeep(witness);
       this.witness.transaction = this;
     }
   }
 
-  add_event(event) {
+  addEvent(event) {
     if (event !== null){
       this.events.push(cloneDeep(event));
     }
   }
 
-  set_event(events) {
-    if (event !== null && Array.isArray(events) ){
+  setEvent(events) {
+    if (events !== null && Array.isArray(events) ){
       this.events = cloneDeep(events);
     }
   }
 
-  add_reference(reference) {
+  addReference(reference) {
     if(reference !== null){
       this.references.push(cloneDeep(reference));
     }
   }
 
-  set_reference(references) {
+  setReference(references) {
     if (Array.isArray(references)) {
       if (references.length > 0) {
         this.references = cloneDeep(references);
@@ -145,13 +145,13 @@ export class BBcTransaction {
     }
   }
 
-  add_relation(relation) {
+  addRelation(relation) {
     if(relation !== null){
       this.relations.push(cloneDeep(relation));
     }
   }
 
-  set_relation(relations) {
+  setRelation(relations) {
     if (Array.isArray(relations)) {
       if (relations.length > 0) {
         this.relations = cloneDeep(relations);
@@ -160,28 +160,28 @@ export class BBcTransaction {
   }
 
 
-  set_cross_ref(cross_ref) {
-    if (cross_ref !== null) {
-      this.cross_ref = cloneDeep(cross_ref);
+  setCrossRef(crossRef) {
+    if (crossRef !== null) {
+      this.crossRef = cloneDeep(crossRef);
     }
   }
 
-  set_sig_index(user_id, index){
-    this.userid_sigidx_mapping[user_id] = index;
+  setSigIndex(userId, index){
+    this.useridSigidxMapping[userId] = index;
   }
 
-  get_sig_index(user_id) {
-    if (!(user_id in this.userid_sigidx_mapping)) {
-      const sig_index_obj = Object.keys(this.userid_sigidx_mapping);
-      this.userid_sigidx_mapping[user_id] = sig_index_obj.length;
+  getSigIndex(userId) {
+    if (!(userId in this.useridSigidxMapping)) {
+      const sigIndexObj = Object.keys(this.useridSigidxMapping);
+      this.useridSigidxMapping[userId] = sigIndexObj.length;
       this.signatures.push(new BBcSignature(para.KeyType.NOT_INITIALIZED));
     }
-    return this.userid_sigidx_mapping[user_id];
+    return this.useridSigidxMapping[userId];
   }
 
-  add_signature(user_id, signature) {
-    if (user_id in this.userid_sigidx_mapping) {
-      const idx = this.userid_sigidx_mapping[cloneDeep(user_id)];
+  addSignature(userId, signature) {
+    if (userId in this.useridSigidxMapping) {
+      const idx = this.useridSigidxMapping[cloneDeep(userId)];
       this.signatures[idx] = cloneDeep(signature);
       return true;
     } else {
@@ -189,264 +189,264 @@ export class BBcTransaction {
     }
   }
 
-  add_signature_using_index(index, signature) {
+  addSignatureUsingIndex(index, signature) {
     this.signatures[index] = cloneDeep(signature);
   }
 
   async digest() {
-    this.target_serialize = await this.get_digest_for_transaction_id();
-    return this.target_serialize;
+    this.targetSerialize = await this.getDigestForTransactionId();
+    return this.targetSerialize;
   }
 
-  pack_cross_ref() {
-    let binary_data = [];
-    if (this.cross_ref !== null) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(1, 2)));
-      const packed_data = this.cross_ref.pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+  packCrossRef() {
+    let binaryData = [];
+    if (this.crossRef !== null) {
+      binaryData = binaryData.concat(Array.from(helper.hbo(1, 2)));
+      const packedData = this.crossRef.pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     } else {
-      binary_data = binary_data.concat(Array.from(helper.hbo(0, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(0, 2)));
     }
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
-  async set_transaction_id() {
-    this.target_serialize = await this.get_digest_for_transaction_id();
-    this.transaction_base_digest = await jscu.hash.compute(this.target_serialize, 'SHA-256');
-    const id = await jscu.hash.compute(helper.concat(this.transaction_base_digest, this.pack_cross_ref()), 'SHA-256');
-    this.transaction_id = id.slice(0, this.id_length);
-    return this.transaction_id;
+  async setTransactionId() {
+    this.targetSerialize = await this.getDigestForTransactionId();
+    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
+    const id = await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
+    this.transactionId = id.slice(0, this.idLength);
+    return this.transactionId;
   }
 
-  async get_digest_for_transaction_id() {
+  async getDigestForTransactionId() {
 
-    let binary_data = [];
+    let binaryData = [];
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.version, 4)));
-    binary_data = binary_data.concat(this.timestamp.toArray('big', 8));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.id_length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
+    binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.events.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
-      const packed_data = this.events[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.events[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.references.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.references.length, 2)));
     for (let i = 0; i < this.references.length; i++) {
-      const packed_data = this.references[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.references[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.relations.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.relations.length, 2)));
     for (let i = 0; i < this.relations.length; i++) {
-      const packed_data = this.relations[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.relations[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
     if (this.witness !== null) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(1, 2)));
-      const packed_data = this.witness.pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      binaryData = binaryData.concat(Array.from(helper.hbo(1, 2)));
+      const packedData = this.witness.pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     } else {
-      binary_data = binary_data.concat(Array.from(helper.hbo(0, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(0, 2)));
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   async pack() {
 
-    let binary_data = [];
+    let binaryData = [];
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.version, 4)));
-    binary_data = binary_data.concat(this.timestamp.toArray('big', 8));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.id_length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
+    binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.events.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
-      const packed_data = this.events[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.events[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.references.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.references.length, 2)));
     for (let i = 0; i < this.references.length; i++) {
-      const packed_data = this.references[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.references[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.relations.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.relations.length, 2)));
     for (let i = 0; i < this.relations.length; i++) {
-      const packed_data = this.relations[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.relations[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
     if (this.witness !== null) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(1, 2)));
-      const packed_data = this.witness.pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      binaryData = binaryData.concat(Array.from(helper.hbo(1, 2)));
+      const packedData = this.witness.pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     } else {
-      binary_data = binary_data.concat(Array.from(helper.hbo(0, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(0, 2)));
     }
 
-    if (this.cross_ref !== null) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(1, 2)));
-      const packed_data = this.cross_ref.pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+    if (this.crossRef !== null) {
+      binaryData = binaryData.concat(Array.from(helper.hbo(1, 2)));
+      const packedData = this.crossRef.pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     } else {
-      binary_data = binary_data.concat(Array.from(helper.hbo(0, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(0, 2)));
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.signatures.length, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.signatures.length, 2)));
     for (let i = 0; i < this.signatures.length; i++) {
-      const packed_data = this.signatures[i].pack();
-      binary_data = binary_data.concat(Array.from(helper.hbo(packed_data.length, 4)));
-      binary_data = binary_data.concat(Array.from(packed_data));
+      const packedData = this.signatures[i].pack();
+      binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
+      binaryData = binaryData.concat(Array.from(packedData));
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
 
   }
 
 
   async unpack(data) {
 
-    let pos_s = 0;
-    let pos_e = 4; // uint32
-    this.version = helper.hboToInt32(data.slice(pos_s, pos_e));
+    let posStart = 0;
+    let posEnd = 4; // uint32
+    this.version = helper.hboToInt32(data.slice(posStart, posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + 8;
-    this.timestamp = new BN(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 8;
+    this.timestamp = new BN(data.slice(posStart, posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    this.id_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    this.idLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_events = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numEvents = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_events > 0) {
-      for (let i = 0; i < num_events; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
-        const event_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    if (numEvents > 0) {
+      for (let i = 0; i < numEvents; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
+        const eventLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + event_length; // uint16
-        const event_bin = data.slice(pos_s, pos_e);
+        posStart = posEnd;
+        posEnd = posEnd + eventLength; // uint16
+        const eventBin = data.slice(posStart, posEnd);
 
         const event = new BBcEvent();
-        event.unpack(event_bin);
+        event.unpack(eventBin);
         this.events.push(event);
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_reference = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numReference = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_reference > 0) {
-      for (let i = 0; i < num_reference; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
-        const reference_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    if (numReference > 0) {
+      for (let i = 0; i < numReference; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
+        const referenceLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + reference_length; // uint16
-        const reference_bin = data.slice(pos_s, pos_e);
-        const ref = new BBcReference(null, null, null, null, this.id_length);
-        ref.unpack(reference_bin);
+        posStart = posEnd;
+        posEnd = posEnd + referenceLength; // uint16
+        const referenceBin = data.slice(posStart, posEnd);
+        const ref = new BBcReference(null, null, null, null, this.idLength);
+        ref.unpack(referenceBin);
         this.references.push(ref);
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_relation = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numRelation = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_relation > 0) {
-      for (let i = 0; i < num_relation; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
-        const relation_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    if (numRelation > 0) {
+      for (let i = 0; i < numRelation; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
+        const relationLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + relation_length; // uint16
-        const relation_bin = data.slice(pos_s, pos_e);
-        const rtn = new BBcRelation( null, this.id_length, this.version);
-        rtn.unpack(relation_bin);
+        posStart = posEnd;
+        posEnd = posEnd + relationLength; // uint16
+        const relationBin = data.slice(posStart, posEnd);
+        const rtn = new BBcRelation( null, this.idLength, this.version);
+        rtn.unpack(relationBin);
         this.relations.push(rtn);
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_witness = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numWitness = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_witness > 0) {
-      for (let i = 0; i < num_witness; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
+    if (numWitness > 0) {
+      for (let i = 0; i < numWitness; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
 
-        const witness_length = helper.hboToInt32(data.slice(pos_s, pos_e));
-        pos_s = pos_e;
-        pos_e = pos_e + witness_length; // uint16
+        const witnessLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        posStart = posEnd;
+        posEnd = posEnd + witnessLength; // uint16
 
-        const witness_bin = data.slice(pos_s, pos_e);
-        const witness = new BBcWitness(this.id_length);
-        witness.unpack(witness_bin);
-        this.set_witness(witness);
-        this.witness.set_sig_index();
+        const witnessBin = data.slice(posStart, posEnd);
+        const witness = new BBcWitness(this.idLength);
+        witness.unpack(witnessBin);
+        this.setWitness(witness);
+        this.witness.setSigIndex();
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_crossref = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numCrossref = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_crossref > 0) {
-      for (let i = 0; i < num_crossref; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
-        const crossref_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    if (numCrossref > 0) {
+      for (let i = 0; i < numCrossref; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
+        const crossrefLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + crossref_length; // uint16
-        const crossref_bin = data.slice(pos_s, pos_e);
+        posStart = posEnd;
+        posEnd = posEnd + crossrefLength; // uint16
+        const crossrefBin = data.slice(posStart, posEnd);
 
-        this.cross_ref = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0));
-        this.cross_ref.unpack(crossref_bin);
+        this.crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0));
+        this.crossRef.unpack(crossrefBin);
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const num_signature = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const numSignature = helper.hboToInt16(data.slice(posStart, posEnd));
 
-    if (num_signature > 0) {
-      for (let i = 0; i < num_signature; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 4; // uint16
-        const signature_length = helper.hboToInt32(data.slice(pos_s, pos_e));
+    if (numSignature > 0) {
+      for (let i = 0; i < numSignature; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 4; // uint16
+        const signatureLength = helper.hboToInt32(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + signature_length; // uint16
-        const signature_bin = data.slice(pos_s, pos_e);
+        posStart = posEnd;
+        posEnd = posEnd + signatureLength; // uint16
+        const signatureBin = data.slice(posStart, posEnd);
 
         const sig = new BBcSignature(0);
-        await sig.unpack(signature_bin);
+        await sig.unpack(signatureBin);
         this.signatures.push(sig);
       }
     }
@@ -454,29 +454,29 @@ export class BBcTransaction {
     return true;
   }
 
-  async sign(private_key, public_key, key_pair) {
+  async sign(privateKey, publicKey, keyPair) {
 
-    if (key_pair === null) {
-      if (private_key.length !== 32 || public_key.length <= 32) {
+    if (keyPair === null) {
+      if (privateKey.length !== 32 || publicKey.length <= 32) {
 
         return null;
       }
 
-      key_pair = new KeyPair();
-      key_pair.set_key_pair(private_key, public_key);
-      if (key_pair == null) {
+      keyPair = new KeyPair();
+      keyPair.setKeyPair(privateKey, publicKey);
+      if (keyPair == null) {
 
         return null;
       }
     }
 
     const sig = new BBcSignature(para.KeyType.ECDSA_P256v1);
-    const s = await key_pair.sign(await this.digest());
+    const s = await keyPair.sign(await this.digest());
     if (s === null) {
       return null;
     }
 
-    await sig.add(s, await key_pair.public_key.jwk);
+    await sig.add(s, await keyPair.publicKey.jwk);
     return sig;
   }
 

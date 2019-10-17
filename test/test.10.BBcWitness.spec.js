@@ -1,6 +1,5 @@
 import chai from 'chai';
 import {getTestEnv} from './prepare.js';
-import { Buffer } from 'buffer';
 import jscu from 'js-crypto-utils';
 import * as helper from '../src/helper';
 const expect = chai.expect;
@@ -16,40 +15,40 @@ describe(`${envName}: Test BBcWitness`, () => {
     console.log('Test for BBcWitness Class');
 
     const witness = new bbclib.BBcWitness(32);
-    const witness_load = new bbclib.BBcWitness(32);
+    const witnessUnpack = new bbclib.BBcWitness(32);
 
-    witness.add_sig_indices(0);
-    const user_id_0 = await jscu.random.getRandomBytes(32);
-    witness.add_user(user_id_0);
+    witness.addSigIndices(0);
+    const userId0 = await jscu.random.getRandomBytes(32);
+    witness.addUser(userId0);
 
-    witness.add_sig_indices(1);
-    const user_id_1 = await jscu.random.getRandomBytes(32);
-    witness.add_user(user_id_1);
+    witness.addSigIndices(1);
+    const userId1 = await jscu.random.getRandomBytes(32);
+    witness.addUser(userId1);
 
-    const s_witness = witness.pack();
-    await witness_load.unpack(s_witness);
+    const witnessBin = witness.pack();
+    await witnessUnpack.unpack(witnessBin);
 
-    expect(witness_load.sig_indices[0]).to.be.eq(0);
-    expect(witness_load.user_ids[0]).to.be.eql(user_id_0);
-    expect(witness_load.sig_indices[1]).to.be.eq(1);
-    expect(witness_load.user_ids[1]).to.be.eql(user_id_1);
+    expect(witnessUnpack.sigIndices[0]).to.be.eq(0);
+    expect(witnessUnpack.userIds[0]).to.be.eql(userId0);
+    expect(witnessUnpack.sigIndices[1]).to.be.eq(1);
+    expect(witnessUnpack.userIds[1]).to.be.eql(userId1);
   });
 
 
   it('load witness hex string ', async () => {
-    const witness_hex_string = '020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650200002000d7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e7850100';
-    const witness_data = helper.fromHexString(witness_hex_string);
-    const bbcWitness_deserialize = new bbclib.BBcWitness(32);
-    await bbcWitness_deserialize.unpack(witness_data);
+    const witnessHexString = '020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650200002000d7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e7850100';
+    const witnessData = helper.fromHexString(witnessHexString);
+    const witnessUnpack = new bbclib.BBcWitness(32);
+    await witnessUnpack.unpack(witnessData);
 
-    expect(bbcWitness_deserialize.sig_indices[0]).to.be.eq(0);
-    const user_id_0_hex_string = '5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502';
-    const user_id_0_data = helper.fromHexString(user_id_0_hex_string);
-    expect(bbcWitness_deserialize.user_ids[0]).to.be.eql(user_id_0_data);
-    expect(bbcWitness_deserialize.sig_indices[1]).to.be.eq(1);
-    const user_id_1_hex_string = 'd7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e785';
-    const user_id_1_data = helper.fromHexString(user_id_1_hex_string);
-    expect(bbcWitness_deserialize.user_ids[1]).to.be.eql(user_id_1_data);
+    expect(witnessUnpack.sigIndices[0]).to.be.eq(0);
+    const userId0HexString = '5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502';
+    const userId0Data = helper.fromHexString(userId0HexString);
+    expect(witnessUnpack.userIds[0]).to.be.eql(userId0Data);
+    expect(witnessUnpack.sigIndices[1]).to.be.eq(1);
+    const userId1HexString = 'd7b571c2e4e2e2c18b73ae78e522b542c7964d8a29728cca906099089b76e785';
+    const userId1Data = helper.fromHexString(userId1HexString);
+    expect(witnessUnpack.userIds[1]).to.be.eql(userId1Data);
   });
 
 });

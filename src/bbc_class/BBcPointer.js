@@ -3,78 +3,78 @@ import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcPointer{
-  constructor(transaction_id, asset_id, id_length =32) {
-    this.id_length = cloneDeep(id_length);
-    if (transaction_id != null) {
-      this.transaction_id = cloneDeep(transaction_id);
+  constructor(transactionId, assetId, idLength =32) {
+    this.idLength = cloneDeep(idLength);
+    if (transactionId != null) {
+      this.transactionId = cloneDeep(transactionId);
     } else {
-      this.transaction_id = new Uint8Array( this.id_length );
+      this.transactionId = new Uint8Array( this.idLength );
     }
 
-    this.asset_id = cloneDeep(asset_id);
-    this.asset_id_existence = 0;
-    if (asset_id != null) {
-      this.asset_id_existence = 1;
+    this.assetId = cloneDeep(assetId);
+    this.assetIdExistence = 0;
+    if (assetId != null) {
+      this.assetIdExistence = 1;
     } else {
-      this.asset_id_existence = 0;
-    }
-  }
-
-  show_pointer() {
-    console.log('transaction_id', jseu.encoder.arrayBufferToHexString(this.transaction_id));
-    if (this.asset_id != null) {
-      console.log('asset_id', jseu.encoder.arrayBufferToHexString(this.asset_id));
+      this.assetIdExistence = 0;
     }
   }
 
-  set_transaction_id(transaction_id) {
-    this.transaction_id = cloneDeep(transaction_id);
+  showPointer() {
+    console.log('transactionId', jseu.encoder.arrayBufferToHexString(this.transactionId));
+    if (this.assetId != null) {
+      console.log('assetId', jseu.encoder.arrayBufferToHexString(this.assetId));
+    }
   }
 
-  set_asset_id(asset_id) {
-    this.asset_id = cloneDeep(asset_id);
-    if(asset_id != null) {
-      this.asset_id_existence = 1;
+  setTransactionId(transactionId) {
+    this.transactionId = cloneDeep(transactionId);
+  }
+
+  setAssetId(assetId) {
+    this.assetId = cloneDeep(assetId);
+    if(assetId != null) {
+      this.assetIdExistence = 1;
     } else {
-      this.asset_id_existence = 0;
+      this.assetIdExistence = 0;
     }
   }
 
   pack() {
-    let binary_data = [];
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.transaction_id.length, 2)));
-    binary_data = binary_data.concat(Array.from(this.transaction_id));
-    if (this.asset_id_existence > 0) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_id_existence, 2)));
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_id.length, 2)));
-      binary_data = binary_data.concat(Array.from(this.asset_id));
+    let binaryData = [];
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.transactionId.length, 2)));
+    binaryData = binaryData.concat(Array.from(this.transactionId));
+    if (this.assetIdExistence > 0) {
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.assetIdExistence, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.assetId.length, 2)));
+      binaryData = binaryData.concat(Array.from(this.assetId));
     } else {
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_id_existence, 2)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.assetIdExistence, 2)));
     }
 
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   unpack(data) {
-    let pos_s = 0;
-    let pos_e = 2; // uint16
-    let value_length =  helper.hboToInt16(data.slice(pos_s,pos_e));
+    let posStart = 0;
+    let posEnd = 2; // uint16
+    let valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + value_length;
-    this.transaction_id = data.slice(pos_s,pos_e);
+    posStart = posEnd;
+    posEnd = posEnd + valueLength;
+    this.transactionId = data.slice(posStart,posEnd);
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    this.asset_id_existence =  helper.hboToInt16(data.slice(pos_s,pos_e));
-    if (this.asset_id_existence > 0) {
-      pos_s = pos_e;
-      pos_e = pos_e + 2; //uint16
-      value_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    this.assetIdExistence =  helper.hboToInt16(data.slice(posStart,posEnd));
+    if (this.assetIdExistence > 0) {
+      posStart = posEnd;
+      posEnd = posEnd + 2; //uint16
+      valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-      pos_s = pos_e;
-      pos_e = pos_e + value_length;
-      this.asset_id = data.slice(pos_s, pos_e);
+      posStart = posEnd;
+      posEnd = posEnd + valueLength;
+      this.assetId = data.slice(posStart, posEnd);
     }
 
     return true;

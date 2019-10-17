@@ -5,100 +5,100 @@ import * as para from '../parameter.js';
 import cloneDeep from "lodash.clonedeep";
 
 export class BBcSignature{
-  constructor(key_type) {
-    this.key_type = key_type;
+  constructor(keyType) {
+    this.keyType = keyType;
     this.signature = new Uint8Array(0);
     this.pubkey = null;
-    this.pubkey_byte = new Uint8Array(0);;
+    this.pubkeyByte = new Uint8Array(0);;
     this.keypair = null;
-    this.not_initialized = true;
+    this.notInitialized = true;
   }
 
-  show_sig() {
-    console.log('key_type :',this.key_type);
+  showSig() {
+    console.log('keyType :',this.keyType);
     console.log('signature :', jseu.encoder.arrayBufferToHexString(this.signature));
     if (this.pubkey != null){
       console.log('pubkey :', this.pubkey);
     }
-    console.log('pubkey_byte :', jseu.encoder.arrayBufferToHexString(this.pubkey_byte));
+    console.log('pubkeyByte :', jseu.encoder.arrayBufferToHexString(this.pubkeyByte));
     if (this.keypair != null) {
       console.log('keypair :', this.keypair);
     }
-    console.log('not_initialized :',this.not_initialized);
+    console.log('notInitialized :',this.notInitialized);
   }
 
-  async add(signature, pub_key) {
+  async add(signature, pubKey) {
     if (signature != null) {
-      this.not_initialized = false;
+      this.notInitialized = false;
       this.signature = cloneDeep(signature);
     }
 
-    if (pub_key != null) {
-      this.pubkey = cloneDeep(pub_key);
-      this.pubkey_byte = await helper.create_pubkey_byte(cloneDeep(pub_key));
+    if (pubKey != null) {
+      this.pubkey = cloneDeep(pubKey);
+      this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(pubKey));
       this.keypair = new KeyPair();
-      this.keypair.set_key_pair(null, cloneDeep(pub_key));
+      this.keypair.setKeyPair(null, cloneDeep(pubKey));
     }
 
     return true;
   }
 
-  add_signature(signature) {
+  addSignature(signature) {
     this.signature = signature;
   }
 
   pack() {
 
-    let binary_data = [];
+    let binaryData = [];
 
-    if (this.key_type === para.KeyType.NOT_INITIALIZED){
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.key_type, 4)));
+    if (this.keyType === para.KeyType.NOT_INITIALIZED){
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
 
     }else {
 
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.key_type, 4)));
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.pubkey_byte.length * 8, 4)));
-      binary_data = binary_data.concat(Array.from(this.pubkey_byte));
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
-      binary_data = binary_data.concat(Array.from(this.signature));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.pubkeyByte.length * 8, 4)));
+      binaryData = binaryData.concat(Array.from(this.pubkeyByte));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
+      binaryData = binaryData.concat(Array.from(this.signature));
     }
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   async unpack(data) {
 
-    let pos_s = 0;
-    let pos_e = 4; // uint32
+    let posStart = 0;
+    let posEnd = 4; // uint32
 
-    this.key_type =  helper.hboToInt32(data.slice(pos_s,pos_e));
+    this.keyType =  helper.hboToInt32(data.slice(posStart,posEnd));
 
-    if (this.key_type === para.KeyType.NOT_INITIALIZED){
+    if (this.keyType === para.KeyType.NOT_INITIALIZED){
       return true;
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 4; // uint32
-    let value_length =  helper.hboToInt32(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 4; // uint32
+    let valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
 
-    if (value_length > 0) {
-      pos_s = pos_e;
-      pos_e = pos_e + (value_length / 8);
-      this.pubkey_byte = data.slice(pos_s, pos_e);
+    if (valueLength > 0) {
+      posStart = posEnd;
+      posEnd = posEnd + (valueLength / 8);
+      this.pubkeyByte = data.slice(posStart, posEnd);
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 4; // uint32
-    value_length =  helper.hboToInt32(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 4; // uint32
+    valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
 
-    if (value_length > 0) {
-      pos_s = pos_e;
-      pos_e = pos_e + (value_length / 8 );
-      this.signature = data.slice(pos_s, pos_e);
+    if (valueLength > 0) {
+      posStart = posEnd;
+      posEnd = posEnd + (valueLength / 8 );
+      this.signature = data.slice(posStart, posEnd);
     }
 
-    if (this.pubkey_byte.length > 0 && this.signature.length > 0){
+    if (this.pubkeyByte.length > 0 && this.signature.length > 0){
       //65byteの鍵形式からJwkへ変換してinput
-      await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkey_byte, 'P-256'));
+      await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkeyByte, 'P-256'));
     }
 
     return true;

@@ -16,102 +16,102 @@ describe(`${envName}: Test BBcEvent`, () => {
     console.log('***********************');
     console.log('Test for BBcEvent Class.');
 
-    const asset_group_id = await jscu.random.getRandomBytes(32);
-    const bbcEvent = new bbclib.BBcEvent(asset_group_id,32);
-    const user_id = await jscu.random.getRandomBytes(32);
-    const bbcAsset = new bbclib.BBcAsset(user_id, 32);
-    await bbcAsset.set_random_nonce();
-    const asset_file = new Uint8Array(32);
-
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const event = new bbclib.BBcEvent(assetGroupId,32);
+    const userId = await jscu.random.getRandomBytes(32);
+    const asset = new bbclib.BBcAsset(userId, 32);
+    await asset.setRandomNonce();
+    
+    const assetFile = new Uint8Array(32);
     for(let i = 0; i < 32; i++){
-      asset_file[i] = 0xFF & i;
+      assetFile[i] = 0xFF & i;
     }
 
-    const asset_body = new Uint8Array(32);
+    const assetBody = new Uint8Array(32);
     for(let i = 0; i < 32; i++){
-      asset_body[i] = 0xFF & (i + 32);
+      assetBody[i] = 0xFF & (i + 32);
     }
 
-    await bbcAsset.add_asset(asset_file, asset_body);
+    await asset.addAsset(assetFile, assetBody);
 
-    bbcEvent.add_asset(bbcAsset);
-    bbcEvent.add_asset_group_id(asset_group_id);
-    bbcEvent.add_mandatory_approver(user_id);
+    event.addAsset(asset);
+    event.addAssetGroupId(assetGroupId);
+    event.addMandatoryApprover(userId);
 
-    const packed_event = bbcEvent.pack();
+    const eventBin = event.pack();
 
-    const unpacked_event = new bbclib.BBcEvent(asset_group_id,32);
-    unpacked_event.unpack(packed_event);
+    const eventUnpack = new bbclib.BBcEvent(assetGroupId,32);
+    eventUnpack.unpack(eventBin);
 
-    //bbcEvent.show_event();
-    //unpacked_event.show_event();
+    //event.showEvent();
+    //eventUnpack.showEvent();
 
-    expect_uint8Array(bbcEvent.asset_group_id,unpacked_event.asset_group_id);
-    if (bbcEvent.reference_indices.length > 0) {
-      for (let i = 0; i < bbcEvent.reference_indices.length; i++) {
-        expect_uint8Array(bbcEvent.reference_indices[i], unpacked_event.reference_indices[i]);
+    expectUint8Array(event.assetGroupId,eventUnpack.assetGroupId);
+    if (event.referenceIndices.length > 0) {
+      for (let i = 0; i < event.referenceIndices.length; i++) {
+        expectUint8Array(event.referenceIndices[i], eventUnpack.referenceIndices[i]);
       }
     }
-    if (bbcEvent.mandatory_approvers.length > 0){
-      for (let i = 0; i < bbcEvent.mandatory_approvers.length; i++ ) {
-        expect_uint8Array(bbcEvent.mandatory_approvers[i], unpacked_event.mandatory_approvers[i]);
+    if (event.mandatoryApprovers.length > 0){
+      for (let i = 0; i < event.mandatoryApprovers.length; i++ ) {
+        expectUint8Array(event.mandatoryApprovers[i], eventUnpack.mandatoryApprovers[i]);
       }
     }
-    expect(bbcEvent.option_approver_num_numerator).to.be.eq(unpacked_event.option_approver_num_numerator);
-    expect(bbcEvent.option_approver_num_denominator).to.be.eq(unpacked_event.option_approver_num_denominator);
-    if (bbcEvent.option_approvers.length > 0){
-      for (let i = 0; i < bbcEvent.option_approvers.length; i++ ){
-        expect_uint8Array(bbcEvent.option_approvers[i], unpacked_event.option_approvers[i]);
+    expect(event.optionApproverNumNumerator).to.be.eq(eventUnpack.optionApproverNumNumerator);
+    expect(event.optionApproverNumDenominator).to.be.eq(eventUnpack.optionApproverNumDenominator);
+    if (event.optionApprovers.length > 0){
+      for (let i = 0; i < event.optionApprovers.length; i++ ){
+        expectUint8Array(event.optionApprovers[i], eventUnpack.optionApprovers[i]);
       }
     }
 
-    expect_uint8Array(bbcEvent.asset.asset_id,unpacked_event.asset.asset_id);
-    expect_uint8Array(bbcEvent.asset.user_id,unpacked_event.asset.user_id);
-    expect_uint8Array(bbcEvent.asset.nonce,unpacked_event.asset.nonce);
-    expect_uint8Array(bbcEvent.asset.asset_file_digest,unpacked_event.asset.asset_file_digest);
-    expect_uint8Array(bbcEvent.asset.asset_body,unpacked_event.asset.asset_body);
+    expectUint8Array(event.asset.assetId,eventUnpack.asset.assetId);
+    expectUint8Array(event.asset.userId,eventUnpack.asset.userId);
+    expectUint8Array(event.asset.nonce,eventUnpack.asset.nonce);
+    expectUint8Array(event.asset.assetFileDigest,eventUnpack.asset.assetFileDigest);
+    expectUint8Array(event.asset.assetBody,eventUnpack.asset.assetBody);
 
-    expect(bbcEvent.asset.asset_file_size).to.be.eq(unpacked_event.asset.asset_file_size);
-    expect(bbcEvent.asset.asset_body_type).to.be.eq(unpacked_event.asset.asset_body_type);
-    expect(bbcEvent.asset.asset_body_size).to.be.eq(unpacked_event.asset.asset_body_size);
+    expect(event.asset.assetFileSize).to.be.eq(eventUnpack.asset.assetFileSize);
+    expect(event.asset.assetBodyType).to.be.eq(eventUnpack.asset.assetBodyType);
+    expect(event.asset.assetBodySize).to.be.eq(eventUnpack.asset.assetBodySize);
 
   });
 
   it('load event hex string ', async () => {
-    const event_hex_string = '2000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13020001000200020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000b7e70c482105bbbe7182f25e18cc7c363f55420f5e2b9519f598c8d436251c2c0100020020008c10c27d57f94f12ee2aa9599fcefa050626346fcf46276c2c8de6ca76c4fa0e20004d99a455dd570aecaa30672f38c63601788f8f79e5215bb0a80665a00741bf8e8000000020002ce7f058d4ed412453ff193ff2dc453a55cc2e4e3a7a1bd7e3dcbb7913e12e2620005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650220008068d7c1f994f17830b8f477aa25c1147c8b09f96b94613a2a6bdd8b8c37dbee000000000000120074657374537472696e673132333435585858';
-    const event_data = helper.fromHexString(event_hex_string);
-    const unpacked_event = new bbclib.BBcEvent(new Uint8Array(0), 32);
-    unpacked_event.unpack(event_data);
+    const eventHexString = '2000c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13020001000200020020005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000b7e70c482105bbbe7182f25e18cc7c363f55420f5e2b9519f598c8d436251c2c0100020020008c10c27d57f94f12ee2aa9599fcefa050626346fcf46276c2c8de6ca76c4fa0e20004d99a455dd570aecaa30672f38c63601788f8f79e5215bb0a80665a00741bf8e8000000020002ce7f058d4ed412453ff193ff2dc453a55cc2e4e3a7a1bd7e3dcbb7913e12e2620005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b847650220008068d7c1f994f17830b8f477aa25c1147c8b09f96b94613a2a6bdd8b8c37dbee000000000000120074657374537472696e673132333435585858';
+    const eventData = helper.fromHexString(eventHexString);
+    const eventUnpack = new bbclib.BBcEvent(new Uint8Array(0), 32);
+    eventUnpack.unpack(eventData);
 
-    //unpacked_event.show_event();
+    //eventUnpack.showEvent();
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.asset_group_id)).to.be.eq( "c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13" );
-    expect(unpacked_event.reference_indices[0]).to.be.eq( 1 );
-    expect(unpacked_event.reference_indices[1]).to.be.eq( 2 );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.assetGroupId)).to.be.eq( "c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13" );
+    expect(eventUnpack.referenceIndices[0]).to.be.eq( 1 );
+    expect(eventUnpack.referenceIndices[1]).to.be.eq( 2 );
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.mandatory_approvers[0])).to.be.eq( "5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502" );
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.mandatory_approvers[1])).to.be.eq( "b7e70c482105bbbe7182f25e18cc7c363f55420f5e2b9519f598c8d436251c2c" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.mandatoryApprovers[0])).to.be.eq( "5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.mandatoryApprovers[1])).to.be.eq( "b7e70c482105bbbe7182f25e18cc7c363f55420f5e2b9519f598c8d436251c2c" );
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.option_approvers[0])).to.be.eq( "8c10c27d57f94f12ee2aa9599fcefa050626346fcf46276c2c8de6ca76c4fa0e" );
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.option_approvers[1])).to.be.eq( "4d99a455dd570aecaa30672f38c63601788f8f79e5215bb0a80665a00741bf8e" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.optionApprovers[0])).to.be.eq( "8c10c27d57f94f12ee2aa9599fcefa050626346fcf46276c2c8de6ca76c4fa0e" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.optionApprovers[1])).to.be.eq( "4d99a455dd570aecaa30672f38c63601788f8f79e5215bb0a80665a00741bf8e" );
 
-    expect(unpacked_event.option_approver_num_numerator).to.be.eq( 1 );
-    expect(unpacked_event.option_approver_num_denominator).to.be.eq( 2 );
+    expect(eventUnpack.optionApproverNumNumerator).to.be.eq( 1 );
+    expect(eventUnpack.optionApproverNumDenominator).to.be.eq( 2 );
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.asset.asset_id)).to.be.eq( "2ce7f058d4ed412453ff193ff2dc453a55cc2e4e3a7a1bd7e3dcbb7913e12e26" );
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.asset.user_id)).to.be.eq( "5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502" );
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.asset.nonce)).to.be.eq( "8068d7c1f994f17830b8f477aa25c1147c8b09f96b94613a2a6bdd8b8c37dbee" );
-    expect(unpacked_event.asset.asset_file_size).to.be.eq( 0 );
-    expect(unpacked_event.asset.asset_body_size).to.be.eq( 18 );
-    expect(unpacked_event.asset.asset_body_type).to.be.eq( 0 );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.asset.assetId)).to.be.eq( "2ce7f058d4ed412453ff193ff2dc453a55cc2e4e3a7a1bd7e3dcbb7913e12e26" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.asset.userId)).to.be.eq( "5e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b8476502" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.asset.nonce)).to.be.eq( "8068d7c1f994f17830b8f477aa25c1147c8b09f96b94613a2a6bdd8b8c37dbee" );
+    expect(eventUnpack.asset.assetFileSize).to.be.eq( 0 );
+    expect(eventUnpack.asset.assetBodySize).to.be.eq( 18 );
+    expect(eventUnpack.asset.assetBodyType).to.be.eq( 0 );
 
-    expect(jseu.encoder.arrayBufferToHexString(unpacked_event.asset.asset_body)).to.be.eq( "74657374537472696e673132333435585858" );
+    expect(jseu.encoder.arrayBufferToHexString(eventUnpack.asset.assetBody)).to.be.eq( "74657374537472696e673132333435585858" );
 
   });
 
 
 });
 
-function expect_uint8Array(bin1, bin2){
+function expectUint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));
 }

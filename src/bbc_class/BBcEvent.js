@@ -4,75 +4,75 @@ import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 
 export class BBcEvent{
-  constructor(asset_group_id, id_length=32) {
-    this.id_length = cloneDeep(id_length);
-    this.asset_group_id = cloneDeep(asset_group_id);
-    this.reference_indices = [];
-    this.mandatory_approvers = [];
-    this.option_approver_num_numerator = 0;
-    this.option_approver_num_denominator = 0;
-    this.option_approvers = [];
+  constructor(assetGroupId, idLength=32) {
+    this.idLength = cloneDeep(idLength);
+    this.assetGroupId = cloneDeep(assetGroupId);
+    this.referenceIndices = [];
+    this.mandatoryApprovers = [];
+    this.optionApproverNumNumerator = 0;
+    this.optionApproverNumDenominator = 0;
+    this.optionApprovers = [];
     this.asset = null;
   }
 
-  show_event() {
-    console.log('------show_event-------');
+  showEvent() {
+    console.log('------showEvent-------');
 
-    console.log('id_length :',this.id_length);
-    console.log('asset_group_id :', jseu.encoder.arrayBufferToHexString(this.asset_group_id));
+    console.log('idLength :',this.idLength);
+    console.log('assetGroupId :', jseu.encoder.arrayBufferToHexString(this.assetGroupId));
 
-    console.log('this.reference_indices.length  :',this.reference_indices.length );
-    if (this.reference_indices.length > 0) {
-      for (let i = 0; i < this.reference_indices.length; i++) {
-        console.log('reference_indices[', i, '] :', this.reference_indices[i]);
+    console.log('this.referenceIndices.length  :',this.referenceIndices.length );
+    if (this.referenceIndices.length > 0) {
+      for (let i = 0; i < this.referenceIndices.length; i++) {
+        console.log('referenceIndices[', i, '] :', this.referenceIndices[i]);
       }
     }
-    console.log('this.mandatory_approvers.length  :',this.mandatory_approvers.length );
-    if (this.mandatory_approvers.length > 0) {
-      for (let i = 0; i < this.mandatory_approvers.length; i++) {
-        console.log('mandatory_approvers[', i, '] :', jseu.encoder.arrayBufferToHexString(this.mandatory_approvers[i]));
+    console.log('this.mandatoryApprovers.length  :',this.mandatoryApprovers.length );
+    if (this.mandatoryApprovers.length > 0) {
+      for (let i = 0; i < this.mandatoryApprovers.length; i++) {
+        console.log('mandatoryApprovers[', i, '] :', jseu.encoder.arrayBufferToHexString(this.mandatoryApprovers[i]));
       }
     }
 
-    console.log('option_approver_num_numerator :',this.option_approver_num_numerator);
-    console.log('option_approver_num_denominator :',this.option_approver_num_denominator);
-    if (this.option_approver_num_denominator.length > 0) {
-      for (let i = 0; i < this.option_approver_num_denominator.length; i++) {
-        console.log('option_approvers [', i, ']',  jseu.encoder.arrayBufferToHexString(this.option_approvers[i]));
+    console.log('optionApproverNumNumerator :',this.optionApproverNumNumerator);
+    console.log('optionApproverNumDenominator :',this.optionApproverNumDenominator);
+    if (this.optionApproverNumDenominator.length > 0) {
+      for (let i = 0; i < this.optionApproverNumDenominator.length; i++) {
+        console.log('optionApprovers [', i, ']',  jseu.encoder.arrayBufferToHexString(this.optionApprovers[i]));
       }
     }
     if (this.asset != null) {
       console.log('asset :');
-      this.asset.show_asset()
+      this.asset.showAsset()
     }
-    console.log('------show_event end-------');
+    console.log('------showEvent end-------');
   }
 
-  add_asset_group_id(asset_group_id) {
-    this.asset_group_id = cloneDeep(asset_group_id);
+  addAssetGroupId(assetGroupId) {
+    this.assetGroupId = cloneDeep(assetGroupId);
   }
 
-  add_reference_indices(reference_indices) {
-    this.reference_indices.push(cloneDeep(reference_indices));
+  addReferenceIndices(referenceIndices) {
+    this.referenceIndices.push(cloneDeep(referenceIndices));
   }
 
-  add_mandatory_approver(mandatory_approver) {
-    this.mandatory_approvers.push(cloneDeep(mandatory_approver));
+  addMandatoryApprover(mandatoryApprover) {
+    this.mandatoryApprovers.push(cloneDeep(mandatoryApprover));
   }
 
-  add_option_approver_num_numerator(option_approver_num_numerator) {
-    this.option_approver_num_numerator = cloneDeep(option_approver_num_numerator);
+  addOptionApproverNumNumerator(optionApproverNumNumerator) {
+    this.optionApproverNumNumerator = cloneDeep(optionApproverNumNumerator);
   }
 
-  add_option_approver_num_denominator(option_approver_num_denominator) {
-    this.option_approver_num_denominator = cloneDeep(option_approver_num_denominator);
+  addOptionApproverNumDenominator(optionApproverNumDenominator) {
+    this.optionApproverNumDenominator = cloneDeep(optionApproverNumDenominator);
   }
 
-  add_option_approver(option_approver) {
-    this.option_approver = cloneDeep(option_approver);
+  addOptionApprover(optionApprover) {
+    this.optionApprover = cloneDeep(optionApprover);
   }
 
-  add_asset(asset) {
+  addAsset(asset) {
     this.asset = cloneDeep(asset);
   }
 
@@ -82,109 +82,110 @@ export class BBcEvent{
       asset = this.asset.pack();
     }
 
-    let binary_data = [];
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.asset_group_id.length, 2)));
-    binary_data = binary_data.concat(Array.from(this.asset_group_id));
+    let binaryData = [];
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.assetGroupId.length, 2)));
+    binaryData = binaryData.concat(Array.from(this.assetGroupId));
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.reference_indices.length,2)));
-    if(this.reference_indices.length > 0){
-      for (let i = 0; i < this.reference_indices.length; i++){
-        binary_data = binary_data.concat(Array.from(helper.hbo(this.reference_indices[i],2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.referenceIndices.length,2)));
+    if(this.referenceIndices.length > 0){
+      for (let i = 0; i < this.referenceIndices.length; i++){
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.referenceIndices[i],2)));
       }
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.mandatory_approvers.length,2)));
-    if(this.mandatory_approvers.length > 0){
-      for (let i = 0; i < this.mandatory_approvers.length; i++){
-        binary_data = binary_data.concat(Array.from(helper.hbo(this.mandatory_approvers[i].length, 2)));
-        binary_data = binary_data.concat(Array.from(this.mandatory_approvers[i]));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.mandatoryApprovers.length,2)));
+    if(this.mandatoryApprovers.length > 0){
+      for (let i = 0; i < this.mandatoryApprovers.length; i++){
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.mandatoryApprovers[i].length, 2)));
+        binaryData = binaryData.concat(Array.from(this.mandatoryApprovers[i]));
       }
     }
 
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.option_approver_num_numerator,2)));
-    binary_data = binary_data.concat(Array.from(helper.hbo(this.option_approver_num_denominator,2)));
-    if(this.option_approver_num_denominator > 0){
-      for (let i = 0; i < this.option_approver_num_denominator; i++){
-        binary_data = binary_data.concat(Array.from(helper.hbo(this.option_approvers[i].length, 2)));
-        binary_data = binary_data.concat(Array.from(this.option_approvers[i]));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.optionApproverNumNumerator,2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.optionApproverNumDenominator,2)));
+    if(this.optionApproverNumDenominator > 0){
+      for (let i = 0; i < this.optionApproverNumDenominator; i++){
+        binaryData = binaryData.concat(Array.from(helper.hbo(this.optionApprovers[i].length, 2)));
+        binaryData = binaryData.concat(Array.from(this.optionApprovers[i]));
       }
     }
-    binary_data = binary_data.concat(Array.from(helper.hbo(asset.length, 4)));
-    binary_data = binary_data.concat(Array.from(asset));
-    return new Uint8Array(binary_data);
+    binaryData = binaryData.concat(Array.from(helper.hbo(asset.length, 4)));
+    binaryData = binaryData.concat(Array.from(asset));
+    return new Uint8Array(binaryData);
 
   }
 
   unpack(data) {
-    let pos_s = 0;
-    let pos_e = 2; // uint16
-    let value_length =  helper.hboToInt16(data.slice(pos_s,pos_e));
+    let posStart = 0;
+    let posEnd = 2; // uint16
+    let valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if (value_length > 0){
-      pos_s = pos_e;
-      pos_e = pos_e + value_length;
-      this.asset_group_id = data.slice(pos_s,pos_e);
+    if (valueLength > 0){
+      posStart = posEnd;
+      posEnd = posEnd + valueLength;
+      this.assetGroupId = data.slice(posStart,posEnd);
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const reference_indices_size  = helper.hboToInt16(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const referenceIndicesSize  = helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if (reference_indices_size > 0) {
-      for (let i = 0 ; i < reference_indices_size; i++){
-        pos_s = pos_e;
-        pos_e = pos_e + 2;
-        this.reference_indices.push(helper.hboToInt16(data.slice(pos_s, pos_e)));
+    if (referenceIndicesSize > 0) {
+      for (let i = 0 ; i < referenceIndicesSize; i++){
+        posStart = posEnd;
+        posEnd = posEnd + 2;
+        this.referenceIndices.push(helper.hboToInt16(data.slice(posStart, posEnd)));
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    const mandatory_approvers_size = helper.hboToInt16(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    const mandatoryApproversSize = helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if (mandatory_approvers_size > 0) {
-      for (let i = 0; i < mandatory_approvers_size; i++){
-        pos_s = pos_e;
-        pos_e = pos_e + 2;
-        value_length = helper.hboToInt16(data.slice(pos_s,pos_e));
+    if (mandatoryApproversSize > 0) {
+      for (let i = 0; i < mandatoryApproversSize; i++){
+        posStart = posEnd;
+        posEnd = posEnd + 2;
+        valueLength = helper.hboToInt16(data.slice(posStart,posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + value_length;
-        this.mandatory_approvers.push(data.slice(pos_s, pos_e));
+        posStart = posEnd;
+        posEnd = posEnd + valueLength;
+        this.mandatoryApprovers.push(data.slice(posStart, posEnd));
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    this.option_approver_num_numerator = helper.hboToInt16(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    this.optionApproverNumNumerator = helper.hboToInt16(data.slice(posStart,posEnd));
 
-    pos_s = pos_e;
-    pos_e = pos_e + 2; // uint16
-    this.option_approver_num_denominator = helper.hboToInt16(data.slice(pos_s,pos_e));
+    posStart = posEnd;
+    posEnd = posEnd + 2; // uint16
+    this.optionApproverNumDenominator = helper.hboToInt16(data.slice(posStart,posEnd));
 
-    if(this.option_approver_num_denominator > 0){
-      for (let i = 0; i < this.option_approver_num_denominator; i++) {
-        pos_s = pos_e;
-        pos_e = pos_e + 2;
-        value_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    if(this.optionApproverNumDenominator > 0){
+      for (let i = 0; i < this.optionApproverNumDenominator; i++) {
+        posStart = posEnd;
+        posEnd = posEnd + 2;
+        valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-        pos_s = pos_e;
-        pos_e = pos_e + value_length;
-        this.option_approvers.push(data.slice(pos_s, pos_e));
+        posStart = posEnd;
+        posEnd = posEnd + valueLength;
+        this.optionApprovers.push(data.slice(posStart, posEnd));
       }
     }
 
-    pos_s = pos_e;
-    pos_e = pos_e + 4; // uint32
-    value_length = helper.hboToInt32(data.slice(pos_s,pos_e));
-    if(value_length > 0){
-      pos_s = pos_e;
-      pos_e = pos_e + value_length; // uint32
+    posStart = posEnd;
+    posEnd = posEnd + 4; // uint32
+    valueLength = helper.hboToInt32(data.slice(posStart,posEnd));
+    if(valueLength > 0){
+      posStart = posEnd;
+      posEnd = posEnd + valueLength; // uint32
 
-      const asset_bin = data.slice(pos_s, pos_e);
+      const assetBin = data.slice(posStart, posEnd);
 
-      this.asset = new BBcAsset(new Uint8Array(0, this.id_length));
-      this.asset.unpack(asset_bin);
+      const user_id = new Uint8Array(0)
+      this.asset = new BBcAsset(user_id, this.idLength);
+      this.asset.unpack(assetBin);
     }
 
     return true;

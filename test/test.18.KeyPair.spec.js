@@ -17,8 +17,8 @@ describe(`${envName}: Test KeyPair`, () => {
 
     const keypair = new bbclib.KeyPair();
     const ret = await keypair.generate();
-    expect(keypair.public_key).to.not.equal(null);
-    expect(keypair.private_key).to.not.equal(null);
+    expect(keypair.publicKey).to.not.equal(null);
+    expect(keypair.privateKey).to.not.equal(null);
 
     const msg = new Uint8Array(32);
     for (let i = 0; i < 32; i++) msg[i] = 0xFF & i;

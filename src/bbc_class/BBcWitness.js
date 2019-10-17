@@ -3,49 +3,49 @@ import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcWitness{
-  constructor(id_length = 32) {
-    this.id_length = cloneDeep(id_length);
+  constructor(idLength = 32) {
+    this.idLength = cloneDeep(idLength);
     this.transaction = null;
-    this.user_ids = [];
-    this.sig_indices = [];
+    this.userIds = [];
+    this.sigIndices = [];
   }
 
-  show_str() {
+  showStr() {
     // eslint-disable-next-line no-console
     console.log('this.transaction :',this.transaction);
-    for (let i = 0; i < this.user_ids.length; i++) {
+    for (let i = 0; i < this.userIds.length; i++) {
       // eslint-disable-next-line no-console
-      console.log('this.user_ids[', i, '] :', jseu.encoder.arrayBufferToHexString(this.user_ids[i]));
+      console.log('this.userIds[', i, '] :', jseu.encoder.arrayBufferToHexString(this.userIds[i]));
     }
-    for (let i = 0; i < this.sig_indices.length; i++) {
+    for (let i = 0; i < this.sigIndices.length; i++) {
       // eslint-disable-next-line no-console
-      console.log('this.sig_indices[', i, '] :', this.sig_indices[i]);
+      console.log('this.sigIndices[', i, '] :', this.sigIndices[i]);
     }
   }
 
-  add_witness(user_id, keyType=0) {
+  addWitness(userId, keyType=0) {
     let flag = false;
-    for (let i = 0; i < this.user_ids.length; i++){
-      if(user_id.toString() === this.user_ids[i].toString()) {
+    for (let i = 0; i < this.userIds.length; i++){
+      if(userId.toString() === this.userIds[i].toString()) {
         flag = true;
         break;
       }
     }
     if (flag === false){
-      this.user_ids.push(cloneDeep(user_id));
-      this.sig_indices.push(this.transaction.get_sig_index(user_id, keyType));
+      this.userIds.push(cloneDeep(userId));
+      this.sigIndices.push(this.transaction.getSigIndex(userId, keyType));
     }
   }
 
-  add_signature(user_id, signature) {
-    this.transaction.add_signature(cloneDeep(user_id), cloneDeep(signature));
+  addSignature(userId, signature) {
+    this.transaction.addSignature(cloneDeep(userId), cloneDeep(signature));
   }
 
-  add_signature_using_index(user_id, signature){
+  addSignatureUsingIndex(userId, signature){
 
-    for (let i = 0; i < this.user_ids.length; i++){
-      if(user_id.toString() === this.user_ids[i].toString()){
-        this.transaction.add_signature_using_index(this.sig_indices[i], signature);
+    for (let i = 0; i < this.userIds.length; i++){
+      if(userId.toString() === this.userIds[i].toString()){
+        this.transaction.addSignatureUsingIndex(this.sigIndices[i], signature);
         return true;
       }
     }
@@ -53,62 +53,62 @@ export class BBcWitness{
     return false;
   }
 
-  set_sig_index(){
-    if(this.transaction === null || this.user_ids.length === 0){
+  setSigIndex(){
+    if(this.transaction === null || this.userIds.length === 0){
       return ;
     }
 
-    for (let i = 0; i < this.user_ids.length; i++){
-      this.transaction.set_sig_index(this.user_ids[i], this.sig_indices[i]);
+    for (let i = 0; i < this.userIds.length; i++){
+      this.transaction.setSigIndex(this.userIds[i], this.sigIndices[i]);
     }
 
   }
 
-  add_user(user) {
+  addUser(user) {
     if (user != null) {
-      this.user_ids.push(cloneDeep(user));
+      this.userIds.push(cloneDeep(user));
       return true;
     }
     return false;
   }
 
-  add_sig_indices(index) {
+  addSigIndices(index) {
     if (index != null) {
-      this.sig_indices.push(cloneDeep(index));
+      this.sigIndices.push(cloneDeep(index));
       return true;
     }
     return false;
   }
 
   pack() {
-    let binary_data = [];
-    const elements_len = this.user_ids.length;
-    binary_data = binary_data.concat(Array.from(helper.hbo(elements_len, 2)));
-    for (let i = 0; i < elements_len; i++) {
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.user_ids[i].length, 2)));
-      binary_data = binary_data.concat(Array.from(this.user_ids[i]));
-      binary_data = binary_data.concat(Array.from(helper.hbo(this.sig_indices[i], 2)));
+    let binaryData = [];
+    const elementsLen = this.userIds.length;
+    binaryData = binaryData.concat(Array.from(helper.hbo(elementsLen, 2)));
+    for (let i = 0; i < elementsLen; i++) {
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.userIds[i].length, 2)));
+      binaryData = binaryData.concat(Array.from(this.userIds[i]));
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.sigIndices[i], 2)));
     }
-    return new Uint8Array(binary_data);
+    return new Uint8Array(binaryData);
   }
 
   unpack(data) {
-    let pos_s = 0;
-    let pos_e = 2;
-    const user_ids_length = helper.hboToInt16(data.slice(pos_s, pos_e));
-    for (let i = 0; i < user_ids_length; i++) {
-      pos_s = pos_e;
-      pos_e = pos_e + 2;
-      const user_value_length = helper.hboToInt16(data.slice(pos_s, pos_e));
+    let posStart = 0;
+    let posEnd = 2;
+    const userIdsLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    for (let i = 0; i < userIdsLength; i++) {
+      posStart = posEnd;
+      posEnd = posEnd + 2;
+      const userValueLength = helper.hboToInt16(data.slice(posStart, posEnd));
 
-      pos_s = pos_e;
-      pos_e = pos_e + user_value_length;
-      this.user_ids.push(data.slice(pos_s, pos_e));
+      posStart = posEnd;
+      posEnd = posEnd + userValueLength;
+      this.userIds.push(data.slice(posStart, posEnd));
 
-      pos_s = pos_e;
-      pos_e = pos_e + 2;
-      const index_value = helper.hboToInt16(data.slice(pos_s, pos_e));
-      this.sig_indices.push(index_value);
+      posStart = posEnd;
+      posEnd = posEnd + 2;
+      const indexValue = helper.hboToInt16(data.slice(posStart, posEnd));
+      this.sigIndices.push(indexValue);
 
     }
   }
