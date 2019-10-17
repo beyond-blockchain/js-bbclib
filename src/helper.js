@@ -1,8 +1,8 @@
-import { BBcEvent } from './bbc_class/BBcEvent';
-import { BBcAsset } from './bbc_class/BBcAsset';
-import { BBcTransaction } from './bbc_class/BBcTransaction';
-import { BBcWitness } from './bbc_class/BBcWitness';
-import { BBcRelation } from './bbc_class/BBcRelation';
+import { BBcEvent } from './bbcClass/BBcEvent';
+import { BBcAsset } from './bbcClass/BBcAsset';
+import { BBcTransaction } from './bbcClass/BBcTransaction';
+import { BBcWitness } from './bbcClass/BBcWitness';
+import { BBcRelation } from './bbcClass/BBcRelation';
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 
