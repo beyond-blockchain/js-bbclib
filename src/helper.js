@@ -5,9 +5,10 @@ import { BBcWitness } from './bbcClass/BBcWitness';
 import { BBcRelation } from './bbcClass/BBcRelation';
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
+import {idsLength} from './bbcClass/idsLength';
 
-export async function makeTransaction(userId, eventNum, refNum, witness) {
-  const txObj = await getNewTransaction(userId, eventNum, refNum, witness);
+export async function makeTransaction(userId, eventNum, refNum, witness, version=1.0){
+  const txObj = await getNewTransaction(userId, eventNum, refNum, witness, version);
   if (eventNum > 0) {
     for (let i = 0; i < eventNum; i++) {
       txObj.events[i].addReferenceIndices(i);
@@ -24,13 +25,13 @@ export async function signAndAddSignature(transaction, keyPair) {
   transaction.addSignature(transaction.userId, sig);
 }
 
-export async function getNewTransaction(userId, eventNum, relatioNum, witness) {
+export async function getNewTransaction(userId, eventNum, relationNum, witness, version=1.0) {
 
-  const transaction = new BBcTransaction(1.0,32);
+  const transaction = new BBcTransaction(version,idsLength);
   if (eventNum > 0) {
     for (let i = 0; i < eventNum; i++) {
-      const evt = new BBcEvent(null,32);
-      const ast = new BBcAsset(null,32);
+      const evt = new BBcEvent(null,idsLength);
+      const ast = new BBcAsset(null,idsLength);
       ast.addUserId(userId);
       await ast.digest();
       evt.addAsset(ast);
@@ -41,11 +42,11 @@ export async function getNewTransaction(userId, eventNum, relatioNum, witness) {
 
   if (relationNum > 0) {
     for (let i = 0; i < relationNum; i++) {
-      transaction.add(new BBcRelation(new Uint8Array(0),32));
+      transaction.add(new BBcRelation(new Uint8Array(0),idsLength));
     }
   }
   if (witness) {
-    transaction.addWitness(new BBcWitness(32));
+    transaction.addWitness(new BBcWitness(idsLength));
   }
   return transaction;
 }
@@ -77,13 +78,12 @@ export async function createPubkeyByte(pubkey) {
     publicKey[i + 1] = byteX[i];
     publicKey[i + 1 + 32] = byteY[i];
   }
-
   return publicKey;
 }
 
 export async function createAsset(userId) {
 
-  const bbcAsset = new BBcAsset(userId, 32);
+  const bbcAsset = new BBcAsset(userId, idsLength);
   await bbcAsset.setRandomNonce();
   const assetFile = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
@@ -100,7 +100,7 @@ export async function createAsset(userId) {
 
 export async function createAssetWithoutFile(userId) {
 
-  const bbcAsset = new BBcAsset(userId, 32);
+  const bbcAsset = new BBcAsset(userId, idsLength);
   await bbcAsset.setRandomNonce();
 
   const assetBody = new Uint8Array(32);

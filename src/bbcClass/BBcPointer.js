@@ -1,14 +1,20 @@
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
+import {idsLength} from "./idsLength";
 
 export class BBcPointer{
-  constructor(transactionId, assetId, idLength =32) {
-    this.idLength = cloneDeep(idLength);
+  constructor(transactionId, assetId, idsLengthConf=null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength);
+    }
+
     if (transactionId != null) {
       this.transactionId = cloneDeep(transactionId);
     } else {
-      this.transactionId = new Uint8Array( this.idLength );
+      this.transactionId = new Uint8Array( this.idsLength.transactionId );
     }
 
     this.assetId = cloneDeep(assetId);
@@ -26,6 +32,11 @@ export class BBcPointer{
       console.log('assetId', jseu.encoder.arrayBufferToHexString(this.assetId));
     }
   }
+
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
+  }
+
 
   setTransactionId(transactionId) {
     this.transactionId = cloneDeep(transactionId);

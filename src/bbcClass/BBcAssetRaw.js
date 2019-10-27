@@ -1,18 +1,22 @@
-import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
+import {idsLength} from './idsLength';
 
 export class BBcAssetRaw{
-  constructor(idLength=32) {
-    this.setLength(idLength); // int
-    this.assetId = new Uint8Array(this.idLength); // Uint8Array
+  constructor(idsLengthConf=null) {
+    if(idsLengthConf !== null){
+      this.setLength(idsLengthConf); // dict
+    }else{
+      this.setLength(idsLength);
+    }
+    this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
     this.assetBodySize = 0; // int
     this.assetBody = new Uint8Array(0); // Uint8Array
   }
 
-  setLength(idLength){
-    this.idLength = cloneDeep(idLength);
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   showAsset() {

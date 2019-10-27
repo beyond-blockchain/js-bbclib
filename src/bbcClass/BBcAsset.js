@@ -2,13 +2,19 @@ import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
+import {idsLength} from './idsLength.js';
 
 export class BBcAsset{
-  constructor(userId, idLength=32) {
-    this.setLength(idLength); // int
+  constructor(userId, idsLengthConf=null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf); // dict
+    }else{
+      this.setLength(idsLength); // dict
+    }
     this.addUserId(userId); // Uint8Array
-    this.assetId = new Uint8Array(this.idLength); // Uint8Array
-    this.nonce = new Uint8Array(this.idLength); // Uint8Array
+    this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
+    this.nonce = new Uint8Array(this.idsLength.nonce); // Uint8Array
+    this.assetFile = new Uint8Array(); // Uint8Array
     this.assetFileSize = 0; // int
     this.assetFileDigest = new Uint8Array(0); // Uint8Array
     this.assetBodyType = 0; // int
@@ -16,8 +22,8 @@ export class BBcAsset{
     this.assetBody = new Uint8Array(0); // Uint8Array
   }
 
-  setLength(idLength){
-    this.idLength = cloneDeep(idLength);
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   showAsset() {
@@ -34,7 +40,8 @@ export class BBcAsset{
   }
 
   async setRandomNonce() {
-    this.nonce = await jscu.random.getRandomBytes(this.idLength);
+    console.log(this.idsLength);
+    this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
   }
 
   setNonce(nonce) {
@@ -65,7 +72,7 @@ export class BBcAsset{
   async digest() {
     const target = this.getDigest();
     const id = await jscu.hash.compute(target, 'SHA-256');
-    this.assetId = id.slice(0, this.idLength);
+    this.assetId = id.slice(0, this.idsLength.assetId);
     return this.assetId;
   }
 
@@ -194,7 +201,6 @@ export class BBcAsset{
       posEnd = posEnd + this.assetBodySize;
       this.assetBody = data.slice(posStart, posEnd);
     }
-
     return true;
   }
 

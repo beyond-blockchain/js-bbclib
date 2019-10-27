@@ -2,8 +2,8 @@ import chai from 'chai';
 const expect = chai.expect;
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
-import { Buffer } from 'buffer';
-import * as helper from '../src/helper';
+import {idsLength} from '../src/bbcClass/idsLength';
+
 
 import {getTestEnv} from './prepare.js';
 const env = getTestEnv();
@@ -11,18 +11,18 @@ const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAssetRaw`, () => {
-  console.log('***********************');
-  console.log('Test for BBcAssetRaw Class.');
 
   it('pack and unpack', async () => {
-    const idLength = 32;
+    console.log('***********************');
+    console.log('Test for BBcAssetRaw Class.');
+
     const assetId = await jscu.random.getRandomBytes(32);
     const assetBody = await jscu.random.getRandomBytes(512);
-    const assetRaw = new bbclib.BBcAssetRaw(idLength);
+    const assetRaw = new bbclib.BBcAssetRaw(idsLength);
     assetRaw.setAsset(assetId, assetBody);
     const assetRawBin = assetRaw.pack();
 
-    const assetRawUnpack = new bbclib.BBcAssetRaw(idLength);
+    const assetRawUnpack = new bbclib.BBcAssetRaw(idsLength);
     await assetRawUnpack.unpack(assetRawBin);
 
     // console.log("----------");

@@ -1,11 +1,16 @@
 import * as helper from '../helper.js';
 import cloneDeep from 'lodash.clonedeep';
+import {idsLength} from './idsLength';
 
 export class BBcReference{
-  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idLength=32) {
-    this.idLength = cloneDeep(idLength);
+  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength);
+    }
     this.assetGroupId = cloneDeep(assetGroupId);
-    this.transactionId = new Uint8Array(this.idLength);
+    this.transactionId = new Uint8Array(this.idsLength.transactionId);
     this.transaction = cloneDeep(transaction);
     this.refTransaction = cloneDeep(refTransaction);
     this.eventIndexInRef = cloneDeep(eventIndexInRef);
@@ -17,6 +22,10 @@ export class BBcReference{
       return;
     }
     this.prepareReference(refTransaction);
+  }
+
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   prepareReference(refTransaction) {

@@ -2,10 +2,15 @@ import { BBcAsset } from './BBcAsset.js';
 import cloneDeep from 'lodash.clonedeep';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
+import {idsLength} from './idsLength';
 
 export class BBcEvent{
-  constructor(assetGroupId, idLength=32) {
-    this.idLength = cloneDeep(idLength);
+  constructor(assetGroupId, idsLengthConf=null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength);
+    }
     this.assetGroupId = cloneDeep(assetGroupId);
     this.referenceIndices = [];
     this.mandatoryApprovers = [];
@@ -18,7 +23,7 @@ export class BBcEvent{
   showEvent() {
     console.log('------showEvent-------');
 
-    console.log('idLength :',this.idLength);
+    console.log('idsLength :',this.idsLength);
     console.log('assetGroupId :', jseu.encoder.arrayBufferToHexString(this.assetGroupId));
 
     console.log('this.referenceIndices.length  :',this.referenceIndices.length );
@@ -46,6 +51,10 @@ export class BBcEvent{
       this.asset.showAsset()
     }
     console.log('------showEvent end-------');
+  }
+
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   addAssetGroupId(assetGroupId) {
@@ -183,8 +192,8 @@ export class BBcEvent{
 
       const assetBin = data.slice(posStart, posEnd);
 
-      const user_id = new Uint8Array(0)
-      this.asset = new BBcAsset(user_id, this.idLength);
+      const user_id = new Uint8Array(0);
+      this.asset = new BBcAsset(user_id, this.idsLength);
       this.asset.unpack(assetBin);
     }
 

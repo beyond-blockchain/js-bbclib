@@ -11,13 +11,18 @@ import * as helper from '../helper.js';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
+import {idsLength} from './idsLength.js';
 
 const date = new Date();
 
 export class BBcTransaction {
 
-  constructor( version=1.0, idLength=32) {
-    this.idLength = cloneDeep(idLength);
+  constructor(version=1.0, idsLengthConf=null) {
+    if (idsLengthConf != null){
+      this.idsLength = idsLengthConf;
+    }else{
+      this.idsLength = idsLength;
+    }
     this.version = cloneDeep(version);
     this.timestamp = (new BN(date.getTime())).mul(new BN(1000000)); //timestampはミリ秒なので nano秒へ変換
     this.events = [];
@@ -159,7 +164,6 @@ export class BBcTransaction {
     }
   }
 
-
   setCrossRef(crossRef) {
     if (crossRef !== null) {
       this.crossRef = cloneDeep(crossRef);
@@ -195,7 +199,18 @@ export class BBcTransaction {
 
   async digest() {
     this.targetSerialize = await this.getDigestForTransactionId();
+    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
+    return await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
+  }
+
+  async digest2() {
+    this.targetSerialize = await this.getDigestForTransactionId();
     return this.targetSerialize;
+  }
+
+  async digest3() {
+    this.targetSerialize = await this.getDigestForTransactionId();
+    return this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
   }
 
   packCrossRef() {
@@ -212,10 +227,8 @@ export class BBcTransaction {
   }
 
   async setTransactionId() {
-    this.targetSerialize = await this.getDigestForTransactionId();
-    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
-    const id = await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
-    this.transactionId = id.slice(0, this.idLength);
+    const digest = await this.digest();
+    this.transactionId = digest.slice(0, this.idLength);
     return this.transactionId;
   }
 
@@ -317,7 +330,6 @@ export class BBcTransaction {
     return new Uint8Array(binaryData);
 
   }
-
 
   async unpack(data) {
 
@@ -450,11 +462,11 @@ export class BBcTransaction {
         this.signatures.push(sig);
       }
     }
-
+    await this.setTransactionId();
     return true;
   }
 
-  async sign(privateKey, publicKey, keyPair) {
+  async sign(keyType, privateKey, publicKey, keyPair) {
 
     if (keyPair === null) {
       if (privateKey.length !== 32 || publicKey.length <= 32) {
@@ -463,7 +475,7 @@ export class BBcTransaction {
       }
 
       keyPair = new KeyPair();
-      keyPair.setKeyPair(privateKey, publicKey);
+      keyPair.setKeyPair(keyType, privateKey, publicKey);
       if (keyPair == null) {
 
         return null;
@@ -475,8 +487,7 @@ export class BBcTransaction {
     if (s === null) {
       return null;
     }
-
-    await sig.add(s, await keyPair.publicKey.jwk);
+    await sig.add(s, await keyPair.exportPublicKey('jwk'));
     return sig;
   }
 

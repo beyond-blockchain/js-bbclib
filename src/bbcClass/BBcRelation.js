@@ -5,15 +5,20 @@ import { BBcPointer } from './BBcPointer.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
+import {idsLength} from './idsLength';
 
 export class BBcRelation{
-  constructor(assetGroupId, idLength=32, version=1) {
+  constructor(assetGroupId, idsLengthConf=null, version=1) {
     this.version = version;
-    this.idLength = cloneDeep(idLength);
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength);
+    }
     if (assetGroupId !== null) {
       this.assetGroupId = cloneDeep(assetGroupId);
     } else {
-      this.assetGroupId = new Uint8Array(this.idLength);
+      this.assetGroupId = new Uint8Array(this.idsLength.assetGroupId);
     }
 
     this.pointers = [];
@@ -25,6 +30,11 @@ export class BBcRelation{
   setVersion(ver) {
     this.version = ver;
   }
+
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
+  }
+
 
   setAsset(asset) {
     this.asset = cloneDeep(asset);
@@ -133,7 +143,7 @@ export class BBcRelation{
         posEnd = posEnd + pointerLength;
 
         const pointerBin = data.slice(posStart, posEnd);
-        const ptr = new BBcPointer(null, null, this.idLength);
+        const ptr = new BBcPointer(null, null, this.idsLength);
 
         ptr.unpack(pointerBin);
         this.pointers.push(ptr);
@@ -148,7 +158,7 @@ export class BBcRelation{
       posStart = posEnd;
       posEnd = posEnd + valueLength; // uint32
       const assetBin = data.slice(posStart, posEnd);
-      this.asset = new BBcAsset(null, this.idLength);
+      this.asset = new BBcAsset(null, this.idsLength);
       this.asset.unpack(assetBin);
     }
 
@@ -161,7 +171,7 @@ export class BBcRelation{
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
         const assetRawBin = data.slice(posStart, posEnd);
-        this.assetRaw = new BBcAssetRaw(this.idLength);
+        this.assetRaw = new BBcAssetRaw(this.idsLength);
         this.assetRaw.unpack(assetRawBin);
       }
 
@@ -173,7 +183,7 @@ export class BBcRelation{
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
         const assetHashBin = data.slice(posStart, posEnd);
-        this.assetHash = new BBcAssetHash(this.idLength);
+        this.assetHash = new BBcAssetHash(this.idsLength);
         this.assetHash.unpack(assetHashBin);
       }
     }

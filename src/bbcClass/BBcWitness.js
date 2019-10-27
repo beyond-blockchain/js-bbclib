@@ -1,10 +1,15 @@
 import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
+import {idsLength} from "./idsLength";
 
 export class BBcWitness{
-  constructor(idLength = 32) {
-    this.idLength = cloneDeep(idLength);
+  constructor(idsLengthConf = null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength);
+    }
     this.transaction = null;
     this.userIds = [];
     this.sigIndices = [];
@@ -22,6 +27,11 @@ export class BBcWitness{
       console.log('this.sigIndices[', i, '] :', this.sigIndices[i]);
     }
   }
+
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
+  }
+
 
   addWitness(userId, keyType=0) {
     let flag = false;
@@ -109,7 +119,6 @@ export class BBcWitness{
       posEnd = posEnd + 2;
       const indexValue = helper.hboToInt16(data.slice(posStart, posEnd));
       this.sigIndices.push(indexValue);
-
     }
   }
 }

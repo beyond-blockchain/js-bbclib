@@ -3,13 +3,14 @@ import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
 import * as para from '../parameter.js';
 import cloneDeep from "lodash.clonedeep";
+import jscu from "js-crypto-utils";
 
 export class BBcSignature{
   constructor(keyType) {
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
     this.pubkey = null;
-    this.pubkeyByte = new Uint8Array(0);;
+    this.pubkeyByte = new Uint8Array(0);
     this.keypair = null;
     this.notInitialized = true;
   }
@@ -32,30 +33,26 @@ export class BBcSignature{
       this.notInitialized = false;
       this.signature = cloneDeep(signature);
     }
-
     if (pubKey != null) {
-      this.pubkey = cloneDeep(pubKey);
+      //this.pubkey = cloneDeep(pubKey);
       this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(pubKey));
+      //this.pubkeyByte = cloneDeep(pubKey);
       this.keypair = new KeyPair();
-      this.keypair.setKeyPair(null, cloneDeep(pubKey));
+      this.keypair.setKeyPair('jwk', null, cloneDeep(pubKey));
     }
-
     return true;
   }
 
-  addSignature(signature) {
-    this.signature = signature;
+  setSignature(signature) {
+    this.notInitialized = false;
+    this.signature = cloneDeep(signature);
   }
 
   pack() {
-
     let binaryData = [];
-
     if (this.keyType === para.KeyType.NOT_INITIALIZED){
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
-
     }else {
-
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
       binaryData = binaryData.concat(Array.from(helper.hbo(this.pubkeyByte.length * 8, 4)));
       binaryData = binaryData.concat(Array.from(this.pubkeyByte));

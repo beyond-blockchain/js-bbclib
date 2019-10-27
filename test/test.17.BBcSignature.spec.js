@@ -19,27 +19,19 @@ describe(`${envName}: Test BBcSignature`, () => {
     console.log('Test for BBcSignature Class');
 
     const signature = new bbclib.BBcSignature(para.KeyType.ECDSA_P256v1);
-    signature.addSignature(new Uint8Array(8));
+    signature.setSignature(new Uint8Array(8));
     const keyPair = new bbclib.KeyPair();
     await keyPair.generate();
 
     const sig = new Uint8Array(8);
-    await signature.add(sig, keyPair.publicKey['_jwk']);
+    await signature.add(sig, keyPair.publicKey);
     const signatureBin = signature.pack();
     const signatureUnpack = new bbclib.BBcSignature(para.KeyType.ECDSA_P256v1);
     await signatureUnpack.unpack(signatureBin);
 
-    //console.log("---------");
-    //signature.showSig();
-    //console.log("---------");
-    //signatureUnpack.showSig();
-
     expectUint8Array(signature.signature,signatureUnpack.signature);
     expect(signature.keyType).to.equal(signatureUnpack.keyType);
-    expect(signature.pubkey['crv']).to.equal(signatureUnpack.pubkey['crv']);
-    expect(signature.pubkey['EC']).to.equal(signatureUnpack.pubkey['EC']);
-    expect(signature.pubkey['x']).to.equal(signatureUnpack.pubkey['x']);
-    expect(signature.pubkey['y']).to.equal(signatureUnpack.pubkey['y']);
+    expectUint8Array(signature.pubkeyByte,signatureUnpack.pubkeyByte);
 
   });
 
@@ -56,8 +48,6 @@ describe(`${envName}: Test BBcSignature`, () => {
     expect(signature.keyType).to.equal(signatureUnpack.keyType);
 
   });
-
-
 
   it('load signature hex string ', async () => {
     const signatureHexString = '0200000008020000043750d6dcb679608cb533e93cfb22ec2df17e10a61c79f113bc1651d02caed51640121e53e4ec83effe9804df5f39521a28a1ba1f41d3198ffd54999fbcb60dd700020000e98b77e2f1bba5c65645aaa9aa7cc7b057240cc49f7e47c09a1a2a93b5cbf249d2c85fb4cb674670369a484d4e3c1e51680a22b8b95caaebdada752bf16e9675';

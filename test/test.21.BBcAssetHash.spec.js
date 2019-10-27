@@ -2,8 +2,7 @@ import chai from 'chai';
 const expect = chai.expect;
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
-import { Buffer } from 'buffer';
-import * as helper from '../src/helper';
+import {idsLength} from '../src/bbcClass/idsLength';
 
 import {getTestEnv} from './prepare.js';
 const env = getTestEnv();
@@ -11,20 +10,19 @@ const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAssetHash`, () => {
-  console.log('***********************');
-  console.log('Test for BBcAssetHash Class.');
 
   it('pack and unpack', async () => {
-    const idLength = 32;
+    console.log('***********************');
+    console.log('Test for BBcAssetHash Class.');
     const assetId_1 = await jscu.random.getRandomBytes(32);
     const assetId_2 = await jscu.random.getRandomBytes(32);
     const assetId_3 = await jscu.random.getRandomBytes(32);
-    const assetHash = new bbclib.BBcAssetHash(idLength);
+    const assetHash = new bbclib.BBcAssetHash(idsLength);
     assetHash.addAssetId(assetId_1);
     assetHash.addAssetId(assetId_2);
     assetHash.addAssetId(assetId_3);
     const assetHashBin = assetHash.pack();
-    const assetHashUnpack = new bbclib.BBcAssetHash(idLength);
+    const assetHashUnpack = new bbclib.BBcAssetHash(idsLength);
     await assetHashUnpack.unpack(assetHashBin);
 
     // console.log("----------");

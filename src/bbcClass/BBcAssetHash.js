@@ -2,15 +2,20 @@ import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
+import {idsLength} from './idsLength';
 
 export class BBcAssetHash{
-  constructor(idLength=32) {
-    this.setLength(idLength); // int
+  constructor(idsLengthConf=null) {
+    if (idsLengthConf !== null){
+      this.setLength(idsLengthConf);
+    }else{
+      this.setLength(idsLength); // int
+    }
     this.assetIds = [];
   }
 
-  setLength(idLength){
-    this.idLength = cloneDeep(idLength);
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   showAsset() {
@@ -45,11 +50,10 @@ export class BBcAssetHash{
     const idsCount =  helper.hboToInt16(data.slice(posStart,posEnd));
 
     for (let i =0; i < idsCount; i++){
-        posStart = posEnd;
-        posEnd = posEnd + this.idLength;
-        this.assetIds.push(data.slice(posStart, posEnd));
+      posStart = posEnd;
+      posEnd = posEnd + this.idsLength.assetId;
+      this.assetIds.push(data.slice(posStart, posEnd));
     }
-
     return true;
   }
 
