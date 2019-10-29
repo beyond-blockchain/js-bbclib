@@ -36,17 +36,11 @@ describe(`${envName}: Test BBcSignature`, () => {
   });
 
   it('serialize and deserialize with KeyType == 0', async () => {
-
-    console.log('***********************');
-    console.log('Test for BBcSignature Class');
-
     const signature = new bbclib.BBcSignature(para.KeyType.NOT_INITIALIZED);
     const signatureBin = signature.pack();
     const signatureUnpack = new bbclib.BBcSignature(para.KeyType.NOT_INITIALIZED);
     await signatureUnpack.unpack(signatureBin);
-
     expect(signature.keyType).to.equal(signatureUnpack.keyType);
-
   });
 
   it('load signature hex string ', async () => {

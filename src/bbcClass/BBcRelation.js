@@ -35,20 +35,23 @@ export class BBcRelation{
     this.idsLength = cloneDeep(_idsLength);
   }
 
-
-  setAsset(asset) {
-    this.asset = cloneDeep(asset);
+  setAsset(_asset) {
+    this.asset = cloneDeep(_asset);
   }
 
-  setAssetRaw(assetRaw) {
+  setAssetGroupId(_assetGroupId) {
+    this.assetGroupId = cloneDeep(_assetGroupId);
+  }
+
+  setAssetRaw(_assetRaw) {
     if(this.version >= 2){
-      this.assetRaw = cloneDeep(assetRaw);
+      this.assetRaw = cloneDeep(_assetRaw);
     }
   }
 
-  setAssetHash(assetHash) {
+  setAssetHash(_assetHash) {
     if(this.version >= 2){
-      this.assetHash = cloneDeep(assetHash);
+      this.assetHash = cloneDeep(_assetHash);
     }
   }
 

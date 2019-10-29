@@ -1,7 +1,7 @@
 import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
-import {idsLength} from "./idsLength";
+import {idsLength} from './idsLength';
 
 export class BBcWitness{
   constructor(idsLengthConf = null) {
@@ -31,7 +31,6 @@ export class BBcWitness{
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
   }
-
 
   addWitness(userId, keyType=0) {
     let flag = false;

@@ -42,7 +42,7 @@ export class BBcTransaction {
   showStr() {
     console.log('**************showStr*************** :');
 
-    console.log('idLength :', this.idLength);
+    console.log('idsLength :', this.idsLength);
     console.log('version :', this.version);
     console.log('timestamp :', this.timestamp);
 
@@ -130,7 +130,7 @@ export class BBcTransaction {
     }
   }
 
-  setEvent(events) {
+  setEvents(events) {
     if (events !== null && Array.isArray(events) ){
       this.events = cloneDeep(events);
     }
@@ -142,7 +142,7 @@ export class BBcTransaction {
     }
   }
 
-  setReference(references) {
+  setReferences(references) {
     if (Array.isArray(references)) {
       if (references.length > 0) {
         this.references = cloneDeep(references);
@@ -156,7 +156,7 @@ export class BBcTransaction {
     }
   }
 
-  setRelation(relations) {
+  setRelations(relations) {
     if (Array.isArray(relations)) {
       if (relations.length > 0) {
         this.relations = cloneDeep(relations);
@@ -197,20 +197,14 @@ export class BBcTransaction {
     this.signatures[index] = cloneDeep(signature);
   }
 
-  async digest() {
+  async getTransactionBase() {
     this.targetSerialize = await this.getDigestForTransactionId();
     this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
-    return await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
+    return helper.concat(this.transactionBaseDigest, this.packCrossRef());
   }
 
-  async digest2() {
-    this.targetSerialize = await this.getDigestForTransactionId();
-    return this.targetSerialize;
-  }
-
-  async digest3() {
-    this.targetSerialize = await this.getDigestForTransactionId();
-    return this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
+  async digest() {
+    return await jscu.hash.compute(await this.getTransactionBase(), 'SHA-256');
   }
 
   packCrossRef() {
@@ -228,7 +222,7 @@ export class BBcTransaction {
 
   async setTransactionId() {
     const digest = await this.digest();
-    this.transactionId = digest.slice(0, this.idLength);
+    this.transactionId = digest.slice(0, this.idsLength.transactionId);
     return this.transactionId;
   }
 
@@ -238,7 +232,7 @@ export class BBcTransaction {
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
     binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
-    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
@@ -279,7 +273,7 @@ export class BBcTransaction {
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
     binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
-    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
@@ -343,7 +337,7 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    this.idLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    this.idsLength.transactionId = helper.hboToInt16(data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
@@ -378,7 +372,7 @@ export class BBcTransaction {
         posStart = posEnd;
         posEnd = posEnd + referenceLength; // uint16
         const referenceBin = data.slice(posStart, posEnd);
-        const ref = new BBcReference(null, null, null, null, this.idLength);
+        const ref = new BBcReference(null, null, null, null, this.idsLength.transactionId);
         ref.unpack(referenceBin);
         this.references.push(ref);
       }
@@ -397,7 +391,7 @@ export class BBcTransaction {
         posStart = posEnd;
         posEnd = posEnd + relationLength; // uint16
         const relationBin = data.slice(posStart, posEnd);
-        const rtn = new BBcRelation( null, this.idLength, this.version);
+        const rtn = new BBcRelation( null, this.idsLength, this.version);
         rtn.unpack(relationBin);
         this.relations.push(rtn);
       }
@@ -417,7 +411,7 @@ export class BBcTransaction {
         posEnd = posEnd + witnessLength; // uint16
 
         const witnessBin = data.slice(posStart, posEnd);
-        const witness = new BBcWitness(this.idLength);
+        const witness = new BBcWitness(this.idsLength);
         witness.unpack(witnessBin);
         this.setWitness(witness);
         this.witness.setSigIndex();
@@ -481,16 +475,12 @@ export class BBcTransaction {
         return null;
       }
     }
-
     const sig = new BBcSignature(para.KeyType.ECDSA_P256v1);
-    const s = await keyPair.sign(await this.digest());
+    const s = await keyPair.sign(await this.getTransactionBase());
     if (s === null) {
       return null;
     }
     await sig.add(s, await keyPair.exportPublicKey('jwk'));
     return sig;
   }
-
 }
-
-

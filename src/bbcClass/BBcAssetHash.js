@@ -36,6 +36,8 @@ export class BBcAssetHash{
     let binaryData = [];
     binaryData = binaryData.concat(Array.from(helper.hbo(this.assetIds.length,2)));
     for (let i = 0; i < this.assetIds.length; i++ ) {
+
+      binaryData = binaryData.concat(Array.from(helper.hbo(this.assetIds[i].length, 2)));
       binaryData = binaryData.concat(Array.from(this.assetIds[i]));
     }
 
@@ -51,7 +53,11 @@ export class BBcAssetHash{
 
     for (let i =0; i < idsCount; i++){
       posStart = posEnd;
-      posEnd = posEnd + this.idsLength.assetId;
+      posEnd = posEnd + 2; //uint16
+      const valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+
+      posStart = posEnd;
+      posEnd = posEnd + valueLength;
       this.assetIds.push(data.slice(posStart, posEnd));
     }
     return true;

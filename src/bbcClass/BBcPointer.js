@@ -1,7 +1,7 @@
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
-import {idsLength} from "./idsLength";
+import {idsLength} from './idsLength';
 
 export class BBcPointer{
   constructor(transactionId, assetId, idsLengthConf=null) {

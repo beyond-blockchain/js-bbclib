@@ -16,24 +16,6 @@ export default {
           '-----END PRIVATE KEY-----\n'
     }
   },
-  '1025':{
-    publicKey:{
-      pem:
-          '-----BEGIN PUBLIC KEY-----\n' +
-          'MHcCAQEEIG0ozmedyxf9Hk1rHrmurU2xGJ6KeXhB\n' +
-          'bHnb2aogQPnIA5D8U6d4NuCES41A6eV/ZbP1B/I/FXbTa+AUFsv59W7O7A==\n' +
-          '-----END PUBLIC KEY-----\n'
-    },
-    privateKey: {
-      pem: '-----BEGIN PRIVATE KEY-----\n' +
-          'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQga+OUwiWnEJg8iUsG\n' +
-          'WXQvHiNvdBjq2ZB6SyMFpx8BrxegCgYIKoZIzj0DAQehRANCAASSVKKeLu+K7EOt\n' +
-          'E93dBhdnMkk+Cn1sedvZqiBA+cgDkPxTp3g24IRLjUDp5X9ls/UH8j8VdtNr4BQW\n' +
-          'y/n1bs7s\n' +
-          '-----END PRIVATE KEY-----\n'
-    }
-  },
-
   '2048': {
     publicKey: {
       jwk: {

@@ -1,6 +1,7 @@
 import * as helper from '../helper.js';
 import cloneDeep from 'lodash.clonedeep';
 import {idsLength} from './idsLength';
+import jscu from "js-crypto-utils";
 
 export class BBcReference{
   constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=null) {
@@ -21,30 +22,47 @@ export class BBcReference{
     if (refTransaction == null) {
       return;
     }
-    this.prepareReference(refTransaction);
   }
 
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
   }
 
-  prepareReference(refTransaction) {
+  async prepareReference(refTransaction) {
+    if (refTransaction == null){
+      return false;
+    }
     this.refTransaction = cloneDeep( refTransaction );
     try {
-
       const evt = refTransaction.events[this.eventIndexInRef];
-      for (let i = 0; i < evt.mandatoryApprovers.length; i++) {
-        this.sigIndices.append(this.transaction.getSigIndex(evt.mandatoryApprovers[i]));
-      }
+      if (this.sigIndices.length === 0){
+        for (let i = 0; i < evt.mandatoryApprovers.length; i++) {
+          this.sigIndices.push(this.transaction.getSigIndex(evt.mandatoryApprovers[i]));
+        }
+        for (let i = 0; i < evt.optionApproverNumNumerator.length; i++) {
+          const dummyId = await jscu.random.getRandomBytes(4);
+          this.optionSigIds.push(dummyId);
+          this.sigIndices.push(this.transaction.getSigIndex(dummyId));
+        }
+      }else{
+        let l = 0;
+        for (let i = 0; i < evt.mandatoryApprovers.length; i++) {
+          this.transaction.setSigIndex(evt.mandatoryApprovers[i], this.sigIndices[l]);
+          l = l + 1;
+        }
+        for (let i=0; i < evt.optionApproverNumNumerator.length; i++){
+          const dummyId = jscu.random.getRandomBytes(4);
+          this.optionSigIds.push(dummyId);
+          this.transaction.setSigIndex(dummyId, this.sigIndices[l]);
+          l = l + 1;
+        }
 
-      for (let i = 0; i < evt.optionApproverNumNumerator.length(); i++) {
-        const dummyId = helper.getRandomValue(4);
-        this.optionSigIds.append(dummyId);
-        this.sigIndices.append(this.transaction.getSigIndex(dummyId));
-        this.mandatoryApprovers = evt.mandatoryApprovers;
-        this.optionApprovers = evt.optionApprovers;
-        this.transactionId = refTransaction.digest();
       }
+      this.mandatoryApprovers = evt.mandatoryApprovers;
+      this.optionApprovers = evt.optionApprovers;
+      await refTransaction.digest();
+      this.transactionId = refTransaction.transactionId;
+
     } catch (e) {
       //print(e);
     }

@@ -38,6 +38,7 @@ const webpackConfig = {
     ]
   },
   externals:[{
+    'crypto': true,
     'js-crypto-utils': false,
     'js-encoding-utils': false,
     'bn': false,

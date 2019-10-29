@@ -1,6 +1,4 @@
 import jscu from 'js-crypto-utils';
-import jseu from "js-encoding-utils";
-import jsec from 'js-crypto-ec';
 
 export class KeyPair{
   constructor() {
@@ -14,12 +12,7 @@ export class KeyPair{
     return true;
   }
 
-  setKeyPair(type, privateKey, publicKey) {
-    // console.log("----start-----");
-    // console.log(type);
-    // console.log(privateKey);
-    // console.log(publicKey);
-    // console.log("----end-----");
+  setKeyPair(type, privateKey, publicKey, options={namedCurve: 'P-256'}) {
     if (type === 'jwk' ||  type === 'pem' || type === 'der'){
       if (privateKey != null) {
         this.privateKeyObj = new jscu.Key(type, privateKey);
@@ -28,34 +21,39 @@ export class KeyPair{
         this.publicKeyObj = new jscu.Key(type, publicKey);
       }
       return true;
+    }else if (type === 'oct'){
+      if (privateKey != null) {
+        this.privateKeyObj = new jscu.Key(type, privateKey, options);
+      }
+      if (publicKey != null) {
+        this.publicKeyObj = new jscu.Key(type, publicKey, options);
+      }
     }
     return false;
   }
 
+  async createPublicKeyFromPrivateKey(){
+    this.publicKeyObj =  new jscu.Key('pem', await this.privateKeyObj.export('pem',  {outputPublic: true}));
+  }
+
   async exportPrivateKey(type){
     if (type === 'jwk' ||  type === 'pem' || type === 'der' || type=== 'oct'){
-      return await this.privateKeyObj.export(type);
+      return this.privateKeyObj.export(type);
     }
   }
 
   async exportPublicKey(type){
     if (type === 'jwk' ||  type === 'pem' || type === 'der' || type=== 'oct'){
-      return await  this.publicKeyObj.export(type);
+      return this.publicKeyObj.export(type);
     }
   }
 
   async sign(msg) {
-    return new Uint8Array(await jscu.pkc.sign(msg, this.privateKeyObj, 'SHA-256'));
+    return jscu.pkc.sign(msg, this.privateKeyObj, 'SHA-256');
   }
 
   async verify(msg, sig) {
-    console.log("verify");
-    console.log(jseu.encoder.arrayBufferToHexString(msg));
-    console.log(jseu.encoder.arrayBufferToHexString(sig));
-    console.log(jseu.encoder.arrayBufferToHexString(await this.publicKeyObj.export('oct')));
-    console.log(await this.publicKeyObj.export('jwk'));
-    console.log( await jscu.pkc.verify(msg, sig, this.publicKeyObj, 'SHA-256'));
-    return await jscu.pkc.verify(msg, sig, this.publicKeyObj, 'SHA-256');
+    return jscu.pkc.verify(msg, sig, this.publicKeyObj, 'SHA-256');
   }
 
 }

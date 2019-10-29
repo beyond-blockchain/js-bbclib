@@ -6,6 +6,7 @@ import { Buffer } from 'buffer';
 import {getTestEnv} from './prepare.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../src/helper';
+import {idsLength} from "../src/bbcClass/idsLength";
 const env = getTestEnv();
 const bbclib = env.library;
 const envName = env.envName;
@@ -21,8 +22,10 @@ describe(`${envName}: Test BBcReference`, () => {
     const refTransaction  = await jscu.random.getRandomBytes(32);
     const eventIndexInRef  = await jscu.random.getRandomBytes(32);
 
-    const reference = new bbclib.BBcReference(assetGroupId, transaction, null, 3, 32);
-    const referenceUnpack = new bbclib.BBcReference(null, null, null, null, 32);
+    const reference = new bbclib.BBcReference(assetGroupId, transaction, null, 3, idsLength);
+    await reference.prepareReference(reference.refTransaction);
+    const referenceUnpack = new bbclib.BBcReference(null, null, null, null, idsLength);
+    await referenceUnpack.prepareReference(referenceUnpack.refTransaction);
 
     const referenceBin = reference.pack();
     referenceUnpack.unpack(referenceBin);

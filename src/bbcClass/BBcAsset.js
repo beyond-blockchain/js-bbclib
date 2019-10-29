@@ -40,7 +40,6 @@ export class BBcAsset{
   }
 
   async setRandomNonce() {
-    console.log(this.idsLength);
     this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
   }
 

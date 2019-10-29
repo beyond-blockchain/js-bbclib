@@ -2,8 +2,7 @@ import { KeyPair } from './KeyPair.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
 import * as para from '../parameter.js';
-import cloneDeep from "lodash.clonedeep";
-import jscu from "js-crypto-utils";
+import cloneDeep from 'lodash.clonedeep';
 
 export class BBcSignature{
   constructor(keyType) {
@@ -34,9 +33,7 @@ export class BBcSignature{
       this.signature = cloneDeep(signature);
     }
     if (pubKey != null) {
-      //this.pubkey = cloneDeep(pubKey);
       this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(pubKey));
-      //this.pubkeyByte = cloneDeep(pubKey);
       this.keypair = new KeyPair();
       this.keypair.setKeyPair('jwk', null, cloneDeep(pubKey));
     }
@@ -101,11 +98,11 @@ export class BBcSignature{
     return true;
   }
 
-  async verify(digest) {
+  async verify(transactionBase) {
     if (this.keypair === null) {
       return false;
     }
-    return await this.keypair.verify(digest, this.signature);
+    return await this.keypair.verify(transactionBase, this.signature);
   }
 
   convertRawHexKeyToJwk(hexKeyObj, algorithm) {

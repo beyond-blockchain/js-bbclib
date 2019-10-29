@@ -47,7 +47,6 @@ export class BBcAssetRaw{
   }
 
   pack() {
-
     let binaryData = [];
     binaryData = binaryData.concat(Array.from(helper.hbo(this.assetId.length, 2)));
     binaryData = binaryData.concat(Array.from(this.assetId));
