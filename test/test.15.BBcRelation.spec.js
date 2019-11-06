@@ -1,5 +1,10 @@
 import chai from 'chai';
-import {idsLength} from "../src/bbcClass/idsLength";
+import {idsLength} from '../src/bbcClass/idsLength';
+import {BBcRelation} from '../src/bbcClass/BBcRelation';
+import {BBcAsset} from '../src/bbcClass/BBcAsset';
+import {BBcPointer} from '../src/bbcClass/BBcPointer';
+import {BBcAssetHash} from '../src/bbcClass/BBcAssetHash';
+import {BBcAssetRaw} from '../src/bbcClass/BBcAssetRaw';
 
 const expect = chai.expect;
 import jscu from 'js-crypto-utils';
@@ -20,10 +25,10 @@ describe(`${envName}: Test BBcRelation`, () => {
     const transactionId = await jscu.random.getRandomBytes(32);
     const userId = await jscu.random.getRandomBytes(32);
 
-    const relation = new bbclib.BBcRelation(assetGroupId, idsLength);
-    relation.addAssetGroupId(new Uint8Array(8));
+    const relation = new BBcRelation(assetGroupId, idsLength);
+    relation.setAssetGroupId(new Uint8Array(8));
 
-    const asset = new bbclib.BBcAsset(userId, idsLength);
+    const asset = new BBcAsset(userId, idsLength);
     await asset.setRandomNonce();
 
     const assetFile = new Uint8Array(32);
@@ -39,13 +44,11 @@ describe(`${envName}: Test BBcRelation`, () => {
     await asset.addAsset(assetFile, assetBody);
 
     relation.setAsset(asset);
-    relation.addPointer(new bbclib.BBcPointer(transactionId, assetGroupId, idsLength));
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, idsLength));
 
     const relationBin = relation.pack();
-    const relationUnpack = new bbclib.BBcRelation(null, idsLength);
+    const relationUnpack = new BBcRelation(null, idsLength);
     relationUnpack.unpack(relationBin);
-
-    //relation.showRelation();
 
     expect( relation.version).to.be.eq(relationUnpack.version);
     expect( relation.idLength).to.be.eq(relationUnpack.idLength);
@@ -66,8 +69,8 @@ describe(`${envName}: Test BBcRelation`, () => {
   it('BBcRelation pack and unpack for asset raw', async () => {
     const assetGroupId = await jscu.random.getRandomBytes(32);
 
-    const relation = new bbclib.BBcRelation(assetGroupId, idsLength, 2);
-    const assetRaw = new bbclib.BBcAssetRaw(idsLength);
+    const relation = new BBcRelation(assetGroupId, idsLength, 2);
+    const assetRaw = new BBcAssetRaw(idsLength);
 
     const assetId = await jscu.random.getRandomBytes(32);
     const assetBody = new Uint8Array(32);
@@ -79,7 +82,7 @@ describe(`${envName}: Test BBcRelation`, () => {
     relation.setAssetRaw(assetRaw);
 
     const relationBin = relation.pack();
-    const relationUnpack = new bbclib.BBcRelation(assetGroupId, idsLength, 2);
+    const relationUnpack = new BBcRelation(assetGroupId, idsLength, 2);
     relationUnpack.unpack(relationBin);
 
     expect(relation.version).to.be.eq(relationUnpack.version);
@@ -95,8 +98,8 @@ describe(`${envName}: Test BBcRelation`, () => {
   it('BBcRelation pack and unpack for asset hash', async () => {
     const assetGroupId = await jscu.random.getRandomBytes(32);
 
-    const relation = new bbclib.BBcRelation(assetGroupId, idsLength, 2);
-    const assetHash = new bbclib.BBcAssetHash(idsLength);
+    const relation = new BBcRelation(assetGroupId, idsLength, 2);
+    const assetHash = new BBcAssetHash(idsLength);
 
     const assetId0 = await jscu.random.getRandomBytes(32);
     const assetId1 = await jscu.random.getRandomBytes(32);
@@ -105,7 +108,7 @@ describe(`${envName}: Test BBcRelation`, () => {
     relation.setAssetHash(assetHash);
 
     const relationBin = relation.pack();
-    const relationUnpack = new bbclib.BBcRelation(assetGroupId, idsLength, 2);
+    const relationUnpack = new BBcRelation(assetGroupId, idsLength, 2);
     relationUnpack.unpack(relationBin);
 
     expect(relation.version).to.be.eq(relationUnpack.version);
@@ -122,7 +125,7 @@ describe(`${envName}: Test BBcRelation`, () => {
     const relationData = helper.fromHexString(relationHexString);
     const assetId = await jscu.random.getRandomBytes(32);
 
-    const relationUnpack = new bbclib.BBcRelation(assetId, idsLength);
+    const relationUnpack = new BBcRelation(assetId, idsLength);
     await relationUnpack.unpack(relationData);
 
     expect( jseu.encoder.arrayBufferToHexString(relationUnpack.assetGroupId)).to.be.eq("c3786b5358bb1e46509c81e75bc1a9726e3be08fcb537910c2f3ad7499cc5f13");

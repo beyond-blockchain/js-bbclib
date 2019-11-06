@@ -5,46 +5,71 @@ import * as para from '../parameter.js';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcSignature{
+  /**
+   *
+   * constructor
+   * @param {Number} keyType
+   */
   constructor(keyType) {
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
-    this.pubkey = null;
     this.pubkeyByte = new Uint8Array(0);
     this.keypair = null;
     this.notInitialized = true;
   }
 
-  showSig() {
-    console.log('keyType :',this.keyType);
-    console.log('signature :', jseu.encoder.arrayBufferToHexString(this.signature));
-    if (this.pubkey != null){
-      console.log('pubkey :', this.pubkey);
-    }
-    console.log('pubkeyByte :', jseu.encoder.arrayBufferToHexString(this.pubkeyByte));
+  /**
+   *
+   * get dump data
+   * @return {String}
+   */
+  dump() {
+    let dump = '--Signature--\n';
+    dump += `keyType: ${this.keyType}\n`;
+    dump += `signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
+    dump += `pubkeyByte: ${jseu.encoder.arrayBufferToHexString(this.pubkeyByte)}\n`;
     if (this.keypair != null) {
-      console.log('keypair :', this.keypair);
+      dump += `keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump())}\n`;
     }
-    console.log('notInitialized :',this.notInitialized);
+    dump += '--end Signature--';
+    return dump;
+
   }
 
-  async add(signature, pubKey) {
-    if (signature != null) {
+  /**
+   *
+   * add signature and jwt public key
+   * @param {Uint8Array} _signature
+   * @param {Object} _pubKey
+   */
+  async add(_signature, _pubKey) {
+    if (_signature != null) {
       this.notInitialized = false;
-      this.signature = cloneDeep(signature);
+      this.signature = cloneDeep(_signature);
     }
-    if (pubKey != null) {
-      this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(pubKey));
+    if (_pubKey != null) {
+      this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(_pubKey));
       this.keypair = new KeyPair();
-      this.keypair.setKeyPair('jwk', null, cloneDeep(pubKey));
+      this.keypair.setKeyPair('jwk', null, cloneDeep(_pubKey));
     }
     return true;
   }
 
-  setSignature(signature) {
+  /**
+   *
+   * set signature
+   * @param {Uint8Array} _signature
+   */
+  setSignature(_signature) {
     this.notInitialized = false;
-    this.signature = cloneDeep(signature);
+    this.signature = cloneDeep(_signature);
   }
 
+  /**
+   *
+   * pack signature data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
     if (this.keyType === para.KeyType.NOT_INITIALIZED){
@@ -59,12 +84,18 @@ export class BBcSignature{
     return new Uint8Array(binaryData);
   }
 
-  async unpack(data) {
+  /**
+   *
+   * unpack signature data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  async unpack(_data) {
 
     let posStart = 0;
     let posEnd = 4; // uint32
 
-    this.keyType =  helper.hboToInt32(data.slice(posStart,posEnd));
+    this.keyType =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
     if (this.keyType === para.KeyType.NOT_INITIALIZED){
       return true;
@@ -72,22 +103,22 @@ export class BBcSignature{
 
     posStart = posEnd;
     posEnd = posEnd + 4; // uint32
-    let valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
+    let valueLength =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
     if (valueLength > 0) {
       posStart = posEnd;
       posEnd = posEnd + (valueLength / 8);
-      this.pubkeyByte = data.slice(posStart, posEnd);
+      this.pubkeyByte = _data.slice(posStart, posEnd);
     }
 
     posStart = posEnd;
     posEnd = posEnd + 4; // uint32
-    valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
+    valueLength =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
     if (valueLength > 0) {
       posStart = posEnd;
       posEnd = posEnd + (valueLength / 8 );
-      this.signature = data.slice(posStart, posEnd);
+      this.signature = _data.slice(posStart, posEnd);
     }
 
     if (this.pubkeyByte.length > 0 && this.signature.length > 0){
@@ -98,23 +129,36 @@ export class BBcSignature{
     return true;
   }
 
-  async verify(transactionBase) {
+  /**
+   *
+   * verify signature
+   * @param {Uint8Array} _transactionBase
+   * @return {Uint8Array}
+   */
+  async verify(_transactionBase) {
     if (this.keypair === null) {
       return false;
     }
-    return await this.keypair.verify(transactionBase, this.signature);
+    return await this.keypair.verify(_transactionBase, this.signature);
   }
 
-  convertRawHexKeyToJwk(hexKeyObj, algorithm) {
+  /**
+   *
+   * convert hex key string to jwk
+   * @param {Uint8Array} _hexKeyObj
+   * @param {String} _algorithm
+   * @return {Object}
+   */
+  convertRawHexKeyToJwk(_hexKeyObj, _algorithm) {
     const len = 16;
     const offset = 1;
-    const hexX = hexKeyObj.slice(offset, offset + len * 2);
-    const hexY = hexKeyObj.slice(offset + len * 2, offset + len * 4);
+    const hexX = _hexKeyObj.slice(offset, offset + len * 2);
+    const hexY = _hexKeyObj.slice(offset + len * 2, offset + len * 4);
     const b64uX = jseu.encoder.encodeBase64Url(hexX);
     const b64uY = jseu.encoder.encodeBase64Url(hexY);
 
     return { // https://www.rfc-editor.org/rfc/rfc7518.txt
-      crv: algorithm,
+      crv: _algorithm,
       ext: true,
       kty: 'EC', // or "RSA", "oct"
       x: b64uX, // hex to base64url

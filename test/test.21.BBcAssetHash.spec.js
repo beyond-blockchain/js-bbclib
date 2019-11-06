@@ -3,6 +3,7 @@ const expect = chai.expect;
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import {idsLength} from '../src/bbcClass/idsLength';
+import {BBcAssetHash} from '../src/bbcClass/BBcAssetHash';
 
 import {getTestEnv} from './prepare.js';
 const env = getTestEnv();
@@ -17,22 +18,29 @@ describe(`${envName}: Test BBcAssetHash`, () => {
     const assetId_1 = await jscu.random.getRandomBytes(32);
     const assetId_2 = await jscu.random.getRandomBytes(32);
     const assetId_3 = await jscu.random.getRandomBytes(32);
-    const assetHash = new bbclib.BBcAssetHash(idsLength);
+    const assetHash = new BBcAssetHash(idsLength);
     assetHash.addAssetId(assetId_1);
     assetHash.addAssetId(assetId_2);
     assetHash.addAssetId(assetId_3);
     const assetHashBin = assetHash.pack();
-    const assetHashUnpack = new bbclib.BBcAssetHash(idsLength);
+    const assetHashUnpack = new BBcAssetHash(idsLength);
     await assetHashUnpack.unpack(assetHashBin);
-
-    // console.log("----------");
-    // assetHash.showAsset();
-    // console.log("----------");
-    // assetHashUnpack.showAsset();
 
     expectUint8Array(assetHash.assetIds[0],assetHashUnpack.assetIds[0]);
     expectUint8Array(assetHash.assetIds[1],assetHashUnpack.assetIds[1]);
     expectUint8Array(assetHash.assetIds[2],assetHashUnpack.assetIds[2]);
+  });
+
+  it('dump', async () => {
+    const assetId_1 = await jscu.random.getRandomBytes(32);
+    const assetId_2 = await jscu.random.getRandomBytes(32);
+    const assetId_3 = await jscu.random.getRandomBytes(32);
+    const assetHash = new BBcAssetHash(idsLength);
+    assetHash.addAssetId(assetId_1);
+    assetHash.addAssetId(assetId_2);
+    assetHash.addAssetId(assetId_3);
+    const dump = assetHash.dump();
+    expect(dump).to.be.not.eq(null);
   });
 });
 

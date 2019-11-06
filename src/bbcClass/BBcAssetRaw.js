@@ -4,32 +4,50 @@ import * as helper from '../helper';
 import {idsLength} from './idsLength';
 
 export class BBcAssetRaw{
+  /**
+   *
+   * constructor
+   * @param {Object} idsLengthConf
+   */
   constructor(idsLengthConf=null) {
     if(idsLengthConf !== null){
-      this.setLength(idsLengthConf); // dict
+      this.setLength(idsLengthConf);
     }else{
       this.setLength(idsLength);
     }
-    this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
+    this.assetId = new Uint8Array(this.idsLength.assetId);
     this.assetBodySize = 0; // int
-    this.assetBody = new Uint8Array(0); // Uint8Array
+    this.assetBody = new Uint8Array(0);
   }
 
+  /**
+   *
+   * set length setLength
+   * @param {Object<{ transactionId: number, assetGroupId: number, userId: number, assetId: number,nonce: number }>} _idsLength
+   */
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
   }
 
-  showAsset() {
-    if (this.assetId != null) {
-      // eslint-disable-next-line no-console
-      console.log('this.assetId :', jseu.encoder.arrayBufferToHexString(this.assetId));
-    }
-    // eslint-disable-next-line no-console
-    console.log('this.assetBodySize', this.assetBodySize);
-    // eslint-disable-next-line no-console
-    console.log('this.assetBody :', jseu.encoder.arrayBufferToHexString(this.assetBody));
+  /**
+   *
+   * get dump data
+   * @return {String}
+   */
+  dump() {
+    let dump = '--AssetRaw--\n';
+    dump += `assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+    dump += `assetBodySize: ${this.assetBodySize}\n`;
+    dump += `assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
+    dump += '--end AssetRaw--\n';
+    return dump;
   }
 
+  /**
+   *
+   * set asset data
+   * @return {Boolean}
+   */
   setAsset(assetId, assetBody) {
     if (assetId !== null) {
       this.assetId = assetId;
@@ -42,10 +60,20 @@ export class BBcAssetRaw{
     return true;
   }
 
+  /**
+   *
+   * get asset digest
+   * @return {Uint8Array}
+   */
   async digest() {
     return this.assetId;
   }
 
+  /**
+   *
+   * pack assetRaw data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
     binaryData = binaryData.concat(Array.from(helper.hbo(this.assetId.length, 2)));
@@ -58,26 +86,32 @@ export class BBcAssetRaw{
     return new Uint8Array(binaryData);
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack assetRaw data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
 
     let posStart = 0;
     let posEnd = 2; // uint16
-    const valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
+    const valueLength =  helper.hboToInt16(_data.slice(posStart,posEnd));
 
     if (valueLength > 0){
       posStart = posEnd;
       posEnd = posEnd + valueLength;
-      this.assetId = data.slice(posStart,posEnd);
+      this.assetId = _data.slice(posStart,posEnd);
     }
 
     posStart = posEnd;
     posEnd = posEnd + 2;  // uint16
-    this.assetBodySize = helper.hboToInt16(data.slice(posStart,posEnd));
+    this.assetBodySize = helper.hboToInt16(_data.slice(posStart,posEnd));
 
     if (this.assetBodySize > 0) {
       posStart = posEnd;
       posEnd = posEnd + this.assetBodySize;
-      this.assetBody = data.slice(posStart, posEnd);
+      this.assetBody = _data.slice(posStart, posEnd);
     }
 
     return true;

@@ -7,19 +7,6 @@ import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import {idsLength} from './bbcClass/idsLength';
 
-export async function makeTransaction(userId, eventNum, refNum, witness, version=1.0){
-  const txObj = await getNewTransaction(userId, eventNum, refNum, witness, version);
-  if (eventNum > 0) {
-    for (let i = 0; i < eventNum; i++) {
-      txObj.events[i].addReferenceIndices(i);
-      txObj.events[i].addMandatoryApprover(hexStringToByte('0'));
-    }
-  }
-  txObj.witness.addWitness(userId);
-  await txObj.setTransactionId();
-  return txObj;
-}
-
 export async function signAndAddSignature(transaction, keyPair) {
   const sig = await transaction.sign(null, null, keyPair);
   transaction.addSignature(transaction.userId, sig);
@@ -55,12 +42,10 @@ function hexStringToByte(str) {
   if (!str) {
     return new Uint8Array(0);
   }
-
   const a = [];
   for (let i = 0, len = str.length; i < len; i += 2) {
     a.push(parseInt(str.substr(i, 2), 16));
   }
-
   return new Uint8Array(a);
 }
 

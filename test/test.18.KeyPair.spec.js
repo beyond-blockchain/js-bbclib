@@ -28,8 +28,6 @@ describe(`${envName}: Test KeyPair`, () => {
     for (let i = 0; i < 32; i++) msg[i] = 0xFF & i;
 
     const sig = await keypair.sign(msg);
-    console.log(sig);
-    console.log(jseu.encoder.arrayBufferToHexString(sig));
     expect(sig).to.not.eq(null);
 
     const result = await keypair.verify(msg, sig);
@@ -73,6 +71,23 @@ describe(`${envName}: Test KeyPair`, () => {
 
       const result = await keypair.verify(msg, sig);
       expect(result).to.be.eq(true);
+
+    }));
+  });
+
+  it('export keypair', async () => {
+    const array = await Promise.all(bits.map(async (bitLen) => {
+      const keypair = new bbclib.KeyPair();
+      if(sampleKey[bitLen].privateKey.jwk == null || sampleKey[bitLen].publicKey.jwk == null){
+        return '';
+      }
+      const ret = keypair.setKeyPair('jwk', sampleKey[bitLen].privateKey.jwk, sampleKey[bitLen].publicKey.jwk);
+      expect(ret).to.be.eq(true);
+
+      const jwk_public_key =  await keypair.exportPublicKey('jwk');
+      const jwk_private_key =  await keypair.exportPrivateKey('jwk');
+      expect(jwk_public_key).to.be.not.eq(null);
+      expect(jwk_private_key).to.be.not.eq(null);
 
     }));
   });

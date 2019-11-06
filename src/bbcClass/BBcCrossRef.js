@@ -3,26 +3,53 @@ import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcCrossRef{
+  /**
+   *
+   * constructor
+   * @param {Uint8Array} domainId
+   * @param {Uint8Array} transactionId
+   */
   constructor(domainId, transactionId) {
     this.domainId = domainId; // Uint8Array
     this.transactionId = transactionId; // Uint8Array
   }
 
-  showCrossRef() {
-    // eslint-disable-next-line no-console
-    console.log('domainId :', jseu.encoder.arrayBufferToHexString(this.domainId));
-    // eslint-disable-next-line no-console
-    console.log('transactionId :',jseu.encoder.arrayBufferToHexString(this.transactionId));
+  /**
+   *
+   * get dump data
+   * @return {String}
+   */
+  dump() {
+    let dump = '--CrossRef--\n';
+    dump += `domainId: ${jseu.encoder.arrayBufferToHexString(this.domainId)}\n`;
+    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    dump += '--end CrossRef--\n';
+    return dump;
   }
 
-  setDomainId(domainId) {
-    this.domainId = cloneDeep(domainId);
+  /**
+   *
+   * set domain id
+   * @return {Uint8Array} _domain
+   */
+  setDomainId(_domainId) {
+    this.domainId = cloneDeep(_domainId);
   }
 
-  setTransactionId(transactionId) {
-    this.transactionId = cloneDeep(transactionId);
+  /**
+   *
+   * set transaction id
+   * @return {Uint8Array} _transactionId
+   */
+  setTransactionId(_transactionId) {
+    this.transactionId = cloneDeep(_transactionId);
   }
 
+  /**
+   *
+   * pack crossRef data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
     binaryData = binaryData.concat(Array.from(helper.hbo(this.domainId.length, 2)));
@@ -32,21 +59,30 @@ export class BBcCrossRef{
     return new Uint8Array(binaryData);
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack crossRef data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
     let valueLength;
 
     let posStart = 0;
     let posEnd = 2;
-    valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
+    valueLength =  helper.hboToInt16(_data.slice(posStart,posEnd));
     posStart = posEnd;
     posEnd = posEnd + valueLength;
-    this.domainId = data.slice(posStart,posEnd);
+    this.domainId = _data.slice(posStart,posEnd);
 
     posStart = posEnd;
     posEnd = posEnd + 2;
-    valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
+    valueLength =  helper.hboToInt16(_data.slice(posStart,posEnd));
     posStart = posEnd;
     posEnd = posEnd + valueLength;
-    this.transactionId = data.slice(posStart,posEnd);
+    this.transactionId = _data.slice(posStart,posEnd);
+
+    return true;
   }
+
 }

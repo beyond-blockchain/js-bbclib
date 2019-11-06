@@ -3,6 +3,7 @@ const expect = chai.expect;
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import {idsLength} from '../src/bbcClass/idsLength';
+import {BBcAssetRaw} from '../src/bbcClass/BBcAssetRaw';
 
 
 import {getTestEnv} from './prepare.js';
@@ -18,21 +19,26 @@ describe(`${envName}: Test BBcAssetRaw`, () => {
 
     const assetId = await jscu.random.getRandomBytes(32);
     const assetBody = await jscu.random.getRandomBytes(512);
-    const assetRaw = new bbclib.BBcAssetRaw(idsLength);
+    const assetRaw = new BBcAssetRaw(idsLength);
     assetRaw.setAsset(assetId, assetBody);
     const assetRawBin = assetRaw.pack();
 
-    const assetRawUnpack = new bbclib.BBcAssetRaw(idsLength);
+    const assetRawUnpack = new BBcAssetRaw(idsLength);
     await assetRawUnpack.unpack(assetRawBin);
-
-    // console.log("----------");
-    // assetRaw.showAsset();
-    // console.log("----------");
-    // assetRawUnpack.showAsset();
 
     expectUint8Array(assetRaw.assetId,assetRawUnpack.assetId);
     expectUint8Array(assetRaw.assetBody,assetRawUnpack.assetBody);
     expect( assetRaw.assetBodySize,assetRawUnpack.assetBodySize);
+  });
+
+  it('dump', async () => {
+    const assetId = await jscu.random.getRandomBytes(32);
+    const assetBody = await jscu.random.getRandomBytes(512);
+    const assetRaw = new BBcAssetRaw(idsLength);
+    assetRaw.setAsset(assetId, assetBody);
+    const dump = assetRaw.dump();
+
+    expect(dump).to.be.not.eq(null);
   });
 });
 

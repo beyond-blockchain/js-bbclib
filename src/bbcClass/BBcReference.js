@@ -1,9 +1,19 @@
 import * as helper from '../helper.js';
 import cloneDeep from 'lodash.clonedeep';
 import {idsLength} from './idsLength';
-import jscu from "js-crypto-utils";
+import jscu from 'js-crypto-utils';
+import jseu from 'js-encoding-utils';
 
 export class BBcReference{
+  /**
+   *
+   * constructor
+   * @param {Uint8Array} assetGroupId
+   * @param {BBcTransaction} transaction
+   * @param {BBcTransaction} refTransaction
+   * @param {Number} eventIndexInRef
+   * @param {Object} idsLengthConf
+   */
   constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=null) {
     if (idsLengthConf !== null){
       this.setLength(idsLengthConf);
@@ -24,17 +34,49 @@ export class BBcReference{
     }
   }
 
+  /**
+   *
+   * get dump data
+   * @return {String}
+   */
+  dump(){
+    let dump = '--Reference--\n';
+    dump += `idsLength: ${idsLength} \n`;
+    dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
+    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    if (this.transaction != null){
+      dump += this.transaction.dump();
+    }
+    dump += `eventIndexInRef: ${this.eventIndexInRef}\n`;
+    dump += `sigIndices.length: ${this.sigIndices.length}\n`;
+    for (let i = 0; i < this.sigIndices.length; i++){
+      dump += `sigIndices[${i}]: ${this.sigIndices[i]}\n`;
+    }
+    dump += '--end Reference--\n';
+    return dump;
+  }
+
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
   }
 
-  async prepareReference(refTransaction) {
-    if (refTransaction == null){
+  /**
+   *
+   * prepare reference
+   * @param {BBcTransaction} _refTransaction
+   */
+  async prepareReference(_refTransaction) {
+    if (_refTransaction == null){
       return false;
     }
-    this.refTransaction = cloneDeep( refTransaction );
+    this.refTransaction = cloneDeep( _refTransaction );
     try {
-      const evt = refTransaction.events[this.eventIndexInRef];
+      const evt = _refTransaction.events[this.eventIndexInRef];
       if (this.sigIndices.length === 0){
         for (let i = 0; i < evt.mandatoryApprovers.length; i++) {
           this.sigIndices.push(this.transaction.getSigIndex(evt.mandatoryApprovers[i]));
@@ -60,8 +102,8 @@ export class BBcReference{
       }
       this.mandatoryApprovers = evt.mandatoryApprovers;
       this.optionApprovers = evt.optionApprovers;
-      await refTransaction.digest();
-      this.transactionId = refTransaction.transactionId;
+      await _refTransaction.digest();
+      this.transactionId = _refTransaction.transactionId;
 
     } catch (e) {
       //print(e);
@@ -69,26 +111,45 @@ export class BBcReference{
 
   }
 
-  addSignature(userId, signature) {
-    if (userId === true) {
+  /**
+   *
+   * add signature
+   * @param {Uint8Array} _userId
+   * @param {Uint8Array} _signature
+   */
+  addSignature(_userId, _signature) {
+    if (_userId === true) {
       if (this.optionSigIds.length === 0) {
         return;
       }
-      // TODO:
-      //userId = this.optionSigIds.pop(0);
-
+      _userId = this.optionSigIds.pop();
     }
-    this.transaction.addSignature(cloneDeep(userId), cloneDeep(signature));
+    this.transaction.addSignature(cloneDeep(_userId), cloneDeep(_signature));
   }
 
+  /**
+   *
+   * get referred transaction
+   * @return {Uint8Array}
+   */
   getReferredTransaction() {
     return {key: this.refTransaction.serialize()};
   }
 
+  /**
+   *
+   * get destinations
+   * @return {Uint8Array}
+   */
   getDestinations() {
     return this.mandatoryApprovers + this.optionApprovers;
   }
 
+  /**
+   *
+   * pack reference data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
 
@@ -102,45 +163,48 @@ export class BBcReference{
     for (let i = 0; i < this.sigIndices.length; i++){
       binaryData = binaryData.concat(Array.from(helper.hbo(this.sigIndices[i], 2)));
     }
-
     return new Uint8Array(binaryData);
-
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack reference data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
     let posStart = 0;
     let posEnd = 2; // uint16
-    let valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    let valueLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + valueLength;
-    this.assetGroupId = data.slice(posStart, posEnd);
+    this.assetGroupId = _data.slice(posStart, posEnd);
 
     posStart = posEnd;
     posEnd = posEnd + 2;
-    valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    valueLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + valueLength;
-    this.transactionId = data.slice(posStart, posEnd);
+    this.transactionId = _data.slice(posStart, posEnd);
 
     posStart = posEnd;
     posEnd = posEnd + 2;
-    this.eventIndexInRef = helper.hboToInt16(data.slice(posStart, posEnd));
+    this.eventIndexInRef = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + 2;
-    const numSigIndices = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numSigIndices = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numSigIndices > 0){
       for (let i =0; i < numSigIndices; i++){
         posStart = posEnd;
         posEnd = posEnd + 2;
-        const sigIndice = helper.hboToInt16(data.slice(posStart, posEnd));
+        const sigIndice = helper.hboToInt16(_data.slice(posStart, posEnd));
         this.sigIndices.push(sigIndice);
       }
     }
-
     return true;
   }
 

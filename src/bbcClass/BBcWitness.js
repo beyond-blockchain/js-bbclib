@@ -4,57 +4,89 @@ import cloneDeep from 'lodash.clonedeep';
 import {idsLength} from './idsLength';
 
 export class BBcWitness{
-  constructor(idsLengthConf = null) {
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength);
-    }
+
+  /**
+   *
+   * constructor
+   * @param {Object} idsLengthConf
+   */
+  constructor(idsLengthConf = idsLength) {
+    this.setLength(idsLengthConf);
     this.transaction = null;
     this.userIds = [];
     this.sigIndices = [];
   }
 
-  showStr() {
-    // eslint-disable-next-line no-console
-    console.log('this.transaction :',this.transaction);
+  /**
+   *
+   * get dump data
+   * @return {String}
+   */
+  dump() {
+    let dump = '--Witness--\n';
+    // dump += `transaction: ${this.transaction.dump()}\n`;
+    dump += `userIds.length: ${this.userIds.length}\n`;
     for (let i = 0; i < this.userIds.length; i++) {
-      // eslint-disable-next-line no-console
-      console.log('this.userIds[', i, '] :', jseu.encoder.arrayBufferToHexString(this.userIds[i]));
+      dump += `userIds[${i}]: ${jseu.encoder.arrayBufferToHexString(this.userIds[i])}\n`;
     }
+    dump += `sigIndices.length: ${this.sigIndices.length}\n`;
     for (let i = 0; i < this.sigIndices.length; i++) {
-      // eslint-disable-next-line no-console
-      console.log('this.sigIndices[', i, '] :', this.sigIndices[i]);
+      dump += `sigIndices[${i}]: ${this.sigIndices[i]}\n`;
     }
+    dump += '--end Witness--';
+    return dump;
   }
 
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
   }
 
-  addWitness(userId, keyType=0) {
+  /**
+   *
+   * add witness
+   * @param {Uint8Array} _userId
+   * @param {Number} _keyType
+   */
+  addWitness(_userId, _keyType=0) {
     let flag = false;
     for (let i = 0; i < this.userIds.length; i++){
-      if(userId.toString() === this.userIds[i].toString()) {
+      if(_userId.toString() === this.userIds[i].toString()) {
         flag = true;
         break;
       }
     }
     if (flag === false){
-      this.userIds.push(cloneDeep(userId));
-      this.sigIndices.push(this.transaction.getSigIndex(userId, keyType));
+      this.userIds.push(cloneDeep(_userId));
+      this.sigIndices.push(this.transaction.getSigIndex(_userId, _keyType));
     }
   }
 
-  addSignature(userId, signature) {
-    this.transaction.addSignature(cloneDeep(userId), cloneDeep(signature));
+  /**
+   *
+   * add signature
+   * @param {Uint8Array} _userId
+   * @param {Uint8Array} _signature
+   */
+  addSignature(_userId, _signature) {
+    this.transaction.addSignature(cloneDeep(_userId), cloneDeep(_signature));
   }
 
-  addSignatureUsingIndex(userId, signature){
+  /**
+   *
+   * add signature using index
+   * @param {Uint8Array} _userId
+   * @param {Uint8Array} _signature
+   */
+  addSignatureUsingIndex(_userId, _signature){
 
     for (let i = 0; i < this.userIds.length; i++){
-      if(userId.toString() === this.userIds[i].toString()){
-        this.transaction.addSignatureUsingIndex(this.sigIndices[i], signature);
+      if(_userId.toString() === this.userIds[i].toString()){
+        this.transaction.addSignatureUsingIndex(this.sigIndices[i], _signature);
         return true;
       }
     }
@@ -62,33 +94,50 @@ export class BBcWitness{
     return false;
   }
 
+  /**
+   *
+   * set signature index
+   */
   setSigIndex(){
     if(this.transaction === null || this.userIds.length === 0){
       return ;
     }
-
     for (let i = 0; i < this.userIds.length; i++){
       this.transaction.setSigIndex(this.userIds[i], this.sigIndices[i]);
     }
-
   }
 
-  addUser(user) {
-    if (user != null) {
-      this.userIds.push(cloneDeep(user));
+  /**
+   *
+   * add user id
+   * @param {Uint8Array} _userId
+   */
+  addUserId(_userId) {
+    if (_userId != null) {
+      this.userIds.push(cloneDeep(_userId));
       return true;
     }
     return false;
   }
 
-  addSigIndices(index) {
-    if (index != null) {
-      this.sigIndices.push(cloneDeep(index));
+  /**
+   *
+   * add signature indices
+   * @param {Number} _index
+   */
+  addSigIndices(_index) {
+    if (_index != null) {
+      this.sigIndices.push(cloneDeep(_index));
       return true;
     }
     return false;
   }
 
+  /**
+   *
+   * pack witness data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
     const elementsLen = this.userIds.length;
@@ -101,22 +150,28 @@ export class BBcWitness{
     return new Uint8Array(binaryData);
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack witness data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
     let posStart = 0;
     let posEnd = 2;
-    const userIdsLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    const userIdsLength = helper.hboToInt16(_data.slice(posStart, posEnd));
     for (let i = 0; i < userIdsLength; i++) {
       posStart = posEnd;
       posEnd = posEnd + 2;
-      const userValueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+      const userValueLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
       posStart = posEnd;
       posEnd = posEnd + userValueLength;
-      this.userIds.push(data.slice(posStart, posEnd));
+      this.userIds.push(_data.slice(posStart, posEnd));
 
       posStart = posEnd;
       posEnd = posEnd + 2;
-      const indexValue = helper.hboToInt16(data.slice(posStart, posEnd));
+      const indexValue = helper.hboToInt16(_data.slice(posStart, posEnd));
       this.sigIndices.push(indexValue);
     }
   }
