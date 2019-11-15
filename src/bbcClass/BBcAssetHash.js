@@ -2,7 +2,7 @@ import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 
 export class BBcAssetHash{
   /**
@@ -10,12 +10,8 @@ export class BBcAssetHash{
    * constructor
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf=null) {
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength); // int
-    }
+  constructor(idsLengthConf=IDsLength) {
+    this.setLength(idsLengthConf);
     this.assetIds = [];
   }
 

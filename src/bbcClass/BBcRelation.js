@@ -5,7 +5,7 @@ import { BBcPointer } from './BBcPointer.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 
 export class BBcRelation{
   /**
@@ -15,13 +15,9 @@ export class BBcRelation{
    * @param {Object} idsLengthConf
    * @param {Number} version
    */
-  constructor(assetGroupId, idsLengthConf=null, version=1) {
+  constructor(assetGroupId, idsLengthConf=IDsLength, version=1) {
     this.version = version;
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength);
-    }
+    this.setLength(idsLengthConf);
     if (assetGroupId !== null) {
       this.assetGroupId = cloneDeep(assetGroupId);
     } else {
@@ -91,6 +87,13 @@ export class BBcRelation{
       this.assetHash = cloneDeep(_assetHash);
     }
   }
+
+  async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0), idsLength=IDsLength){
+    this.asset = new BBcAsset(userId, idsLength);
+    await this.asset.setAssetFile(assetFile);
+    await this.asset.setAssetBody(assetBody);
+  }
+
 
   /**
    *

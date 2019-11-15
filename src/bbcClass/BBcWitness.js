@@ -1,7 +1,7 @@
 import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 
 export class BBcWitness{
 
@@ -10,7 +10,7 @@ export class BBcWitness{
    * constructor
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf = idsLength) {
+  constructor(idsLengthConf = IDsLength) {
     this.setLength(idsLengthConf);
     this.transaction = null;
     this.userIds = [];
@@ -52,7 +52,7 @@ export class BBcWitness{
    * @param {Uint8Array} _userId
    * @param {Number} _keyType
    */
-  addWitness(_userId, _keyType=0) {
+  addWitness(_userId) {
     let flag = false;
     for (let i = 0; i < this.userIds.length; i++){
       if(_userId.toString() === this.userIds[i].toString()) {
@@ -62,7 +62,7 @@ export class BBcWitness{
     }
     if (flag === false){
       this.userIds.push(cloneDeep(_userId));
-      this.sigIndices.push(this.transaction.getSigIndex(_userId, _keyType));
+      this.sigIndices.push(this.transaction.getSigIndex(_userId));
     }
   }
 

@@ -1,6 +1,6 @@
 import * as helper from '../helper.js';
 import cloneDeep from 'lodash.clonedeep';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 
@@ -14,12 +14,8 @@ export class BBcReference{
    * @param {Number} eventIndexInRef
    * @param {Object} idsLengthConf
    */
-  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=null) {
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength);
-    }
+  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=IDsLength) {
+    this.setLength(idsLengthConf);
     this.assetGroupId = cloneDeep(assetGroupId);
     this.transactionId = new Uint8Array(this.idsLength.transactionId);
     this.transaction = cloneDeep(transaction);

@@ -1,7 +1,7 @@
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 
 export class BBcAssetRaw{
   /**
@@ -9,12 +9,8 @@ export class BBcAssetRaw{
    * constructor
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf=null) {
-    if(idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength);
-    }
+  constructor(idsLengthConf=IDsLength) {
+    this.setLength(idsLengthConf);
     this.assetId = new Uint8Array(this.idsLength.assetId);
     this.assetBodySize = 0; // int
     this.assetBody = new Uint8Array(0);

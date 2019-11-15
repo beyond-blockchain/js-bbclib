@@ -11,7 +11,7 @@ import * as helper from '../helper.js';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
-import {idsLength} from './idsLength.js';
+import {IDsLength} from './idsLength.js';
 
 const date = new Date();
 
@@ -22,12 +22,8 @@ export class BBcTransaction {
    * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(version=1.0, idsLengthConf=null) {
-    if (idsLengthConf != null){
-      this.idsLength = idsLengthConf;
-    }else{
-      this.idsLength = idsLength;
-    }
+  constructor(version=1.0, idsLengthConf=IDsLength) {
+    this.idsLength = idsLengthConf;
     this.version = cloneDeep(version);
     this.timestamp = (new BN(date.getTime())).mul(new BN(1000000)); //timestampはミリ秒なので nano秒へ変換
     this.events = [];

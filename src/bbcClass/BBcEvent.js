@@ -2,7 +2,7 @@ import { BBcAsset } from './BBcAsset.js';
 import cloneDeep from 'lodash.clonedeep';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
-import {idsLength} from './idsLength';
+import {IDsLength} from './idsLength';
 
 export class BBcEvent{
 
@@ -12,12 +12,8 @@ export class BBcEvent{
    * @param {Uint8Array} assetGroupId
    * @param {Object} idsLengthConf
    */
-  constructor(assetGroupId, idsLengthConf=null) {
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf);
-    }else{
-      this.setLength(idsLength);
-    }
+  constructor(assetGroupId, idsLengthConf=IDsLength) {
+    this.setLength(idsLengthConf);
     this.assetGroupId = cloneDeep(assetGroupId);
     this.referenceIndices = [];
     this.mandatoryApprovers = [];
@@ -78,43 +74,43 @@ export class BBcEvent{
 
   /**
    *
-   * add reference indices
+   * push reference indices
    * @param {Number} _referenceIndices
    */
-  addReferenceIndices(_referenceIndices) {
+  pushReferenceIndices(_referenceIndices) {
     this.referenceIndices.push(cloneDeep(_referenceIndices));
   }
 
   /**
    *
-   * add mandatory approver
-   * @param {Uint8Array} _mandatoryApprover
+   * push mandatory approvers
+   * @param {Uint8Array} _mandatoryApprovers
    */
-  addMandatoryApprover(_mandatoryApprover) {
-    this.mandatoryApprovers.push(cloneDeep(_mandatoryApprover));
+  pushMandatoryApprovers(_mandatoryApprovers) {
+    this.mandatoryApprovers.push(cloneDeep(_mandatoryApprovers));
   }
 
   /**
    *
-   * add option approver num numuerator
+   * set option approver num numuerator
    * @param {Number} _optionApproverNumNumerator
    */
-  addOptionApproverNumNumerator(_optionApproverNumNumerator) {
+  setOptionApproverNumNumerator(_optionApproverNumNumerator) {
     this.optionApproverNumNumerator = cloneDeep(_optionApproverNumNumerator);
   }
 
   /**
    *
-   * add option approver num denominator
+   * set option approver num denominator
    * @param {Number} _optionApproverNumDenominator
    */
-  addOptionApproverNumDenominator(_optionApproverNumDenominator) {
+  setOptionApproverNumDenominator(_optionApproverNumDenominator) {
     this.optionApproverNumDenominator = cloneDeep(_optionApproverNumDenominator);
   }
 
   /**
    *
-   * add option approver
+   * set option approver
    * @param {Number} _optionApprover
    */
   addOptionApprover(_optionApprover) {
@@ -128,6 +124,17 @@ export class BBcEvent{
    */
   setAsset(_asset) {
     this.asset = cloneDeep(_asset);
+  }
+
+  /**
+   *
+   * set asset
+   * @param {BBcAsset} _asset
+   */
+  async createAsset(userId, idsLength=null, assetBody=null, assetFile=null) {
+    this.asset = new BBcAsset(userId, idsLength);
+    await this.asset.setAssetBody(assetBody);
+    await this.asset.setAssetFile(assetFile);
   }
 
   /**

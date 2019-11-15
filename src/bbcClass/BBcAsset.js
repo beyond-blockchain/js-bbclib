@@ -2,7 +2,7 @@ import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
-import {idsLength} from './idsLength.js';
+import {IDsLength} from './idsLength.js';
 
 export class BBcAsset{
   /**
@@ -11,12 +11,8 @@ export class BBcAsset{
    * @param {Uint8Array} userId
    * @param {Object} idsLengthConf
    */
-  constructor(userId, idsLengthConf=null) {
-    if (idsLengthConf !== null){
-      this.setLength(idsLengthConf); // dict
-    }else{
-      this.setLength(idsLength); // dict
-    }
+  constructor(userId, idsLengthConf=IDsLength) {
+    this.setLength(idsLengthConf); // dict
     this.setUserId(userId); // Uint8Array
     this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
     this.nonce = new Uint8Array(this.idsLength.nonce); // Uint8Array
@@ -93,19 +89,36 @@ export class BBcAsset{
    * @param {Uint8Array} _assetBody
    * @returns {Boolean}
    */
-  async addAsset(_assetFile, _assetBody) {
-    if (_assetFile !== null) {
-      this.assetFileSize = _assetFile.length;
-      this.assetFileDigest = await jscu.hash.compute(_assetFile, 'SHA-256');
-    }
+  async setAsset(_assetFile, _assetBody) {
+    this.setAssetBody(_assetBody);
+    this.setAssetFile(_assetFile);
+    return true;
+  }
 
+  /**
+   *
+   * set assetBody
+   * @param {Uint8Array} _assetBody
+   */
+  async setAssetBody(_assetBody) {
     if (_assetBody !== null) {
       this.assetBody = _assetBody;
       this.assetBodySize = _assetBody.length;
     }
     await this.digest();
+  }
 
-    return true;
+  /**
+   *
+   * set assetFile
+   * @param {Uint8Array} _assetFile
+   */
+  async setAssetFile(_assetFile) {
+    if (_assetFile !== null) {
+      this.assetFileSize = _assetFile.length;
+      this.assetFileDigest = await jscu.hash.compute(_assetFile, 'SHA-256');
+    }
+    await this.digest();
   }
 
   /**
@@ -228,7 +241,6 @@ export class BBcAsset{
       posStart = posEnd;
       posEnd = posEnd + valueLength;
       this.assetId = _data.slice(posStart,posEnd);
-
     }
 
     posStart = posEnd;
@@ -280,7 +292,4 @@ export class BBcAsset{
     }
     return true;
   }
-
 }
-
-
