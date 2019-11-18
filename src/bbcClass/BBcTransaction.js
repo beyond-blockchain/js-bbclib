@@ -1,4 +1,3 @@
-import jscu from 'js-crypto-utils';
 import { BBcWitness } from './BBcWitness.js';
 import { BBcReference } from './BBcReference.js';
 import { BBcSignature } from './BBcSignature.js';
@@ -8,11 +7,12 @@ import { BBcCrossRef } from './BBcCrossRef';
 import { KeyPair } from './KeyPair.js';
 import * as para from '../parameter.js';
 import * as helper from '../helper.js';
-import jseu from 'js-encoding-utils';
+import {getJscu} from '../env.js';
 import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
 import {IDsLength} from './idsLength.js';
-
+import jseu from 'js-encoding-utils';
+const jscu = getJscu();
 const date = new Date();
 
 export class BBcTransaction {
@@ -260,18 +260,41 @@ export class BBcTransaction {
 
   /**
    *
-   * add signature
+   * add signature object
    * @param {Uint8Array} _userId
    * @param {Uint8Array} _signature
    * @return {Boolean}
    */
-  addSignature(_userId, _signature) {
+  addSignatureObject(_userId, _signature) {
     if (_userId in this.useridSigidxMapping) {
       const idx = this.useridSigidxMapping[cloneDeep(_userId)];
       this.signatures[idx] = cloneDeep(_signature);
       return true;
     } else {
       return false;
+    }
+  }
+
+  /**
+   *
+   * add signature
+   * @param {Uint8Array} _userId
+   * @param {Number} _keyType
+   * @param {Uint8Array} _privateKey
+   * @param {Uint8Array} _publicKey
+   * @param {Object} _keyPair
+   * @param {Uint8Array} _isPublicKey
+   * @return {Boolean}
+   */
+  addSignature(_userId, _keyType=null, _privateKey=new Uint8Array(0), _publicKey=new Uint8Array(0), _keyPair=null) {
+    _userId = _userId.slice(0, this.idsLength.userId);
+    const sig = this.sign(_keyType, _privateKey, _publicKey, _keyPair);
+    if (!this.addSignatureObject(_userId, sig)){
+      for (let i = 0; i < this.references.length; i++){
+        if (this.references[i].addSignature(_userId, sig)){
+          return true;
+        }
+      }
     }
   }
 
@@ -478,7 +501,7 @@ export class BBcTransaction {
         posEnd = posEnd + eventLength; // uint16
         const eventBin = _data.slice(posStart, posEnd);
 
-        const event = new BBcEvent();
+        const event = new BBcEvent(new Uint8Array(0), this.version, this.idsLength);
         event.unpack(eventBin);
         this.events.push(event);
       }
@@ -497,7 +520,7 @@ export class BBcTransaction {
         posStart = posEnd;
         posEnd = posEnd + referenceLength; // uint16
         const referenceBin = _data.slice(posStart, posEnd);
-        const ref = new BBcReference(null, null, null, null, this.idsLength.transactionId);
+        const ref = new BBcReference(null, null, null, null, this.version, this.idsLength.transactionId);
         ref.unpack(referenceBin);
         this.references.push(ref);
       }
@@ -516,7 +539,7 @@ export class BBcTransaction {
         posStart = posEnd;
         posEnd = posEnd + relationLength; // uint16
         const relationBin = _data.slice(posStart, posEnd);
-        const rtn = new BBcRelation( null, this.idsLength, this.version);
+        const rtn = new BBcRelation( new Uint8Array(0), this.version, this.idsLength);
         rtn.unpack(relationBin);
         this.relations.push(rtn);
       }
@@ -536,7 +559,7 @@ export class BBcTransaction {
         posEnd = posEnd + witnessLength; // uint16
 
         const witnessBin = _data.slice(posStart, posEnd);
-        const witness = new BBcWitness(this.idsLength);
+        const witness = new BBcWitness(this.version, this.idsLength);
         witness.unpack(witnessBin);
         this.setWitness(witness);
         this.witness.setSigIndex();
@@ -557,7 +580,7 @@ export class BBcTransaction {
         posEnd = posEnd + crossrefLength; // uint16
         const crossrefBin = _data.slice(posStart, posEnd);
 
-        this.crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0));
+        this.crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0), this.version, this.idsLength);
         this.crossRef.unpack(crossrefBin);
       }
     }
@@ -617,4 +640,5 @@ export class BBcTransaction {
     await sig.add(s, await _keyPair.exportPublicKey('jwk'));
     return sig;
   }
+
 }

@@ -3,50 +3,42 @@ import { BBcAsset } from './bbcClass/BBcAsset';
 import { BBcTransaction } from './bbcClass/BBcTransaction';
 import { BBcWitness } from './bbcClass/BBcWitness';
 import { BBcRelation } from './bbcClass/BBcRelation';
-import jscu from 'js-crypto-utils';
+import {getJscu} from './env.js';
 import jseu from 'js-encoding-utils';
-import {idsLength} from './bbcClass/idsLength';
+import {IDsLength} from './bbcClass/idsLength';
+
+const jscu = getJscu();
+
 
 export async function signAndAddSignature(transaction, keyPair) {
   const sig = await transaction.sign(null, null, keyPair);
-  transaction.addSignature(transaction.userId, sig);
+  transaction.addSignatureObject(transaction.userId, sig);
 }
 
-export async function getNewTransaction(userId, eventNum, relationNum, witness, version=1.0) {
+export async function getNewTransaction(userId, eventNum, relationNum, witness, version=1.0, idsLength=IDsLength) {
 
-  const transaction = new BBcTransaction(version,idsLength);
+  const transaction = new BBcTransaction(version, idsLength);
   if (eventNum > 0) {
     for (let i = 0; i < eventNum; i++) {
-      const evt = new BBcEvent(null,idsLength);
-      const ast = new BBcAsset(null,idsLength);
+      const evt = new BBcEvent(null, version, idsLength);
+      const ast = new BBcAsset(null, version, idsLength);
       ast.addUserId(userId);
       await ast.digest();
-      evt.addAsset(ast);
-      evt.addAssetGroupId(new Uint8Array(8));
+      evt.setAsset(ast);
+      evt.setAssetGroupId(new Uint8Array(8));
       transaction.addEvent(evt);
     }
   }
 
   if (relationNum > 0) {
     for (let i = 0; i < relationNum; i++) {
-      transaction.add(new BBcRelation(new Uint8Array(0),idsLength));
+      transaction.add(new BBcRelation(new Uint8Array(0), version, idsLength));
     }
   }
   if (witness) {
-    transaction.addWitness(new BBcWitness(idsLength));
+    transaction.addWitness(new BBcWitness(version, idsLength));
   }
   return transaction;
-}
-
-function hexStringToByte(str) {
-  if (!str) {
-    return new Uint8Array(0);
-  }
-  const a = [];
-  for (let i = 0, len = str.length; i < len; i += 2) {
-    a.push(parseInt(str.substr(i, 2), 16));
-  }
-  return new Uint8Array(a);
 }
 
 export async function getRandomValue(length) {
@@ -66,24 +58,18 @@ export async function createPubkeyByte(pubkey) {
   return publicKey;
 }
 
-export async function createAsset(userId) {
+export async function createAsset(userId, idsLength=IDsLength) {
 
   const bbcAsset = new BBcAsset(userId, idsLength);
   await bbcAsset.setRandomNonce();
   const assetFile = new Uint8Array(32);
-  for (let i = 0; i < 32; i++) {
-    assetFile[i] = 0xFF & i;
-  }
   const assetBody = new Uint8Array(32);
-  for (let i = 0; i < 32; i++) {
-    assetBody[i] = 0xFF & (i + 32);
-  }
-  await bbcAsset.addAsset(assetFile, assetBody);
+  await bbcAsset.setAsset(assetFile, assetBody);
 
   return bbcAsset;
 }
 
-export async function createAssetWithoutFile(userId) {
+export async function createAssetWithoutFile(userId, idsLength=IDsLength) {
 
   const bbcAsset = new BBcAsset(userId, idsLength);
   await bbcAsset.setRandomNonce();
@@ -92,7 +78,7 @@ export async function createAssetWithoutFile(userId) {
   for (let i = 0; i < 32; i++) {
     assetBody[i] = 0xFF & (i + 32);
   }
-  await bbcAsset.addAsset(null, assetBody);
+  await bbcAsset.setAsset(null, assetBody);
 
   return bbcAsset;
 }
@@ -116,9 +102,7 @@ export function hboToInt64(bin){
 }
 
 export function hboToInt32(bin){
-  let num = 0;
-  num = num + (bin[0]);
-  num = num + (bin[1] * 256 );
+  let num = hboToInt16(bin);
   num = num + (bin[2] * 256 * 256);
   num = num + (bin[3] * 256 * 256 * 256);
   return num;
@@ -142,7 +126,7 @@ export function concat(buf1, buf2) {
   if(!buf2 || buf2.length === 0) return buf1;
   if(!buf1 || buf1.length === 0) return buf2;
 
-  var tmp = new Uint8Array(buf1.length + buf2.length);
+  let tmp = new Uint8Array(buf1.length + buf2.length);
   tmp.set(new Uint8Array(buf1), 0);
   tmp.set(new Uint8Array(buf2), buf1.length);
   return tmp;

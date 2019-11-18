@@ -1,8 +1,8 @@
-import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 import {IDsLength} from './idsLength';
+
 
 export class BBcAssetHash{
   /**
@@ -10,9 +10,11 @@ export class BBcAssetHash{
    * constructor
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf=IDsLength) {
+  constructor(assetIds, version=2.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf);
+    this.version = version;
     this.assetIds = [];
+    this.setAssetIds(assetIds);
   }
 
   /**
@@ -22,6 +24,17 @@ export class BBcAssetHash{
    */
   setLength(_idsLength){
     this.idsLength = cloneDeep(_idsLength);
+  }
+
+  /**
+   *
+   * set asset ids
+   * @param {Array<Uint8Array>} _assetIds
+   */
+  setAssetIds(_assetIds){
+    for(let i = 0; i < _assetIds.length; i++){
+      this.assetIds.push(_assetIds[i].slice(0, this.idsLength.assetId));
+    }
   }
 
   /**

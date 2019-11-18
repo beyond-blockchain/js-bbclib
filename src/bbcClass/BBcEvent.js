@@ -10,11 +10,13 @@ export class BBcEvent{
    *
    * constructor
    * @param {Uint8Array} assetGroupId
+   * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(assetGroupId, idsLengthConf=IDsLength) {
+  constructor(assetGroupId, version=2.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf);
-    this.assetGroupId = cloneDeep(assetGroupId);
+    this.version = version;
+    this.assetGroupId = cloneDeep(assetGroupId.slice(0, this.idsLength.assetGroupId));
     this.referenceIndices = [];
     this.mandatoryApprovers = [];
     this.optionApproverNumNumerator = 0;
@@ -30,7 +32,7 @@ export class BBcEvent{
    */
   dump() {
     let dump = '--Event--\n';
-    dump += `idsLength: ${idsLength} \n`;
+    dump += `idsLength: ${this.idsLength} \n`;
     dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
     dump += `referenceIndices.length: ${this.referenceIndices.length}\n`;
     for (let i = 0; i < this.referenceIndices.length; i++) {
@@ -69,7 +71,7 @@ export class BBcEvent{
    * @param {Uint8Array} _assetGroupId
    */
   setAssetGroupId(_assetGroupId) {
-    this.assetGroupId = cloneDeep(_assetGroupId);
+    this.assetGroupId = cloneDeep(_assetGroupId.slice(0, this.idsLength.assetGroupId));
   }
 
   /**
@@ -83,11 +85,29 @@ export class BBcEvent{
 
   /**
    *
+   * set reference indices
+   * @param {Uint8Array} _mandatoryApprovers
+   */
+  setReferenceIndices(_referenceIndices) {
+    this.referenceIndices = cloneDeep(_referenceIndices);
+  }
+
+  /**
+   *
    * push mandatory approvers
    * @param {Uint8Array} _mandatoryApprovers
    */
-  pushMandatoryApprovers(_mandatoryApprovers) {
-    this.mandatoryApprovers.push(cloneDeep(_mandatoryApprovers));
+  pushMandatoryApprover(_mandatoryApprover) {
+    this.mandatoryApprovers.push(cloneDeep(_mandatoryApprover));
+  }
+
+  /**
+   *
+   * set mandatory approvers
+   * @param {Uint8Array} _mandatoryApprovers
+   */
+  setMandatoryApprovers(_mandatoryApprovers) {
+    this.mandatoryApprovers = cloneDeep(_mandatoryApprovers);
   }
 
   /**
@@ -113,7 +133,7 @@ export class BBcEvent{
    * set option approver
    * @param {Number} _optionApprover
    */
-  addOptionApprover(_optionApprover) {
+  setOptionApprover(_optionApprover) {
     this.optionApprover = cloneDeep(_optionApprover);
   }
 
@@ -128,11 +148,13 @@ export class BBcEvent{
 
   /**
    *
-   * set asset
-   * @param {BBcAsset} _asset
+   * create asset
+   * @param {Uint8Array} userId
+   * @param {Uint8Array} assetBody
+   * @param {Uint8Array} assetFile
    */
-  async createAsset(userId, idsLength=null, assetBody=null, assetFile=null) {
-    this.asset = new BBcAsset(userId, idsLength);
+  async createAsset(userId, assetBody=null, assetFile=null) {
+    this.asset = new BBcAsset(userId, this.version, this.idsLength);
     await this.asset.setAssetBody(assetBody);
     await this.asset.setAssetFile(assetFile);
   }

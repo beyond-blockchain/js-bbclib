@@ -4,8 +4,6 @@ import sampleKey  from './sampleKey.js';
 const expect = chai.expect;
 
 import {getTestEnv} from './prepare.js';
-import jseu from "js-encoding-utils";
-import jscu from "js-crypto-utils";
 
 const env = getTestEnv();
 const bbclib = env.library;

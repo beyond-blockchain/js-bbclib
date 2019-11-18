@@ -1,6 +1,7 @@
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
+import {IDsLength} from './idsLength';
 
 export class BBcCrossRef{
   /**
@@ -8,10 +9,14 @@ export class BBcCrossRef{
    * constructor
    * @param {Uint8Array} domainId
    * @param {Uint8Array} transactionId
+   * @param {Number} version
+   * @param {Object} idsLengthConf
    */
-  constructor(domainId, transactionId) {
+  constructor(domainId, transactionId, version=1.0, idsLength=IDsLength) {
     this.domainId = domainId; // Uint8Array
     this.transactionId = transactionId; // Uint8Array
+    this.version = version;
+    this.setLength(idsLength);
   }
 
   /**
@@ -25,6 +30,15 @@ export class BBcCrossRef{
     dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
     dump += '--end CrossRef--\n';
     return dump;
+  }
+
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   /**

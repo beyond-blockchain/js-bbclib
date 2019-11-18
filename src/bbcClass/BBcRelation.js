@@ -15,7 +15,7 @@ export class BBcRelation{
    * @param {Object} idsLengthConf
    * @param {Number} version
    */
-  constructor(assetGroupId, idsLengthConf=IDsLength, version=1) {
+  constructor(assetGroupId,  version=1, idsLengthConf=IDsLength) {
     this.version = version;
     this.setLength(idsLengthConf);
     if (assetGroupId !== null) {
@@ -77,6 +77,14 @@ export class BBcRelation{
     }
   }
 
+  createAssetRaw(assetId, assetBody){
+    this.assetRaw = new BBcAssetRaw(assetId, assetBody, this.version, this.idsLength);
+  }
+
+  createAssetHash(assetIds){
+    this.assetHash = new BBcAssetHash(assetIds, this.version, this.idsLength);
+  }
+
   /**
    *
    * set assetHash
@@ -88,8 +96,8 @@ export class BBcRelation{
     }
   }
 
-  async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0), idsLength=IDsLength){
-    this.asset = new BBcAsset(userId, idsLength);
+  async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0)){
+    this.asset = new BBcAsset(userId,this.version, this.idsLength);
     await this.asset.setAssetFile(assetFile);
     await this.asset.setAssetBody(assetBody);
   }
@@ -102,6 +110,7 @@ export class BBcRelation{
    */
   dump() {
     let dump = '--Relation--\n';
+    dump += `idsLength: ${this.idsLength} \n`;
     dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
     dump += `pointers.length: ${this.pointers.length}\n`;
     for (let i = 0; i < this.pointers.length; i++) {
@@ -123,7 +132,16 @@ export class BBcRelation{
 
   /**
    *
-   * add pointer
+   * create pointer
+   * @param {BBcPointer} _pointer
+   */
+  createPointer(transactionId=null, assetId=null) {
+    this.pointers.push( new BBcPointer(transactionId, assetId, this.version, this.idsLength));
+  }
+
+  /**
+   *
+   * create pointer
    * @param {BBcPointer} _pointer
    */
   addPointer(_pointer) {
@@ -235,7 +253,7 @@ export class BBcRelation{
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
         const assetRawBin = _data.slice(posStart, posEnd);
-        this.assetRaw = new BBcAssetRaw(this.idsLength);
+        this.assetRaw = new BBcAssetRaw(null, null, this.version, this.idsLength);
         this.assetRaw.unpack(assetRawBin);
       }
 
@@ -247,7 +265,7 @@ export class BBcRelation{
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
         const assetHashBin = _data.slice(posStart, posEnd);
-        this.assetHash = new BBcAssetHash(this.idsLength);
+        this.assetHash = new BBcAssetHash([], this.version, this.idsLength);
         this.assetHash.unpack(assetHashBin);
       }
     }

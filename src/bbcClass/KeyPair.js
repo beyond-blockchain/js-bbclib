@@ -1,5 +1,5 @@
-import jscu from 'js-crypto-utils';
-
+import {getJscu} from '../env.js';
+const jscu = getJscu();
 export class KeyPair{
   /**
    *

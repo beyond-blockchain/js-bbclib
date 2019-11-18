@@ -66,13 +66,13 @@
     "webpack-merge": "4.2.2"
   },
   "dependencies": {
-    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
-    "@babel/plugin-transform-regenerator": "7.4.5",
-    "@babel/runtime": "^7.1.2",
-    "bn.js": "^4.11.8",
-    "js-crypto-utils": "^0.17.1",
-    "js-encoding-utils": "^0.5.4",
-    "lodash.clonedeep": "^4.5.0"
+    "@babel/plugin-syntax-dynamic-import": "~7.0.0",
+    "@babel/plugin-transform-regenerator": "~7.4.5",
+    "@babel/runtime": "~7.1.2",
+    "bn.js": "~4.11.8",
+    "js-crypto-utils": "0.17.1",
+    "js-encoding-utils": "0.5.4",
+    "lodash.clonedeep": "~4.5.0"
   },
   "description": "",
   "browser": {}

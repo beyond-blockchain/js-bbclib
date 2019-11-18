@@ -10,8 +10,9 @@ export class BBcWitness{
    * constructor
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf = IDsLength) {
+  constructor(version=1.0, idsLengthConf = IDsLength) {
     this.setLength(idsLengthConf);
+    this.version = version;
     this.transaction = null;
     this.userIds = [];
     this.sigIndices = [];
@@ -48,6 +49,15 @@ export class BBcWitness{
 
   /**
    *
+   * set user ids
+   * @param {Array<Uint8Array>} _userIds
+   */
+  setUserIds(_userIds){
+    this.userIds = _userIds;
+  }
+
+  /**
+   *
    * add witness
    * @param {Uint8Array} _userId
    * @param {Number} _keyType
@@ -73,7 +83,7 @@ export class BBcWitness{
    * @param {Uint8Array} _signature
    */
   addSignature(_userId, _signature) {
-    this.transaction.addSignature(cloneDeep(_userId), cloneDeep(_signature));
+    this.transaction.addSignatureObject(cloneDeep(_userId), cloneDeep(_signature));
   }
 
   /**
@@ -132,6 +142,8 @@ export class BBcWitness{
     }
     return false;
   }
+
+
 
   /**
    *

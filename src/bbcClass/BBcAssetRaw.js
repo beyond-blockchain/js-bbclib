@@ -7,13 +7,18 @@ export class BBcAssetRaw{
   /**
    *
    * constructor
+   * @param {Uint8Array} assetId
+   * @param {Uint8Array} assetBody
+   * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(idsLengthConf=IDsLength) {
+  constructor(assetId, assetBody, version=2.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf);
-    this.assetId = new Uint8Array(this.idsLength.assetId);
-    this.assetBodySize = 0; // int
+    this.version = version;
+    this.assetId = new Uint8Array(0);
     this.assetBody = new Uint8Array(0);
+    this.assetBodySize = 0;
+    this.setAsset(assetId, assetBody);
   }
 
   /**
@@ -46,7 +51,7 @@ export class BBcAssetRaw{
    */
   setAsset(assetId, assetBody) {
     if (assetId !== null) {
-      this.assetId = assetId;
+      this.assetId = assetId.slice(0, this.idsLength.assetId);
     }
 
     if (assetBody !== null) {

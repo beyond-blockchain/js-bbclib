@@ -1,18 +1,22 @@
-import jscu from 'js-crypto-utils';
+import {getJscu} from '../env.js';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 import {IDsLength} from './idsLength.js';
+
+const jscu = getJscu();
 
 export class BBcAsset{
   /**
    *
    * constructor
    * @param {Uint8Array} userId
+   * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(userId, idsLengthConf=IDsLength) {
+  constructor(userId, version=2.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf); // dict
+    this.version = version;
     this.setUserId(userId); // Uint8Array
     this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
     this.nonce = new Uint8Array(this.idsLength.nonce); // Uint8Array
@@ -59,6 +63,7 @@ export class BBcAsset{
    * set random nonce
    */
   async setRandomNonce() {
+
     this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
   }
 
@@ -84,7 +89,7 @@ export class BBcAsset{
 
   /**
    *
-   * add asset
+   * set asset
    * @param {Uint8Array} _assetFile
    * @param {Uint8Array} _assetBody
    * @returns {Boolean}

@@ -1,8 +1,9 @@
 import * as helper from '../helper.js';
 import cloneDeep from 'lodash.clonedeep';
 import {IDsLength} from './idsLength';
-import jscu from 'js-crypto-utils';
+import {getJscu} from '../env.js';
 import jseu from 'js-encoding-utils';
+const jscu = getJscu();
 
 export class BBcReference{
   /**
@@ -12,10 +13,12 @@ export class BBcReference{
    * @param {BBcTransaction} transaction
    * @param {BBcTransaction} refTransaction
    * @param {Number} eventIndexInRef
+   * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, idsLengthConf=IDsLength) {
+  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, version=1.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf);
+    this.version = version;
     this.assetGroupId = cloneDeep(assetGroupId);
     this.transactionId = new Uint8Array(this.idsLength.transactionId);
     this.transaction = cloneDeep(transaction);
@@ -37,7 +40,7 @@ export class BBcReference{
    */
   dump(){
     let dump = '--Reference--\n';
-    dump += `idsLength: ${idsLength} \n`;
+    dump += `idsLength: ${this.idsLength} \n`;
     dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
     dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
     if (this.transaction != null){
@@ -120,7 +123,7 @@ export class BBcReference{
       }
       _userId = this.optionSigIds.pop();
     }
-    this.transaction.addSignature(cloneDeep(_userId), cloneDeep(_signature));
+    this.transaction.addSignatureObject(cloneDeep(_userId), cloneDeep(_signature));
   }
 
   /**

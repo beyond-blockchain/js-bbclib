@@ -39,8 +39,7 @@ const webpackConfig = {
   },
   externals:[{
     'crypto': true,
-    'js-crypto-utils': false,
-    'js-encoding-utils': false,
+    'js-crypto-utils': true,
     'bn': false,
     'lodash.clonedeep': false
   }],

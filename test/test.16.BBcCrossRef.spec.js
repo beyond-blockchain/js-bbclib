@@ -1,8 +1,8 @@
 import chai from 'chai';
 import {getTestEnv} from './prepare.js';
 import * as helper from '../src/helper';
-import jseu from 'js-encoding-utils';
 import {BBcCrossRef} from '../src/bbcClass/BBcCrossRef';
+import jseu from 'js-encoding-utils';
 
 const expect = chai.expect;
 const env = getTestEnv();

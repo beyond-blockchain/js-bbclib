@@ -1,7 +1,7 @@
-import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
 import {IDsLength} from './idsLength';
+import jseu from 'js-encoding-utils';
 
 export class BBcPointer{
   /**
@@ -9,16 +9,22 @@ export class BBcPointer{
    * constructor
    * @param {Uint8Array} transactionId
    * @param {Uint8Array} assetId
+   * @param {Number} version
    * @param {Object} idsLengthConf
    */
-  constructor(transactionId, assetId, idsLengthConf=IDsLength) {
+  constructor(transactionId, assetId, version=2.0, idsLengthConf=IDsLength) {
     this.setLength(idsLengthConf);
+    this.version = version;
     if (transactionId != null) {
-      this.transactionId = cloneDeep(transactionId);
+      this.transactionId = cloneDeep(transactionId.slice(0,this.idsLength.transactionId));
     } else {
       this.transactionId = new Uint8Array( this.idsLength.transactionId );
     }
-    this.assetId = cloneDeep(assetId);
+    if (assetId != null) {
+      this.assetId = cloneDeep(assetId.slice(0, this.idsLength.assetId));
+    }else{
+      this.assetId = new Uint8Array( this.idsLength.assetId );
+    }
     this.assetIdExistence = 0;
     if (assetId != null) {
       this.assetIdExistence = 1;
@@ -34,7 +40,7 @@ export class BBcPointer{
    */
   dump() {
     let dump = '--Pointer--\n';
-    dump += `idsLength: ${idsLength} \n`;
+    dump += `idsLength: ${this.idsLength} \n`;
     dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
     if (this.assetId != null) {
       dump += `assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
@@ -58,7 +64,7 @@ export class BBcPointer{
    * @param {Object} _transactionId
    */
   setTransactionId(_transactionId) {
-    this.transactionId = cloneDeep(_transactionId);
+    this.transactionId = cloneDeep(_transactionId.slice(0,this.idsLength.transactionId));
   }
 
   /**
@@ -67,7 +73,7 @@ export class BBcPointer{
    * @param {Uint8Array} _assetId
    */
   setAssetId(_assetId) {
-    this.assetId = cloneDeep(_assetId);
+    this.assetId = cloneDeep(_assetId.slice(0, this.idsLength.assetId));
     if(_assetId != null) {
       this.assetIdExistence = 1;
     } else {

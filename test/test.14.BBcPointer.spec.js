@@ -1,11 +1,12 @@
 import chai from 'chai';
 const expect = chai.expect;
-import jscu from 'js-crypto-utils';
 import { BBcPointer } from '../src/bbcClass/BBcPointer';
-
 import {getTestEnv} from './prepare.js';
 import * as helper from '../src/helper';
+import {getJscu} from '../src/env.js';
 import jseu from 'js-encoding-utils';
+import {IDsLength} from '../src/bbcClass/idsLength';
+const jscu = getJscu();
 const env = getTestEnv();
 const bbclib = env.library;
 const envName = env.envName;
@@ -19,10 +20,10 @@ describe(`${envName}: Test BBcPointer`, () => {
     const transactionId = await jscu.random.getRandomBytes(32);
     const assetId = await jscu.random.getRandomBytes(32);
 
-    const pointer = new BBcPointer(transactionId, assetId, 32);
+    const pointer = new BBcPointer(transactionId, assetId, 2.0, IDsLength);
 
     const pointerBin = pointer.pack();
-    const pointerUnpack = new BBcPointer(null, null, 32);
+    const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
     pointerUnpack.unpack(pointerBin);
 
     expectUint8Array(pointer.transactionId,pointerUnpack.transactionId);
@@ -35,10 +36,10 @@ describe(`${envName}: Test BBcPointer`, () => {
 
     const transactionId = await jscu.random.getRandomBytes(32);
 
-    const pointer = new BBcPointer(transactionId, null, 32);
+    const pointer = new BBcPointer(transactionId, null, 2.0, IDsLength);
 
     const pointerBin = pointer.pack();
-    const pointerUnpack = new BBcPointer(null, null, 32);
+    const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
     pointerUnpack.unpack(pointerBin);
 
     expectUint8Array(pointer.transactionId,pointerUnpack.transactionId);
@@ -51,7 +52,7 @@ describe(`${envName}: Test BBcPointer`, () => {
     const transactionId = await jscu.random.getRandomBytes(32);
     const assetId = await jscu.random.getRandomBytes(32);
 
-    const pointer = new BBcPointer(transactionId, assetId, 32);
+    const pointer = new BBcPointer(transactionId, assetId, 2.0, IDsLength);
     const dump = pointer.dump();
 
     expect(dump).to.be.not.eq(null);
@@ -62,7 +63,7 @@ describe(`${envName}: Test BBcPointer`, () => {
     const pointerHexString = '20003eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9010020008c2f9fd27c0044c83e64bc66162be45810cadb85e774fb9ab5eaf26ea68f7fa8';
     const pointerData = helper.fromHexString(pointerHexString);
 
-    const pointerUnpack = new BBcPointer(null, null, 32);
+    const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
     await pointerUnpack.unpack(pointerData);
 
     expect(jseu.encoder.arrayBufferToHexString(pointerUnpack.assetId)).to.be.eq( "8c2f9fd27c0044c83e64bc66162be45810cadb85e774fb9ab5eaf26ea68f7fa8" );

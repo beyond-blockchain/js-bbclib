@@ -1,13 +1,13 @@
 import chai from 'chai';
 const expect = chai.expect;
-import jscu from 'js-crypto-utils';
+import {getJscu} from '../src/env.js';
 import * as para from '../src/parameter.js';
 import { BBcSignature} from '../src/bbcClass/BBcSignature';
 import { KeyPair} from '../src/bbcClass/KeyPair';
-
 import {getTestEnv} from './prepare.js';
-import jseu from 'js-encoding-utils';
 import * as helper from '../src/helper';
+import jseu from 'js-encoding-utils';
+const jscu = getJscu();
 const env = getTestEnv();
 const bbclib = env.library;
 const envName = env.envName;
