@@ -70,7 +70,7 @@
     "@babel/plugin-transform-regenerator": "7.7.0",
     "@babel/runtime": "^7.1.2",
     "bn.js": "^5.0.0",
-    "js-crypto-utils": "^0.17.1",
+    "js-crypto-utils": "^0.18.0",
     "js-encoding-utils": "^0.5.4",
     "lodash.clonedeep": "^4.5.0"
   },
