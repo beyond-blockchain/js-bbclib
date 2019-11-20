@@ -1,30 +1,23 @@
 import chai from 'chai';
 const expect = chai.expect;
-import jscu from 'js-crypto-utils';
-import jseu from 'js-encoding-utils';
-import { Buffer } from 'buffer';
+import {getJscu} from '../src/env.js';
 import * as helper from '../src/helper';
-
+import {BBcAsset} from '../src/bbcClass/BBcAsset';
 import {getTestEnv} from './prepare.js';
+import {IDsLength} from '../src/bbcClass/idsLength';
+import jseu from 'js-encoding-utils';
+const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAsset`, () => {
-  console.log('***********************');
-  console.log('Test for BBcAsset Class.');
 
   it('pack and unpack with file and body', async () => {
     const userId = await jscu.random.getRandomBytes(32);
     const asset = await helper.createAsset(userId);
     const assetBin = await asset.pack();
-    const assetUnpack = new bbclib.BBcAsset(userId,32);
+    const assetUnpack = new BBcAsset(userId, 1.0, IDsLength);
     await assetUnpack.unpack(assetBin);
-
-    //console.log("----------");
-    //asset.showAsset();
-    //console.log("----------");
-    //assetUnpack.showAsset();
 
     expectUint8Array(asset.assetId,assetUnpack.assetId);
     expectUint8Array(asset.userId,assetUnpack.userId);
@@ -37,11 +30,18 @@ describe(`${envName}: Test BBcAsset`, () => {
 
   });
 
+  it('dump', async () => {
+    const userId = await jscu.random.getRandomBytes(32);
+    const asset = await helper.createAsset(userId);
+    const dump = asset.dump();
+    expect(dump).to.be.not.eq(null);
+  });
+
   it('serialize and deserialize without file', async () => {
     const userId = await jscu.random.getRandomBytes(32);
     const asset = await helper.createAssetWithoutFile(userId);
     const assetBin = await asset.pack();
-    const assetUnpack = new bbclib.BBcAsset(userId,32);
+    const assetUnpack = new BBcAsset(userId,1.0, IDsLength);
     await assetUnpack.unpack(assetBin);
 
     expectUint8Array(asset.assetId,assetUnpack.assetId);
@@ -68,7 +68,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     }
     assetBody[0] = 0x00;
 
-    const asset = new bbclib.BBcAsset(userId, 32);
+    const asset = new BBcAsset(userId, 1.0, IDsLength);
 
     const nonce = new Uint8Array(8);
     for (let i = 0; i < 8; i++) {
@@ -77,7 +77,7 @@ describe(`${envName}: Test BBcAsset`, () => {
 
     asset.setNonce(nonce);
 
-    await asset.addAsset(null, assetBody);
+    await asset.setAssetBody(assetBody);
     const digest = await asset.digest();
 
     expect(jseu.encoder.arrayBufferToHexString(digest)).to.be.eq('5feda19fb60af18c8c1d0e4af7d613726ec71cc9f6067c924ce2d081a61aa6d1');
@@ -87,11 +87,10 @@ describe(`${envName}: Test BBcAsset`, () => {
     const assetHexString = '200036335a38ca83d7594d96d00f50288644cc180c47d870eae291185bf8a111dbba20005e64bb946e38aa0dd3dce77abe38f017834bf1e32c2de1ced4bce443b84765022000a3bc8fa47aed0ab75817e516a52a17df27c1233c0eab5a97bc1049b8285481b7000000000000120074657374537472696e673132333435585858';
     const assetData = helper.fromHexString(assetHexString);
     const userId = await jscu.random.getRandomBytes(32);
-    const assetUnpack = new bbclib.BBcAsset(userId, 32);
+    const assetUnpack = new BBcAsset(userId, 1.0, IDsLength);
     await assetUnpack.unpack(assetData);
 
     const digest = await assetUnpack.digest();
-    //assetUnpack.showAsset();
 
     expect(jseu.encoder.arrayBufferToHexString(digest)).to.be.eq( "36335a38ca83d7594d96d00f50288644cc180c47d870eae291185bf8a111dbba" );
     expect(jseu.encoder.arrayBufferToHexString(assetUnpack.assetId)).to.be.eq( "36335a38ca83d7594d96d00f50288644cc180c47d870eae291185bf8a111dbba" );

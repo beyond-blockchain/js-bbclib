@@ -1,23 +1,28 @@
-import jscu from 'js-crypto-utils';
 import { BBcWitness } from './BBcWitness.js';
 import { BBcReference } from './BBcReference.js';
 import { BBcSignature } from './BBcSignature.js';
 import { BBcRelation } from './BBcRelation.js';
 import { BBcEvent } from './BBcEvent.js';
 import { BBcCrossRef } from './BBcCrossRef';
-import { KeyPair } from './KeyPair.js';
 import * as para from '../parameter.js';
 import * as helper from '../helper.js';
-import jseu from 'js-encoding-utils';
+import {getJscu} from '../env.js';
 import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
-
+import {IDsLength} from './idsLength.js';
+import jseu from 'js-encoding-utils';
+const jscu = getJscu();
 const date = new Date();
 
 export class BBcTransaction {
-
-  constructor( version=1.0, idLength=32) {
-    this.idLength = cloneDeep(idLength);
+  /**
+   *
+   * constructor
+   * @param {Number} version
+   * @param {Object} idsLengthConf
+   */
+  constructor(version=1.0, idsLengthConf=IDsLength) {
+    this.idsLength = idsLengthConf;
     this.version = cloneDeep(version);
     this.timestamp = (new BN(date.getTime())).mul(new BN(1000000)); //timestampはミリ秒なので nano秒へ変換
     this.events = [];
@@ -29,52 +34,79 @@ export class BBcTransaction {
     this.useridSigidxMapping = {};
     this.transactionId = new Uint8Array(0);
     this.transactionBaseDigest = new Uint8Array(0);
-    this.transactionData = null;
-    this.assetGroupIds = {};
     this.targetSerialize = null;
   }
 
-  showStr() {
-    console.log('**************showStr*************** :');
-
-    console.log('idLength :', this.idLength);
-    console.log('version :', this.version);
-    console.log('timestamp :', this.timestamp);
+  /**
+   *
+   * get dump data
+   * @param {Number} intentNum
+   * @return {String}
+   */
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Transaction--\n`;
+    dump += `${intent}idsLength: ${this.idsLength}\n`;
+    dump += `${intent}version: ${this.version}\n`;
+    dump += `${intent}timestamp: ${this.timestamp}\n`;
 
     if (this.events.length > 0) {
-      console.log('events');
       for (let i = 0; i < this.events.length; i++) {
-        console.log('event[', i, '] :', this.events[i].showEvent());
+        dump += `${intent}event[${i}]: ${this.events[i].dump(intentNum + 1)}\n`;
       }
     }
 
-    console.log('references :', this.references);
-    console.log('relations :', this.relations);
+    if (this.references.length > 0) {
+      for (let i = 0; i < this.references.length; i++) {
+        dump += `${intent}references[${i}]: ${this.references[i].dump(intentNum + 1)}\n`;
+      }
+    }
+
+    if (this.relations.length > 0) {
+      for (let i = 0; i < this.relations.length; i++) {
+        dump += `${intent}relations[${i}]: ${this.relations[i].dump(intentNum + 1)}\n`;
+      }
+    }
+
     if (this.witness !== null) {
-      console.log(this.witness.showStr());
-    } else {
-      console.log(this.witness);
+      dump += `${intent}witness: ${this.witness.dump(intentNum + 1)}\n`;
     }
 
-    console.log('crossRef :', this.crossRef);
-    console.log('signatures :', this.signatures);
-
-    console.log('signatures length :', this.signatures.length);
-
-    if (this.signatures != null && this.signatures.length > 0) {
-      console.log('signatures length :', this.signatures.length);
-      console.log(this.signatures[0].showSig());
-    } else {
-      console.log(this.signatures);
+    if (this.crossRef !== null) {
+      dump += `${intent}crossRef: ${this.crossRef.dump(intentNum + 1)}\n`;
     }
-    console.log('useridSigidxMapping :', this.useridSigidxMapping);
-    console.log('transactionId :', jseu.encoder.arrayBufferToHexString(this.transactionId));
-    console.log('transactionBaseDigest :', jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest));
-    console.log('transactionData :', this.transactionData);
-    console.log('assetGroupIds :', this.assetGroupIds);
+
+    if (this.signatures.length > 0) {
+      for (let i = 0; i < this.signatures.length; i++) {
+        dump += `${intent}signatures[${i}]: ${this.signatures[i].dump(intentNum + 1)}\n`;
+      }
+    }
+
+    Object.keys(this.useridSigidxMapping).forEach( (key) => {
+      dump += `${intent}${key}: ${this.useridSigidxMapping[key]}\n`;
+    });
+
+    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    dump += `${intent}transactionBaseDigest: ${jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest)}\n`;
+    dump += `${intent}--end Transaction--`;
+
+    return dump;
 
   }
 
+  /**
+   *
+   * add parts
+   * @param {Array<BBcEvent>} _event
+   * @param {Array<BBcReference>} _reference
+   * @param {Array<BBcRelation>} _relation
+   * @param {BBcWitness} _witness
+   * @param {BBcCrossRef} _crossRef
+   * @return {BBcTransaction}
+   */
   addParts(_event, _reference, _relation, _witness, _crossRef) {
     if (Array.isArray(_event)) {
       if (_event.length > 0) {
@@ -109,95 +141,210 @@ export class BBcTransaction {
       this.crossRef = cloneDeep(_crossRef);
     }
 
-    return true;
+    return this;
   }
 
-  setWitness(witness) {
-    if (witness !== null) {
-      this.witness = cloneDeep(witness);
+  /**
+   *
+   * set witness
+   * @param {BBcWitness} _witness
+   * @return {BBcTransaction}
+   */
+  setWitness(_witness) {
+    if (_witness !== null) {
+      this.witness = cloneDeep(_witness);
       this.witness.transaction = this;
     }
+    return this;
   }
 
-  addEvent(event) {
-    if (event !== null){
-      this.events.push(cloneDeep(event));
+  /**
+   *
+   * add event
+   * @param {BBcEvent} _event
+   */
+  addEvent(_event) {
+    if (_event !== null){
+      this.events.push(cloneDeep(_event));
     }
+    return this;
   }
 
-  setEvent(events) {
-    if (events !== null && Array.isArray(events) ){
-      this.events = cloneDeep(events);
+  /**
+   *
+   * set events
+   * @param {Array<BBcEvent>} _events
+   */
+  setEvents(_events) {
+    if (_events !== null && Array.isArray(_events) ){
+      this.events = cloneDeep(_events);
     }
+    return this;
   }
 
-  addReference(reference) {
-    if(reference !== null){
-      this.references.push(cloneDeep(reference));
+  /**
+   *
+   * add reference
+   * @param {BBcReference} _reference
+   */
+  addReference(_reference) {
+    if(_reference !== null){
+      this.references.push(cloneDeep(_reference));
     }
+    return this;
   }
 
-  setReference(references) {
-    if (Array.isArray(references)) {
-      if (references.length > 0) {
-        this.references = cloneDeep(references);
-      }
+  /**
+   *
+   * set references
+   * @param {Array<BBcReference>} _references
+   */
+  setReferences(_references) {
+    if (_references != null && Array.isArray(_references)) {
+      this.references = cloneDeep(_references);
     }
+    return this;
   }
 
-  addRelation(relation) {
-    if(relation !== null){
-      this.relations.push(cloneDeep(relation));
+  /**
+   *
+   * add relation
+   * @param {BBcRelation} _relation
+   */
+  addRelation(_relation) {
+    if(_relation !== null){
+      this.relations.push(cloneDeep(_relation));
     }
+    return this;
   }
 
-  setRelation(relations) {
-    if (Array.isArray(relations)) {
-      if (relations.length > 0) {
-        this.relations = cloneDeep(relations);
-      }
+  /**
+   *
+   * set relations
+   * @param {Array<BBcRelation>} _relations
+   */
+  setRelations(_relations) {
+    if (_relations != null && Array.isArray(_relations)) {
+      this.relations = cloneDeep(_relations);
     }
+    return this;
   }
 
-
-  setCrossRef(crossRef) {
-    if (crossRef !== null) {
-      this.crossRef = cloneDeep(crossRef);
+  /**
+   *
+   * set crossRef
+   * @param {BBcCrossRef} _crossRef
+   */
+  setCrossRef(_crossRef) {
+    if (_crossRef !== null) {
+      this.crossRef = cloneDeep(_crossRef);
     }
+    return this;
   }
 
-  setSigIndex(userId, index){
-    this.useridSigidxMapping[userId] = index;
+  /**
+   *
+   * set sigIndex
+   * @param {Uint8Array} _userId
+   * @param {Number} _index
+   */
+  setSigIndex(_userId, _index){
+    this.useridSigidxMapping[_userId] = _index;
+    return this;
   }
 
-  getSigIndex(userId) {
-    if (!(userId in this.useridSigidxMapping)) {
+  /**
+   *
+   * get sigIndex
+   * @param {Uint8Array} _userId
+   * @return {Number}
+   */
+  getSigIndex(_userId) {
+    if (!(_userId in this.useridSigidxMapping)) {
       const sigIndexObj = Object.keys(this.useridSigidxMapping);
-      this.useridSigidxMapping[userId] = sigIndexObj.length;
+      this.useridSigidxMapping[_userId] = sigIndexObj.length;
       this.signatures.push(new BBcSignature(para.KeyType.NOT_INITIALIZED));
     }
-    return this.useridSigidxMapping[userId];
+    return this.useridSigidxMapping[_userId];
   }
 
-  addSignature(userId, signature) {
-    if (userId in this.useridSigidxMapping) {
-      const idx = this.useridSigidxMapping[cloneDeep(userId)];
-      this.signatures[idx] = cloneDeep(signature);
+  /**
+   *
+   * add signature object
+   * @param {Uint8Array} _userId
+   * @param {Uint8Array} _signature
+   * @return {Boolean}
+   */
+  addSignatureObject(_userId, _signature) {
+    if (_userId in this.useridSigidxMapping) {
+      const idx = this.useridSigidxMapping[cloneDeep(_userId)];
+      this.signatures[idx] = cloneDeep(_signature);
       return true;
     } else {
       return false;
     }
   }
 
-  addSignatureUsingIndex(index, signature) {
-    this.signatures[index] = cloneDeep(signature);
+  /**
+   *
+   * add signature
+   * @param {Uint8Array} _userId
+   * @param {Number} _keyType
+   * @param {Uint8Array} _privateKey
+   * @param {Uint8Array} _publicKey
+   * @param {Object} _keyPair
+   * @param {Uint8Array} _isPublicKey
+   * @return {Boolean}
+   */
+  addSignature(_userId, _keyType=null, _privateKey=new Uint8Array(0), _publicKey=new Uint8Array(0), _keyPair=null) {
+    _userId = _userId.slice(0, this.idsLength.userId);
+    const sig = this.sign(_keyType, _privateKey, _publicKey, _keyPair);
+    if (!this.addSignatureObject(_userId, sig)){
+      for (let i = 0; i < this.references.length; i++){
+        if (this.references[i].addSignature(_userId, sig)){
+          return true;
+        }
+      }
+    }
   }
 
-  async digest() {
+  /**
+   *
+   * add signature using index
+   * @param {Number} _index
+   * @param {Uint8Array} _signature
+   * @return {Boolean}
+   */
+  addSignatureUsingIndex(_index, _signature) {
+    this.signatures[_index] = cloneDeep(_signature);
+    return this;
+  }
+
+  /**
+   *
+   * get transaction base
+   * @return {Uint8Array}
+   */
+  async getTransactionBase() {
     this.targetSerialize = await this.getDigestForTransactionId();
-    return this.targetSerialize;
+    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
+    return helper.concat(this.transactionBaseDigest, this.packCrossRef());
   }
 
+  /**
+   *
+   * get digest
+   * @return {Uint8Array}
+   */
+  async digest() {
+    return await jscu.hash.compute(await this.getTransactionBase(), 'SHA-256');
+  }
+
+  /**
+   *
+   * pack crossRef
+   * @return {Uint8Array}
+   */
   packCrossRef() {
     let binaryData = [];
     if (this.crossRef !== null) {
@@ -211,21 +358,29 @@ export class BBcTransaction {
     return new Uint8Array(binaryData);
   }
 
+  /**
+   *
+   * set transaction id
+   * @return {Uint8Array}
+   */
   async setTransactionId() {
-    this.targetSerialize = await this.getDigestForTransactionId();
-    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
-    const id = await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
-    this.transactionId = id.slice(0, this.idLength);
+    const digest = await this.digest();
+    this.transactionId = digest.slice(0, this.idsLength.transactionId);
     return this.transactionId;
   }
 
+  /**
+   *
+   * get digest for transaction id
+   * @return {Uint8Array}
+   */
   async getDigestForTransactionId() {
 
     let binaryData = [];
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
     binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
-    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
@@ -260,13 +415,18 @@ export class BBcTransaction {
     return new Uint8Array(binaryData);
   }
 
+  /**
+   *
+   * pack transaction data
+   * @return {Uint8Array}
+   */
   async pack() {
 
     let binaryData = [];
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
     binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
-    binaryData = binaryData.concat(Array.from(helper.hbo(this.idLength, 2)));
+    binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
     for (let i = 0; i < this.events.length; i++) {
@@ -309,7 +469,7 @@ export class BBcTransaction {
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.signatures.length, 2)));
     for (let i = 0; i < this.signatures.length; i++) {
-      const packedData = this.signatures[i].pack();
+      const packedData = await this.signatures[i].pack();
       binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
       binaryData = binaryData.concat(Array.from(packedData));
     }
@@ -318,36 +478,41 @@ export class BBcTransaction {
 
   }
 
-
-  async unpack(data) {
+  /**
+   *
+   * unpack transaction data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  async unpack(_data) {
 
     let posStart = 0;
     let posEnd = 4; // uint32
-    this.version = helper.hboToInt32(data.slice(posStart, posEnd));
+    this.version = helper.hboToInt32(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + 8;
-    this.timestamp = new BN(data.slice(posStart, posEnd));
+    this.timestamp = new BN(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    this.idLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    this.idsLength.transactionId = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numEvents = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numEvents = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numEvents > 0) {
       for (let i = 0; i < numEvents; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
-        const eventLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const eventLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + eventLength; // uint16
-        const eventBin = data.slice(posStart, posEnd);
+        const eventBin = _data.slice(posStart, posEnd);
 
-        const event = new BBcEvent();
+        const event = new BBcEvent(new Uint8Array(0), this.version, this.idsLength);
         event.unpack(eventBin);
         this.events.push(event);
       }
@@ -355,18 +520,18 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numReference = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numReference = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numReference > 0) {
       for (let i = 0; i < numReference; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
-        const referenceLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const referenceLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + referenceLength; // uint16
-        const referenceBin = data.slice(posStart, posEnd);
-        const ref = new BBcReference(null, null, null, null, this.idLength);
+        const referenceBin = _data.slice(posStart, posEnd);
+        const ref = new BBcReference(null, null, null, null, this.version, this.idsLength.transactionId);
         ref.unpack(referenceBin);
         this.references.push(ref);
       }
@@ -374,18 +539,18 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numRelation = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numRelation = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numRelation > 0) {
       for (let i = 0; i < numRelation; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
-        const relationLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const relationLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + relationLength; // uint16
-        const relationBin = data.slice(posStart, posEnd);
-        const rtn = new BBcRelation( null, this.idLength, this.version);
+        const relationBin = _data.slice(posStart, posEnd);
+        const rtn = new BBcRelation( new Uint8Array(0), this.version, this.idsLength);
         rtn.unpack(relationBin);
         this.relations.push(rtn);
       }
@@ -393,19 +558,19 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numWitness = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numWitness = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numWitness > 0) {
       for (let i = 0; i < numWitness; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
 
-        const witnessLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const witnessLength = helper.hboToInt32(_data.slice(posStart, posEnd));
         posStart = posEnd;
         posEnd = posEnd + witnessLength; // uint16
 
-        const witnessBin = data.slice(posStart, posEnd);
-        const witness = new BBcWitness(this.idLength);
+        const witnessBin = _data.slice(posStart, posEnd);
+        const witness = new BBcWitness(this.version, this.idsLength);
         witness.unpack(witnessBin);
         this.setWitness(witness);
         this.witness.setSigIndex();
@@ -414,72 +579,60 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numCrossref = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numCrossref = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numCrossref > 0) {
       for (let i = 0; i < numCrossref; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
-        const crossrefLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const crossrefLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + crossrefLength; // uint16
-        const crossrefBin = data.slice(posStart, posEnd);
+        const crossrefBin = _data.slice(posStart, posEnd);
 
-        this.crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0));
+        this.crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0), this.version, this.idsLength);
         this.crossRef.unpack(crossrefBin);
       }
     }
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    const numSignature = helper.hboToInt16(data.slice(posStart, posEnd));
+    const numSignature = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (numSignature > 0) {
       for (let i = 0; i < numSignature; i++) {
         posStart = posEnd;
         posEnd = posEnd + 4; // uint16
-        const signatureLength = helper.hboToInt32(data.slice(posStart, posEnd));
+        const signatureLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + signatureLength; // uint16
-        const signatureBin = data.slice(posStart, posEnd);
+        const signatureBin = _data.slice(posStart, posEnd);
 
         const sig = new BBcSignature(0);
         await sig.unpack(signatureBin);
         this.signatures.push(sig);
       }
     }
-
+    await this.setTransactionId();
     return true;
   }
 
-  async sign(privateKey, publicKey, keyPair) {
-
-    if (keyPair === null) {
-      if (privateKey.length !== 32 || publicKey.length <= 32) {
-
-        return null;
-      }
-
-      keyPair = new KeyPair();
-      keyPair.setKeyPair(privateKey, publicKey);
-      if (keyPair == null) {
-
-        return null;
-      }
-    }
-
-    const sig = new BBcSignature(para.KeyType.ECDSA_P256v1);
-    const s = await keyPair.sign(await this.digest());
+  /**
+   *
+   * sign transaction data
+   * @param {Uint8Array} _userId
+   * @param {KeyPair} _keyPair
+   * @return {BBcSignature}
+   */
+  async sign(_userId, _keyPair) {
+    const sig = new BBcSignature(_keyPair.keyType);
+    const s = await _keyPair.sign(await this.getTransactionBase());
     if (s === null) {
       return null;
     }
-
-    await sig.add(s, await keyPair.publicKey.jwk);
-    return sig;
+    await sig.addSignatureAndPublicKey(s, await _keyPair.exportPublicKey('jwk'));
+    return this.addSignatureObject(_userId, sig);
   }
-
 }
-
-

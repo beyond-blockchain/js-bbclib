@@ -5,15 +5,23 @@ import { BBcPointer } from './BBcPointer.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper';
 import cloneDeep from 'lodash.clonedeep';
+import {IDsLength} from './idsLength';
 
 export class BBcRelation{
-  constructor(assetGroupId, idLength=32, version=1) {
+  /**
+   *
+   * constructor
+   * @param {Uint8Array} assetGroupId
+   * @param {Number} version
+   * @param {Object} idsLength
+   */
+  constructor(assetGroupId,  version=1, idsLength=IDsLength) {
     this.version = version;
-    this.idLength = cloneDeep(idLength);
+    this.setLength(idsLength);
     if (assetGroupId !== null) {
       this.assetGroupId = cloneDeep(assetGroupId);
     } else {
-      this.assetGroupId = new Uint8Array(this.idLength);
+      this.assetGroupId = new Uint8Array(this.idsLength.assetGroupId);
     }
 
     this.pointers = [];
@@ -22,53 +30,168 @@ export class BBcRelation{
     this.assetHash = null;
   }
 
-  setVersion(ver) {
-    this.version = ver;
+  /**
+   *
+   * set version
+   * @return {String}
+   */
+  setVersion(_version) {
+    this.version = _version;
   }
 
-  setAsset(asset) {
-    this.asset = cloneDeep(asset);
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
-  setAssetRaw(assetRaw) {
+  /**
+   *
+   * set asset
+   * @param {BBcAsset} _asset
+   * @return {BBcRelation}
+   */
+  setAsset(_asset) {
+    this.asset = cloneDeep(_asset);
+    return this;
+  }
+
+  /**
+   *
+   * set asset group id
+   * @param {Uint8Array} _assetGroupId
+   * @return {BBcRelation}
+   */
+  setAssetGroupId(_assetGroupId) {
+    this.assetGroupId = cloneDeep(_assetGroupId);
+    return this;
+  }
+
+  /**
+   *
+   * set assetRaw
+   * @param {BBcAssetRaw} _assetRaw
+   * @return {BBcRelation}
+   */
+  setAssetRaw(_assetRaw) {
     if(this.version >= 2){
-      this.assetRaw = cloneDeep(assetRaw);
+      this.assetRaw = cloneDeep(_assetRaw);
     }
+    return this;
   }
 
-  setAssetHash(assetHash) {
+  /**
+   *
+   * create assetRaw
+   * @param {Uint8Array} assetId
+   * @param {Uint8Array} assetBody
+   * @return {BBcRelation}
+   */
+  createAssetRaw(assetId, assetBody){
+    this.assetRaw = new BBcAssetRaw(assetId, assetBody, this.version, this.idsLength);
+    return this;
+  }
+
+  /**
+   *
+   * create assetHash
+   * @param {Array<Uint8Array>} assetIds
+   * @return {BBcRelation}
+   */
+  createAssetHash(assetIds){
+    this.assetHash = new BBcAssetHash(assetIds, this.version, this.idsLength);
+    return this;
+  }
+
+  /**
+   *
+   * set assetHash
+   * @param {BBcAssetHash} _assetHash
+   * @return {BBcRelation}
+   */
+  setAssetHash(_assetHash) {
     if(this.version >= 2){
-      this.assetHash = cloneDeep(assetHash);
+      this.assetHash = cloneDeep(_assetHash);
     }
+    return this;
   }
 
-  showRelation() {
-    console.log('assetGroupId :', jseu.encoder.arrayBufferToHexString(this.assetGroupId));
-    console.log('pointers.length :', this.pointers.length);
-    if (this.pointers.length > 0) {
-      for (let i = 0; i < this.pointers.length; i++) {
-        console.log('pointers[',i,'] :');
-        this.pointers[i].showPointer();
-      }
-    }
+  /**
+   *
+   * crete asset
+   * @param {Uint8Array} userId
+   * @param {Uint8Array} assetBody
+   * @param {Uint8Array} assetFile
+   * @return {BBcRelation}
+   */
+  async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0)){
+    this.asset = new BBcAsset(userId,this.version, this.idsLength);
+    await this.asset.setAssetFile(assetFile);
+    await this.asset.setAssetBody(assetBody);
+    return this;
+  }
 
+
+  /**
+   *
+   * get dump data
+   * @param {Number} intentNum
+   * @return {String}
+   */
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Relation--\n`;
+    dump += `${intent}idsLength.assetGroupId: ${this.idsLength.assetGroupId} \n`;
+    dump += `${intent}assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
+    dump += `${intent}pointers.length: ${this.pointers.length}\n`;
+    for (let i = 0; i < this.pointers.length; i++) {
+      dump += `${intent}pointers[${i}]: \n${this.pointers[i].dump(intentNum + 1)}\n`;
+    }
     if (this.asset != null) {
-      console.log('asset:',this.asset.showAsset());
+      dump += `${intent}asset: \n${this.asset.dump(intentNum +1 )}\n`;
+    }
+
+    if (this.version > 1 && this.assetRaw !== null){
+      dump += `${intent}assetRaw: \n${this.assetRaw.dump(intentNum +1)}\n`;
+    }
+    if (this.version > 1 && this.assetHash !== null){
+      dump += `${intent}assetHash: \n${this.assetHash.dump(intentNum +1)}\n`;
+    }
+    dump += `${intent}--end Relation--`;
+    return dump;
+  }
+
+  /**
+   *
+   * create pointer
+   * @param {BBcPointer} _pointer
+   */
+  createPointer(transactionId=null, assetId=null) {
+    this.pointers.push( new BBcPointer(transactionId, assetId, this.version, this.idsLength));
+  }
+
+  /**
+   *
+   * create pointer
+   * @param {BBcPointer} _pointer
+   */
+  addPointer(_pointer) {
+    if (_pointer != null) {
+      this.pointers.push(cloneDeep(_pointer));
     }
   }
 
-  addAssetGroupId(assetGroupId) {
-    if (assetGroupId != null) {
-      this.assetGroupId = cloneDeep(assetGroupId);
-    }
-  }
-
-  addPointer(pointer) {
-    if (pointer != null) {
-      this.pointers.push(cloneDeep(pointer));
-    }
-  }
-
+  /**
+   *
+   * pack relation data
+   * @return {Uint8Array}
+   */
   pack() {
     let binaryData = [];
 
@@ -109,31 +232,37 @@ export class BBcRelation{
 
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack relation data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
 
     let posStart = 0;
     let posEnd = 2; // uint16
-    let valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    let valueLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     posStart = posEnd;
     posEnd = posEnd + valueLength;
-    this.assetGroupId = data.slice(posStart, posEnd);
+    this.assetGroupId = _data.slice(posStart, posEnd);
 
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
-    valueLength = helper.hboToInt16(data.slice(posStart, posEnd));
+    valueLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
     if (valueLength > 0) {
       for (let i = 0; i < valueLength; i++) {
         posStart = posEnd;
         posEnd = posEnd + 2;
-        const pointerLength = helper.hboToInt16(data.slice(posStart, posEnd));
+        const pointerLength = helper.hboToInt16(_data.slice(posStart, posEnd));
 
         posStart = posEnd;
         posEnd = posEnd + pointerLength;
 
-        const pointerBin = data.slice(posStart, posEnd);
-        const ptr = new BBcPointer(null, null, this.idLength);
+        const pointerBin = _data.slice(posStart, posEnd);
+        const ptr = new BBcPointer(null, null, this.idsLength);
 
         ptr.unpack(pointerBin);
         this.pointers.push(ptr);
@@ -142,38 +271,38 @@ export class BBcRelation{
 
     posStart = posEnd;
     posEnd = posEnd + 4; // uint32
-    valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
+    valueLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
     if (valueLength > 0) {
       posStart = posEnd;
       posEnd = posEnd + valueLength; // uint32
-      const assetBin = data.slice(posStart, posEnd);
-      this.asset = new BBcAsset(null, this.idLength);
+      const assetBin = _data.slice(posStart, posEnd);
+      this.asset = new BBcAsset(null, this.idsLength);
       this.asset.unpack(assetBin);
     }
 
     if (this.version >= 2) {
       posStart = posEnd;
       posEnd = posEnd + 4; // uint32
-      valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
+      valueLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
       if (valueLength > 0) {
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
-        const assetRawBin = data.slice(posStart, posEnd);
-        this.assetRaw = new BBcAssetRaw(this.idLength);
+        const assetRawBin = _data.slice(posStart, posEnd);
+        this.assetRaw = new BBcAssetRaw(null, null, this.version, this.idsLength);
         this.assetRaw.unpack(assetRawBin);
       }
 
       posStart = posEnd;
       posEnd = posEnd + 4; // uint32
-      valueLength = helper.hboToInt32(data.slice(posStart, posEnd));
+      valueLength = helper.hboToInt32(_data.slice(posStart, posEnd));
 
       if (valueLength > 0) {
         posStart = posEnd;
         posEnd = posEnd + valueLength; // uint32
-        const assetHashBin = data.slice(posStart, posEnd);
-        this.assetHash = new BBcAssetHash(this.idLength);
+        const assetHashBin = _data.slice(posStart, posEnd);
+        this.assetHash = new BBcAssetHash([], this.version, this.idsLength);
         this.assetHash.unpack(assetHashBin);
       }
     }

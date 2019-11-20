@@ -26,9 +26,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       `./dist/${common.bundleName}`,
+      './node_modules/js-crypto-utils/dist/jscu.bundle.min.js',
       './test/**/*.spec.js',
-      //'./test/test.11.BBcAsset.spec.js'
-
     ],
 
 
@@ -72,8 +71,13 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['ChromeHeadless'],
-    // browsers: ['Chrome'],
+    browsers: ["Chrome-headless"],
+    customLaunchers: {
+      "Chrome-headless": {
+        base: 'Chrome',
+        flags: ['--headless', '--remote-debugging-port=9222', '--no-sandbox']
+      }
+    },
 
 
     // Continuous Integration mode

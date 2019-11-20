@@ -13,7 +13,7 @@
     } ]
   ],
   "ignore": [ "node_modules" ],
-  "only": [ "src","src/bbc_class", "test" ],
+  "only": [ "src", "test" ],
   "plugins": [
     [
       "@babel/plugin-transform-runtime",
@@ -28,6 +28,9 @@
       "plugins": ["babel-plugin-transform-remove-console"]
     },
     "development": {
+      "plugins": ["babel-plugin-istanbul"]
+    },
+    "test": {
       "plugins": ["babel-plugin-istanbul"]
     }
   }

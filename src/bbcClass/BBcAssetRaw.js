@@ -1,49 +1,86 @@
-import jscu from 'js-crypto-utils';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
+import {IDsLength} from './idsLength';
 
 export class BBcAssetRaw{
-  constructor(idLength=32) {
-    this.setLength(idLength); // int
-    this.assetId = new Uint8Array(this.idLength); // Uint8Array
-    this.assetBodySize = 0; // int
-    this.assetBody = new Uint8Array(0); // Uint8Array
+  /**
+   *
+   * constructor
+   * @param {Uint8Array} assetId
+   * @param {Uint8Array} assetBody
+   * @param {Number} version
+   * @param {Object} idsLength
+   */
+  constructor(assetId, assetBody, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
+    this.version = version;
+    this.assetId = new Uint8Array(0);
+    this.assetBody = new Uint8Array(0);
+    this.assetBodySize = 0;
+    this.setAsset(assetId, assetBody);
   }
 
-  setLength(idLength){
-    this.idLength = cloneDeep(idLength);
+  /**
+   *
+   * set length setLength
+   * @param {Object<{ transactionId: number, assetGroupId: number, userId: number, assetId: number,nonce: number }>} _idsLength
+   */
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
-  showAsset() {
-    if (this.assetId != null) {
-      // eslint-disable-next-line no-console
-      console.log('this.assetId :', jseu.encoder.arrayBufferToHexString(this.assetId));
+  /**
+   *
+   * get dump data
+   * @param {Number} intentNum
+   * @return {String}
+   */
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
     }
-    // eslint-disable-next-line no-console
-    console.log('this.assetBodySize', this.assetBodySize);
-    // eslint-disable-next-line no-console
-    console.log('this.assetBody :', jseu.encoder.arrayBufferToHexString(this.assetBody));
+    let dump = `${intent}--AssetRaw--\n`;
+    dump += `${intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+    dump += `${intent}assetBodySize: ${this.assetBodySize}\n`;
+    dump += `${intent}assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
+    dump += `${intent}--end AssetRaw--\n`;
+    return dump;
   }
 
+  /**
+   *
+   * set asset data
+   * @return {BBcAssetRaw}
+   */
   setAsset(assetId, assetBody) {
     if (assetId !== null) {
-      this.assetId = assetId;
+      this.assetId = assetId.slice(0, this.idsLength.assetId);
     }
 
     if (assetBody !== null) {
       this.assetBody = assetBody;
       this.assetBodySize = assetBody.length;
     }
-    return true;
+    return this;
   }
 
+  /**
+   *
+   * get asset digest
+   * @return {Uint8Array}
+   */
   async digest() {
     return this.assetId;
   }
 
+  /**
+   *
+   * pack assetRaw data
+   * @return {Uint8Array}
+   */
   pack() {
-
     let binaryData = [];
     binaryData = binaryData.concat(Array.from(helper.hbo(this.assetId.length, 2)));
     binaryData = binaryData.concat(Array.from(this.assetId));
@@ -55,26 +92,32 @@ export class BBcAssetRaw{
     return new Uint8Array(binaryData);
   }
 
-  unpack(data) {
+  /**
+   *
+   * unpack assetRaw data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  unpack(_data) {
 
     let posStart = 0;
     let posEnd = 2; // uint16
-    const valueLength =  helper.hboToInt16(data.slice(posStart,posEnd));
+    const valueLength =  helper.hboToInt16(_data.slice(posStart,posEnd));
 
     if (valueLength > 0){
       posStart = posEnd;
       posEnd = posEnd + valueLength;
-      this.assetId = data.slice(posStart,posEnd);
+      this.assetId = _data.slice(posStart,posEnd);
     }
 
     posStart = posEnd;
     posEnd = posEnd + 2;  // uint16
-    this.assetBodySize = helper.hboToInt16(data.slice(posStart,posEnd));
+    this.assetBodySize = helper.hboToInt16(_data.slice(posStart,posEnd));
 
     if (this.assetBodySize > 0) {
       posStart = posEnd;
       posEnd = posEnd + this.assetBodySize;
-      this.assetBody = data.slice(posStart, posEnd);
+      this.assetBody = _data.slice(posStart, posEnd);
     }
 
     return true;
