@@ -40,8 +40,6 @@ const webpackConfig = {
   externals:[{
     'crypto': true,
     'js-crypto-utils': true,
-    'bn': false,
-    'lodash.clonedeep': false
   }],
   node: {
     fs: 'empty'
