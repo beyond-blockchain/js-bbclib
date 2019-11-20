@@ -13,7 +13,6 @@ export class BBcSignature{
   constructor(keyType) {
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
-    // this.pubkeyByte = new Uint8Array(0);
     this.keypair = null;
     this.notInitialized = true;
   }

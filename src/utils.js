@@ -4,7 +4,6 @@ import { BBcWitness } from './bbcClass/BBcWitness';
 import { BBcRelation } from './bbcClass/BBcRelation';
 import {IDsLength} from './bbcClass/idsLength';
 import { KeyPair } from './bbcClass/KeyPair';
-import {BBcReference} from "./bbcClass/BBcReference";
 
 /**
  *
@@ -36,13 +35,25 @@ export const makeTransaction = async ( _eventNum, _relationNum, _witness, _versi
   return transaction;
 };
 
+/**
+ *
+ * load transaction data
+ * @param {Uint8Array} _transactionBin
+ * @param {Number} _version
+ * @param {Object} _idsLength
+ * @return {BBcTransaction}
+ */
 export const loadTransaction = async (_transactionBin, _version=2.0, _idsLength=IDsLength) => {
   const transaction = new BBcTransaction(_version, _idsLength);
   await transaction.unpack(_transactionBin);
   return transaction;
 };
 
-
+/**
+ *
+ * create KeyPair
+ * @return {KeyPair}
+ */
 export const createKeypair = () => new KeyPair();
 
 export default { makeTransaction, loadTransaction, createKeypair };

@@ -612,6 +612,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     transaction.addParts([event], refs, [], null, null);
 
     const dump = await transaction.dump();
+    console.log(dump);
     expect(dump).to.be.not.eq(null);
 
   });
