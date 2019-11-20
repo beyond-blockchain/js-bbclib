@@ -7,7 +7,7 @@ BBc-1(Beyond Block-chain One) Library, written in Javascript.
 # Overview
 The library is implemented bbclib functions on platform of BBc-1.
 It provides make transaction function, sign and verify transaction function, serialize and deserialize function for some collection of data on BBc-1 platform. (They are BBcTransaction, BBcEvent, BBcAsset, BBcSignature, BBcRelation, BBcReference, BBcCrossRef, BBcPointer and BBcWitness).
-It works on modern browsers(Firefox, IE, Edge, Chrome and Safari) and Node.js. 
+It works on modern browsers(Firefox, Edge, Chrome and Safari) and Node.js. 
 The module is totally written in ES6+ and needed to get transpiled with babel for legacy environments.
 
 ※The design and detail of BBc-1 is following.<br>
@@ -36,16 +36,85 @@ bn.js: https://www.npmjs.com/package/bn.js
 
  
 # Usage
-トランザクションの作成
-例ではトランザクションに４つのBBcRelationおよび１つのBBcEvent、BBcWitnessを入れ込むことを想定する。
-まずはじめにmakeTransaction関数を必要なパラメータ呼び、BBcTransactionクラスを生成する。
-BBcRelationにはBBcAsset、BBcPointer、BBcAssetRaw、BBcAssetHashをいれる。
-BBcRelation[0]にはBBcAssetをセットする。
-BBcRelation[1]にはBBcPointerをセットする。
-BBcRelation[2]にはBBcAssetRawをセットする。
-BBcRelation[3]にはBBcAssetHashをセットする。
-BBcEvent[0]にはBBcAssetをセットした後、mandatoryApproverをセットする。
+js-bbclibのAPIはmakeTransaction、loadTransaction、createKeyの３つである。それぞれの役割は、トランザクションの作成、トランザクションの読込、署名に利用する鍵の生成・読込である。
+トランザクションの中身（eventやasset等）を設定する際には、makeTransactionの戻り値であるBBcTransactionのメソットを利用する。（set、addおよびcreateメソット等）
+BBcTransactionのset、addおよびcreateメソットの一部の戻り値はPromise型となるので、利用する際にはawaitを利用する等注意が必要となる。
 
+トランザクションの作成
+以下の例で作成するトランザクションはメンバー変数として１つのBBcEvent、４つのBBcRelation、BBcWitnessおよび２つのBBcSignature（署名）を持つことを想定する。
+BBcEventにはassetGroupIdとBBcAssetを設定する。
+BBcRelationにはassetGroupIdを設定し、BBcAsset、BBcPointer、BBcAssetRaw、BBcAssetHashをそれぞれ設定する。
+BBcWitnessには２つの署名の格納するユーザ情報としてuserIdsおよびsigIndicesを設定する。
+BBcSignatureにはユーザ情報および署名の内容、公開鍵の情報を設定する。
+
+transaction
+  |-events
+  |  |-events[0]
+  |     |-asset
+  |     |  |-userId
+  |     |  |-assetBody
+  |     |  |-assetFile
+  |     |
+  |     |-assetGroupId
+  |     
+  |-relations
+  |  |-relations[0]
+  |  |  |-asset
+  |  |  |  |-userId
+  |  |  |  |-assetBody
+  |  |  |  |-assetFile
+  |  |  |  
+  |  |  |-assetGroupId 
+  |  |    
+  |  |-relations[1]
+  |  |  |-pointers
+  |  |  |  |-pointers[0]
+  |  |  |     |-transactionId
+  |  |  |  
+  |  |  |-assetGroupId  
+  |  |      
+  |  |-relations[2]
+  |  |  |-assetRaw  
+  |  |  |  |-assetId
+  |  |  |  |-assetBody
+  |  |  |
+  |  |  |-assetGroupId
+  |  |     
+  |  |-relations[3]
+  |  |  |-assetHash 
+  |  |  |  |-assetIds 
+  |  |  |     |-assetIds[0]
+  |  |  |        |-assetId
+  |  |  |        
+  |  |  |-assetGroupId
+  |  |         
+  |-witness        
+  |  |-userIds        
+  |  |  |-userIds[0]        
+  |  |  |  |-userId  
+  |  |  |      
+  |  |  |-userIds[1]      
+  |  |     |-userId   
+  |  |        
+  |  |-sigIndices
+  |     |-sigIndices[0]      
+  |     |  |-indice
+  |     |  
+  |     |-sigIndices[1]      
+  |       |-indice
+  |    
+  |-signatures    
+  |  |-signatures[0]   
+  |  |  |-keyType  
+  |  |  |-signature
+  |  |  |-keyPair
+  |  |   
+  |  |-signatures[1]   
+  |     |-keyType  
+  |     |-signature
+  |     |-keyPair
+  |
+  |-transactionId
 
 ```
 import * as bbclib from 'js-bbclib.js'
@@ -69,12 +138,10 @@ await transaction.events[0].setAssetGroupId(assetGroupId).createAsset(userId, as
 transaction.witness.addWitness(userId);
 transaction.setTransactionId();
 
-const transactionBin = await transaction.pack();
-
 ```
 
 トランザクションのバイナリデータの読み込み
- ```
+```
  import * as bbclib from 'js-bbclib.js'
  
  const transactionBin;
@@ -87,9 +154,11 @@ const transactionBin = await transaction.pack();
    nonce: 32
  };
  
+ const transactionBin = await transaction.pack();
  const transaction = await bbclib.loadTrnasaction(transactionBin versoin, IDsLength); 
+ console.log(transaction.dump())
  
- ```
+```
 
 鍵の読み込みおよびトランザクションへのsign
 トランザクション関数のsignメソッドを呼ぶことで実現
@@ -108,6 +177,7 @@ const transaction = await bbclib.makeTransaction(1, 1, true, versoin, IDsLength)
 ~
 ~
 
+transaction.witness.addWitness([userId])
 await transaction.sign(userId, keypair);
 
 ```
