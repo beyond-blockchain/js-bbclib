@@ -8,14 +8,11 @@ import * as helper from '../src/helper';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcRelation`, () => {
 
   it('BBcRelation pack and unpack for asset', async () => {
-    console.log('***********************');
-    console.log('Test for BBcRelation Class');
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const transactionId = await jscu.random.getRandomBytes(32);
     const userId = await jscu.random.getRandomBytes(32);

@@ -7,7 +7,6 @@ import {BBcWitness} from '../src/bbcClass/BBcWitness';
 const jscu = getJscu();
 const expect = chai.expect;
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcWitness`, () => {

@@ -1,7 +1,7 @@
 import { KeyPair } from './KeyPair.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
-import * as para from '../parameter.js';
+import {KeyType} from '../parameter.js';
 import cloneDeep from 'lodash.clonedeep';
 
 export class BBcSignature{
@@ -13,7 +13,7 @@ export class BBcSignature{
   constructor(keyType) {
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
-    this.pubkeyByte = new Uint8Array(0);
+    // this.pubkeyByte = new Uint8Array(0);
     this.keypair = null;
     this.notInitialized = true;
   }
@@ -27,8 +27,10 @@ export class BBcSignature{
     let dump = '--Signature--\n';
     dump += `keyType: ${this.keyType}\n`;
     dump += `signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
-    dump += `pubkeyByte: ${jseu.encoder.arrayBufferToHexString(this.pubkeyByte)}\n`;
     if (this.keypair != null) {
+      if (this.keypair.publicKeyObj != null){
+        dump += `pubkeyByte: ${jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct'))}\n`;
+      }
       dump += `keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump())}\n`;
     }
     dump += '--end Signature--';
@@ -42,13 +44,12 @@ export class BBcSignature{
    * @param {Uint8Array} _signature
    * @param {Object} _pubKey
    */
-  async add(_signature, _pubKey) {
+  async addSignatureAndPublicKey(_signature, _pubKey) {
     if (_signature != null) {
       this.notInitialized = false;
       this.signature = cloneDeep(_signature);
     }
     if (_pubKey != null) {
-      this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(_pubKey));
       this.keypair = new KeyPair();
       this.keypair.setKeyPair('jwk', null, cloneDeep(_pubKey));
     }
@@ -70,14 +71,15 @@ export class BBcSignature{
    * pack signature data
    * @return {Uint8Array}
    */
-  pack() {
+  async pack() {
     let binaryData = [];
-    if (this.keyType === para.KeyType.NOT_INITIALIZED){
+    if (this.keyType === KeyType.NOT_INITIALIZED){
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
     }else {
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
-      binaryData = binaryData.concat(Array.from(helper.hbo(this.pubkeyByte.length * 8, 4)));
-      binaryData = binaryData.concat(Array.from(this.pubkeyByte));
+      const pubkey = await this.keypair.exportPublicKey('oct');
+      binaryData = binaryData.concat(Array.from(helper.hbo(pubkey.length * 8, 4)));
+      binaryData = binaryData.concat(Array.from(await this.keypair.exportPublicKey('oct')));
       binaryData = binaryData.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
       binaryData = binaryData.concat(Array.from(this.signature));
     }
@@ -97,7 +99,7 @@ export class BBcSignature{
 
     this.keyType =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
-    if (this.keyType === para.KeyType.NOT_INITIALIZED){
+    if (this.keyType === KeyType.NOT_INITIALIZED){
       return true;
     }
 
@@ -108,7 +110,8 @@ export class BBcSignature{
     if (valueLength > 0) {
       posStart = posEnd;
       posEnd = posEnd + (valueLength / 8);
-      this.pubkeyByte = _data.slice(posStart, posEnd);
+      this.keypair = new KeyPair();
+      this.keypair.setKeyPair('oct', null,  _data.slice(posStart, posEnd));
     }
 
     posStart = posEnd;
@@ -117,13 +120,9 @@ export class BBcSignature{
 
     if (valueLength > 0) {
       posStart = posEnd;
-      posEnd = posEnd + (valueLength / 8 );
+      posEnd = posEnd + (valueLength / 8);
       this.signature = _data.slice(posStart, posEnd);
-    }
-
-    if (this.pubkeyByte.length > 0 && this.signature.length > 0){
-      //65byteの鍵形式からJwkへ変換してinput
-      await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkeyByte, 'P-256'));
+      await this.addSignatureAndPublicKey(this.signature,null);
     }
 
     return true;

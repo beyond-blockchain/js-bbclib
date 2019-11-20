@@ -8,10 +8,12 @@ export class BBcAssetHash{
   /**
    *
    * constructor
-   * @param {Object} idsLengthConf
+   * @param {Array<Uint8Array>} assetIds
+   * @param {Number} version
+   * @param {Object} idsLength
    */
-  constructor(assetIds, version=2.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(assetIds, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     this.assetIds = [];
     this.setAssetIds(assetIds);

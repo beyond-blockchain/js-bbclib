@@ -14,10 +14,10 @@ export class BBcReference{
    * @param {BBcTransaction} refTransaction
    * @param {Number} eventIndexInRef
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
-  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, version=1.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(assetGroupId, transaction, refTransaction, eventIndexInRef, version=1.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     this.assetGroupId = cloneDeep(assetGroupId);
     this.transactionId = new Uint8Array(this.idsLength.transactionId);

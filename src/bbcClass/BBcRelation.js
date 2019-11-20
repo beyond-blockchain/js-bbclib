@@ -12,12 +12,12 @@ export class BBcRelation{
    *
    * constructor
    * @param {Uint8Array} assetGroupId
-   * @param {Object} idsLengthConf
    * @param {Number} version
+   * @param {Object} idsLength
    */
-  constructor(assetGroupId,  version=1, idsLengthConf=IDsLength) {
+  constructor(assetGroupId,  version=1, idsLength=IDsLength) {
     this.version = version;
-    this.setLength(idsLengthConf);
+    this.setLength(idsLength);
     if (assetGroupId !== null) {
       this.assetGroupId = cloneDeep(assetGroupId);
     } else {

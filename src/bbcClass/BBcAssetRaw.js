@@ -10,10 +10,10 @@ export class BBcAssetRaw{
    * @param {Uint8Array} assetId
    * @param {Uint8Array} assetBody
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
-  constructor(assetId, assetBody, version=2.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(assetId, assetBody, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     this.assetId = new Uint8Array(0);
     this.assetBody = new Uint8Array(0);

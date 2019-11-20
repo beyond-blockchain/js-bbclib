@@ -10,7 +10,7 @@ export class BBcCrossRef{
    * @param {Uint8Array} domainId
    * @param {Uint8Array} transactionId
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
   constructor(domainId, transactionId, version=1.0, idsLength=IDsLength) {
     this.domainId = domainId; // Uint8Array

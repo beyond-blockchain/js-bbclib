@@ -1,8 +1,3 @@
-export const DefaultLength = {
-  BBcSimple: 8,
-  BBcOne: 32
-};
-
 export const KeyType = {
   NOT_INITIALIZED: 0,
   ECDSA_SECP256k1: 1,

@@ -6,17 +6,11 @@ import jseu from 'js-encoding-utils';
 
 const expect = chai.expect;
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcCrossRef`, () => {
 
   it('pack and unpack', async () => {
-    // eslint-disable-next-line no-console
-    console.log('***********************');
-    // eslint-disable-next-line no-console
-    console.log('Test for BBcCrossRef Class');
-
     const crossRef = new BBcCrossRef(null, null);
     const domainId = new Uint8Array(8);
     for (let i = 0; i < 8; i++) {

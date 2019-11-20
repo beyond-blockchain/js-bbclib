@@ -4,7 +4,6 @@ import { BBcSignature } from './BBcSignature.js';
 import { BBcRelation } from './BBcRelation.js';
 import { BBcEvent } from './BBcEvent.js';
 import { BBcCrossRef } from './BBcCrossRef';
-import { KeyPair } from './KeyPair.js';
 import * as para from '../parameter.js';
 import * as helper from '../helper.js';
 import {getJscu} from '../env.js';
@@ -101,7 +100,7 @@ export class BBcTransaction {
    * @param {Array<BBcRelation>} _relation
    * @param {BBcWitness} _witness
    * @param {BBcCrossRef} _crossRef
-   * @return {Boolean}
+   * @return {BBcTransaction}
    */
   addParts(_event, _reference, _relation, _witness, _crossRef) {
     if (Array.isArray(_event)) {
@@ -137,19 +136,21 @@ export class BBcTransaction {
       this.crossRef = cloneDeep(_crossRef);
     }
 
-    return true;
+    return this;
   }
 
   /**
    *
    * set witness
    * @param {BBcWitness} _witness
+   * @return {BBcTransaction}
    */
   setWitness(_witness) {
     if (_witness !== null) {
       this.witness = cloneDeep(_witness);
       this.witness.transaction = this;
     }
+    return this;
   }
 
   /**
@@ -161,6 +162,7 @@ export class BBcTransaction {
     if (_event !== null){
       this.events.push(cloneDeep(_event));
     }
+    return this;
   }
 
   /**
@@ -172,6 +174,7 @@ export class BBcTransaction {
     if (_events !== null && Array.isArray(_events) ){
       this.events = cloneDeep(_events);
     }
+    return this;
   }
 
   /**
@@ -183,6 +186,7 @@ export class BBcTransaction {
     if(_reference !== null){
       this.references.push(cloneDeep(_reference));
     }
+    return this;
   }
 
   /**
@@ -191,11 +195,10 @@ export class BBcTransaction {
    * @param {Array<BBcReference>} _references
    */
   setReferences(_references) {
-    if (Array.isArray(_references)) {
-      if (_references.length > 0) {
-        this.references = cloneDeep(_references);
-      }
+    if (_references != null && Array.isArray(_references)) {
+      this.references = cloneDeep(_references);
     }
+    return this;
   }
 
   /**
@@ -207,6 +210,7 @@ export class BBcTransaction {
     if(_relation !== null){
       this.relations.push(cloneDeep(_relation));
     }
+    return this;
   }
 
   /**
@@ -215,11 +219,10 @@ export class BBcTransaction {
    * @param {Array<BBcRelation>} _relations
    */
   setRelations(_relations) {
-    if (Array.isArray(_relations)) {
-      if (_relations.length > 0) {
-        this.relations = cloneDeep(_relations);
-      }
+    if (_relations != null && Array.isArray(_relations)) {
+      this.relations = cloneDeep(_relations);
     }
+    return this;
   }
 
   /**
@@ -231,6 +234,7 @@ export class BBcTransaction {
     if (_crossRef !== null) {
       this.crossRef = cloneDeep(_crossRef);
     }
+    return this;
   }
 
   /**
@@ -241,6 +245,7 @@ export class BBcTransaction {
    */
   setSigIndex(_userId, _index){
     this.useridSigidxMapping[_userId] = _index;
+    return this;
   }
 
   /**
@@ -307,6 +312,7 @@ export class BBcTransaction {
    */
   addSignatureUsingIndex(_index, _signature) {
     this.signatures[_index] = cloneDeep(_signature);
+    return this;
   }
 
   /**
@@ -458,7 +464,7 @@ export class BBcTransaction {
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.signatures.length, 2)));
     for (let i = 0; i < this.signatures.length; i++) {
-      const packedData = this.signatures[i].pack();
+      const packedData = await this.signatures[i].pack();
       binaryData = binaryData.concat(Array.from(helper.hbo(packedData.length, 4)));
       binaryData = binaryData.concat(Array.from(packedData));
     }
@@ -611,34 +617,17 @@ export class BBcTransaction {
   /**
    *
    * sign transaction data
-   * @param {Number} _keyType
-   * @param {Uint8Array} _privateKey
-   * @param {Uint8Array} _publicKey
+   * @param {Uint8Array} _userId
    * @param {KeyPair} _keyPair
    * @return {BBcSignature}
    */
-  async sign(_keyType, _privateKey, _publicKey, _keyPair) {
-
-    if (_keyPair === null) {
-      if (_privateKey.length !== 32 || _publicKey.length <= 32) {
-
-        return null;
-      }
-
-      _keyPair = new KeyPair();
-      _keyPair.setKeyPair(_keyType, _privateKey, _publicKey);
-      if (_keyPair == null) {
-
-        return null;
-      }
-    }
-    const sig = new BBcSignature(para.KeyType.ECDSA_P256v1);
+  async sign(_userId, _keyPair) {
+    const sig = new BBcSignature(_keyPair.keyType);
     const s = await _keyPair.sign(await this.getTransactionBase());
     if (s === null) {
       return null;
     }
-    await sig.add(s, await _keyPair.exportPublicKey('jwk'));
-    return sig;
+    await sig.addSignatureAndPublicKey(s, await _keyPair.exportPublicKey('jwk'));
+    return this.addSignatureObject(_userId, sig);
   }
-
 }

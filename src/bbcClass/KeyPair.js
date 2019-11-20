@@ -1,11 +1,14 @@
 import {getJscu} from '../env.js';
+import {KeyType} from '../parameter';
 const jscu = getJscu();
 export class KeyPair{
   /**
    *
    * constructor
+   * @param {Number} _keyType
    */
-  constructor() {
+  constructor(_keyType=KeyType.ECDSA_P256v1) {
+    this.keyType = _keyType;
     this.privateKeyObj = null;
     this.publicKeyObj = null;
   }

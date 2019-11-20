@@ -8,15 +8,11 @@ import jseu from 'js-encoding-utils';
 import {IDsLength} from '../src/bbcClass/idsLength';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcPointer`, () => {
 
   it('pack and unpack', async () => {
-    console.log('***********************');
-    console.log('Test for BBcPointer Class');
-
     const transactionId = await jscu.random.getRandomBytes(32);
     const assetId = await jscu.random.getRandomBytes(32);
 

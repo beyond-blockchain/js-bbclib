@@ -12,10 +12,10 @@ export class BBcAsset{
    * constructor
    * @param {Uint8Array} userId
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
-  constructor(userId, version=2.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf); // dict
+  constructor(userId, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength); // dict
     this.version = version;
     this.setUserId(userId); // Uint8Array
     this.assetId = new Uint8Array(this.idsLength.assetId); // Uint8Array
@@ -63,7 +63,6 @@ export class BBcAsset{
    * set random nonce
    */
   async setRandomNonce() {
-
     this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
   }
 

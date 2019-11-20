@@ -1,12 +1,11 @@
 import chai from 'chai';
 import sampleKey  from './sampleKey.js';
-
+import {KeyPair} from '../src/bbcClass/KeyPair.js';
 const expect = chai.expect;
 
 import {getTestEnv} from './prepare.js';
 
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 const bits = ['1024', '2048'];
@@ -14,11 +13,8 @@ const bits = ['1024', '2048'];
 describe(`${envName}: Test KeyPair`, () => {
 
   it('sign and verify', async () => {
-    console.log('***********************');
-    console.log('Test for KeyPair Class.');
-
-    const keypair = new bbclib.KeyPair();
-    const ret = await keypair.generate();
+    const keypair = new KeyPair();
+    await keypair.generate();
     expect(keypair.publicKey).to.not.equal(null);
     expect(keypair.privateKey).to.not.equal(null);
 
@@ -35,7 +31,7 @@ describe(`${envName}: Test KeyPair`, () => {
 
   it('setKeyPair for pem format', async () => {
     const array = await Promise.all(bits.map(async (bitLen) => {
-      const keypair = new bbclib.KeyPair();
+      const keypair = new KeyPair();
       const ret = keypair.setKeyPair('pem', await sampleKey[bitLen].privateKey.pem, await sampleKey[bitLen].publicKey.pem);
       expect(ret).to.be.eq(true);
 
@@ -54,7 +50,7 @@ describe(`${envName}: Test KeyPair`, () => {
 
   it('setKeyPair for jwk format', async () => {
     const array = await Promise.all(bits.map(async (bitLen) => {
-      const keypair = new bbclib.KeyPair();
+      const keypair = new KeyPair();
       if(sampleKey[bitLen].privateKey.jwk == null || sampleKey[bitLen].publicKey.jwk == null){
         return '';
       }
@@ -75,7 +71,7 @@ describe(`${envName}: Test KeyPair`, () => {
 
   it('export keypair', async () => {
     const array = await Promise.all(bits.map(async (bitLen) => {
-      const keypair = new bbclib.KeyPair();
+      const keypair = new KeyPair();
       if(sampleKey[bitLen].privateKey.jwk == null || sampleKey[bitLen].publicKey.jwk == null){
         return '';
       }

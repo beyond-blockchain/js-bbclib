@@ -1,7 +1,7 @@
 import chai from 'chai';
 const expect = chai.expect;
 import {getTestEnv} from './prepare.js';
-import {getJscu, getJseu} from '../src/env.js';
+import {getJscu} from '../src/env.js';
 import * as helper from '../src/helper';
 import {IDsLength} from '../src/bbcClass/idsLength';
 import {BBcEvent} from '../src/bbcClass/BBcEvent';
@@ -9,15 +9,12 @@ import {BBcAsset} from '../src/bbcClass/BBcAsset';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcEvent`, () => {
 
 
   it('pack and unpack', async () => {
-    console.log('***********************');
-    console.log('Test for BBcEvent Class.');
 
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const event = new BBcEvent(assetGroupId,1.0, IDsLength);
@@ -39,7 +36,7 @@ describe(`${envName}: Test BBcEvent`, () => {
 
     event.setAsset(asset);
     event.setAssetGroupId(assetGroupId);
-    event.pushMandatoryApprover(userId);
+    event.addMandatoryApprover(userId);
 
     const eventBin = event.pack();
 
@@ -98,7 +95,7 @@ describe(`${envName}: Test BBcEvent`, () => {
 
     event.setAsset(asset);
     event.setAssetGroupId(assetGroupId);
-    event.pushMandatoryApprover(userId);
+    event.addMandatoryApprover(userId);
 
     const dump = event.dump();
 

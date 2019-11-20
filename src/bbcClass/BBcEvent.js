@@ -11,10 +11,10 @@ export class BBcEvent{
    * constructor
    * @param {Uint8Array} assetGroupId
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
-  constructor(assetGroupId, version=2.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(assetGroupId, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     this.assetGroupId = cloneDeep(assetGroupId.slice(0, this.idsLength.assetGroupId));
     this.referenceIndices = [];
@@ -76,17 +76,17 @@ export class BBcEvent{
 
   /**
    *
-   * push reference indices
-   * @param {Number} _referenceIndices
+   * add a reference indice
+   * @param {Number} _referenceIndice
    */
-  pushReferenceIndices(_referenceIndices) {
-    this.referenceIndices.push(cloneDeep(_referenceIndices));
+  addReferenceIndices(_referenceIndice) {
+    this.referenceIndices.push(cloneDeep(_referenceIndice));
   }
 
   /**
    *
    * set reference indices
-   * @param {Uint8Array} _mandatoryApprovers
+   * @param {Uint8Array} _referenceIndices
    */
   setReferenceIndices(_referenceIndices) {
     this.referenceIndices = cloneDeep(_referenceIndices);
@@ -94,10 +94,10 @@ export class BBcEvent{
 
   /**
    *
-   * push mandatory approvers
-   * @param {Uint8Array} _mandatoryApprovers
+   * add mandatory approvers
+   * @param {Uint8Array} _mandatoryApprover
    */
-  pushMandatoryApprover(_mandatoryApprover) {
+  addMandatoryApprover(_mandatoryApprover) {
     this.mandatoryApprovers.push(cloneDeep(_mandatoryApprover));
   }
 

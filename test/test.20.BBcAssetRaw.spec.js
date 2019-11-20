@@ -7,15 +7,11 @@ import {getTestEnv} from './prepare.js';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAssetRaw`, () => {
 
   it('pack and unpack', async () => {
-    console.log('***********************');
-    console.log('Test for BBcAssetRaw Class.');
-
     const assetId = await jscu.random.getRandomBytes(32);
     const assetBody = await jscu.random.getRandomBytes(512);
     const assetRaw = new BBcAssetRaw(assetId, assetBody, 2.0, IDsLength);

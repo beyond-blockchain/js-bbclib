@@ -10,10 +10,10 @@ export class BBcPointer{
    * @param {Uint8Array} transactionId
    * @param {Uint8Array} assetId
    * @param {Number} version
-   * @param {Object} idsLengthConf
+   * @param {Object} idsLength
    */
-  constructor(transactionId, assetId, version=2.0, idsLengthConf=IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(transactionId, assetId, version=2.0, idsLength=IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     if (transactionId != null) {
       this.transactionId = cloneDeep(transactionId.slice(0,this.idsLength.transactionId));

@@ -8,19 +8,15 @@ import {IDsLength} from '../src/bbcClass/idsLength';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAsset`, () => {
 
   it('pack and unpack with file and body', async () => {
-    console.log('***********************');
-    console.log('Test for BBcAsset Class.');
-
     const userId = await jscu.random.getRandomBytes(32);
     const asset = await helper.createAsset(userId);
     const assetBin = await asset.pack();
-    const assetUnpack = new bbclib.BBcAsset(userId, 1.0, IDsLength);
+    const assetUnpack = new BBcAsset(userId, 1.0, IDsLength);
     await assetUnpack.unpack(assetBin);
 
     expectUint8Array(asset.assetId,assetUnpack.assetId);
@@ -72,7 +68,7 @@ describe(`${envName}: Test BBcAsset`, () => {
     }
     assetBody[0] = 0x00;
 
-    const asset = new bbclib.BBcAsset(userId, 1.0, IDsLength);
+    const asset = new BBcAsset(userId, 1.0, IDsLength);
 
     const nonce = new Uint8Array(8);
     for (let i = 0; i < 8; i++) {

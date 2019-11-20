@@ -8,19 +8,13 @@ import {IDsLength} from '../src/bbcClass/idsLength';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcReference`, () => {
 
   it('pack and unpack', async () => {
-    console.log('***********************');
-    console.log('Test for BBcReference Class.');
-
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const transaction = await jscu.random.getRandomBytes(32);
-    const refTransaction  = await jscu.random.getRandomBytes(32);
-    const eventIndexInRef  = await jscu.random.getRandomBytes(32);
 
     const reference = new BBcReference(assetGroupId, transaction, null, 3, 1.0, IDsLength);
     await reference.prepareReference(reference.refTransaction);
@@ -43,9 +37,6 @@ describe(`${envName}: Test BBcReference`, () => {
 
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const transaction = await jscu.random.getRandomBytes(32);
-    const refTransaction  = await jscu.random.getRandomBytes(32);
-    const eventIndexInRef  = await jscu.random.getRandomBytes(32);
-
     const reference = new BBcReference(assetGroupId, transaction, null, 3, 1.0, IDsLength);
     await reference.prepareReference(reference.refTransaction);
     const referenceUnpack = new BBcReference(null, null, null, null, 1.0, IDsLength);

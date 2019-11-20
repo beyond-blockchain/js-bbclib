@@ -9,11 +9,10 @@ import {IDsLength} from './bbcClass/idsLength';
 
 const jscu = getJscu();
 
-
-export async function signAndAddSignature(transaction, keyPair) {
-  const sig = await transaction.sign(null, null, keyPair);
-  transaction.addSignatureObject(transaction.userId, sig);
-}
+// export async function signAndAddSignature(transaction, keyPair) {
+//   const sig = await transaction.sign(null, null, keyPair);
+//   transaction.addSignatureObject(transaction.userId, sig);
+// }
 
 export async function getNewTransaction(userId, eventNum, relationNum, witness, version=1.0, idsLength=IDsLength) {
 
@@ -131,3 +130,7 @@ export function concat(buf1, buf2) {
   tmp.set(new Uint8Array(buf2), buf1.length);
   return tmp;
 }
+
+export const typeOf = (obj) => {
+  return toString.call(obj).slice(8, -1).toLowerCase();
+};

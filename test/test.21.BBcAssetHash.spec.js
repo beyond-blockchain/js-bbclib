@@ -7,16 +7,10 @@ import {getTestEnv} from './prepare.js';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
-const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBcAssetHash`, () => {
-
-
   it('pack and unpack', async () => {
-    console.log('***********************');
-    console.log('Test for BBcAssetHash Class.');
-
     const assetId_1 = await jscu.random.getRandomBytes(32);
     const assetId_2 = await jscu.random.getRandomBytes(32);
     const assetId_3 = await jscu.random.getRandomBytes(32);

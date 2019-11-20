@@ -8,10 +8,11 @@ export class BBcWitness{
   /**
    *
    * constructor
-   * @param {Object} idsLengthConf
+   * @param {Number} version
+   * @param {Object} idsLength
    */
-  constructor(version=1.0, idsLengthConf = IDsLength) {
-    this.setLength(idsLengthConf);
+  constructor(version=1.0, idsLength = IDsLength) {
+    this.setLength(idsLength);
     this.version = version;
     this.transaction = null;
     this.userIds = [];
@@ -60,7 +61,6 @@ export class BBcWitness{
    *
    * add witness
    * @param {Uint8Array} _userId
-   * @param {Number} _keyType
    */
   addWitness(_userId) {
     let flag = false;
@@ -142,8 +142,6 @@ export class BBcWitness{
     }
     return false;
   }
-
-
 
   /**
    *
