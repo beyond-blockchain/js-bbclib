@@ -47,7 +47,7 @@ export class BBcAssetRaw{
   /**
    *
    * set asset data
-   * @return {Boolean}
+   * @return {BBcAssetRaw}
    */
   setAsset(assetId, assetBody) {
     if (assetId !== null) {
@@ -58,7 +58,7 @@ export class BBcAssetRaw{
       this.assetBody = assetBody;
       this.assetBodySize = assetBody.length;
     }
-    return true;
+    return this;
   }
 
   /**

@@ -61,29 +61,35 @@ export class BBcAsset{
   /**
    *
    * set random nonce
+   * @return {BBcAsset}
    */
   async setRandomNonce() {
     this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
+    return this;
   }
 
   /**
    *
    * set nonce
    * @param {Uint8Array} _nonce
+   * @return {BBcAsset}
    */
   setNonce(_nonce) {
     this.nonce = _nonce;
+    return this;
   }
 
   /**
    *
    * set user id
    * @param {Uint8Array} _userId
+   * @return {BBcAsset}
    */
   setUserId(_userId) {
     if (_userId != null) {
       this.userId = cloneDeep(_userId);
     }
+    return this;
   }
 
   /**
@@ -91,18 +97,19 @@ export class BBcAsset{
    * set asset
    * @param {Uint8Array} _assetFile
    * @param {Uint8Array} _assetBody
-   * @returns {Boolean}
+   * @returns {BBcAsset}
    */
   async setAsset(_assetFile, _assetBody) {
-    this.setAssetBody(_assetBody);
-    this.setAssetFile(_assetFile);
-    return true;
+    await this.setAssetBody(_assetBody);
+    await this.setAssetFile(_assetFile);
+    return this;
   }
 
   /**
    *
    * set assetBody
    * @param {Uint8Array} _assetBody
+   * @returns {BBcAsset}
    */
   async setAssetBody(_assetBody) {
     if (_assetBody !== null) {
@@ -110,12 +117,14 @@ export class BBcAsset{
       this.assetBodySize = _assetBody.length;
     }
     await this.digest();
+    return this;
   }
 
   /**
    *
    * set assetFile
    * @param {Uint8Array} _assetFile
+   * @returns {BBcAsset}
    */
   async setAssetFile(_assetFile) {
     if (_assetFile !== null) {
@@ -123,6 +132,7 @@ export class BBcAsset{
       this.assetFileDigest = await jscu.hash.compute(_assetFile, 'SHA-256');
     }
     await this.digest();
+    return this;
   }
 
   /**
@@ -142,7 +152,7 @@ export class BBcAsset{
    * set asset id
    * @return {Uint8Array}
    */
-  async setAssetId() {
+  async addAssetId() {
     const target = this.getDigest();
     this.assetId = await jscu.hash.compute(target, 'SHA-256');
     return this.assetId;

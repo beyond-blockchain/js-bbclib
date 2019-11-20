@@ -68,6 +68,7 @@ export class BBcReference{
    *
    * prepare reference
    * @param {BBcTransaction} _refTransaction
+   * @return {BBcReference}
    */
   async prepareReference(_refTransaction) {
     if (_refTransaction == null){
@@ -108,6 +109,7 @@ export class BBcReference{
       //print(e);
     }
 
+    return this;
   }
 
   /**
@@ -115,6 +117,7 @@ export class BBcReference{
    * add signature
    * @param {Uint8Array} _userId
    * @param {Uint8Array} _signature
+   * @return {BBcReference}
    */
   addSignature(_userId, _signature) {
     if (_userId === true) {
@@ -124,6 +127,7 @@ export class BBcReference{
       _userId = this.optionSigIds.pop();
     }
     this.transaction.addSignatureObject(cloneDeep(_userId), cloneDeep(_signature));
+    return this;
   }
 
   /**

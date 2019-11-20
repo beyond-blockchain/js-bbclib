@@ -72,78 +72,95 @@ export class BBcEvent{
    */
   setAssetGroupId(_assetGroupId) {
     this.assetGroupId = cloneDeep(_assetGroupId.slice(0, this.idsLength.assetGroupId));
+    return this;
   }
 
   /**
    *
    * add a reference indice
    * @param {Number} _referenceIndice
+   * @return {BBcEvent}
    */
   addReferenceIndices(_referenceIndice) {
     this.referenceIndices.push(cloneDeep(_referenceIndice));
+    return this;
   }
 
   /**
    *
    * set reference indices
    * @param {Uint8Array} _referenceIndices
+   * @return {BBcEvent}
    */
   setReferenceIndices(_referenceIndices) {
     this.referenceIndices = cloneDeep(_referenceIndices);
+    return this;
   }
 
   /**
    *
    * add mandatory approvers
    * @param {Uint8Array} _mandatoryApprover
+   * @return {BBcEvent}
    */
   addMandatoryApprover(_mandatoryApprover) {
     this.mandatoryApprovers.push(cloneDeep(_mandatoryApprover));
+    return this;
   }
 
   /**
    *
    * set mandatory approvers
    * @param {Uint8Array} _mandatoryApprovers
+   * @return {BBcEvent}
    */
   setMandatoryApprovers(_mandatoryApprovers) {
     this.mandatoryApprovers = cloneDeep(_mandatoryApprovers);
+    return this;
   }
 
   /**
    *
    * set option approver num numuerator
    * @param {Number} _optionApproverNumNumerator
+   * @return {BBcEvent}
    */
   setOptionApproverNumNumerator(_optionApproverNumNumerator) {
     this.optionApproverNumNumerator = cloneDeep(_optionApproverNumNumerator);
+    return this;
   }
 
   /**
    *
    * set option approver num denominator
    * @param {Number} _optionApproverNumDenominator
+   * @return {BBcEvent}
    */
   setOptionApproverNumDenominator(_optionApproverNumDenominator) {
     this.optionApproverNumDenominator = cloneDeep(_optionApproverNumDenominator);
+    return this;
   }
 
   /**
    *
    * set option approver
    * @param {Number} _optionApprover
+   * @return {BBcEvent}
    */
   setOptionApprover(_optionApprover) {
     this.optionApprover = cloneDeep(_optionApprover);
+    return this;
   }
 
   /**
    *
    * set asset
    * @param {BBcAsset} _asset
+   * @return {BBcEvent}
    */
   setAsset(_asset) {
     this.asset = cloneDeep(_asset);
+    return this;
   }
 
   /**
@@ -157,6 +174,7 @@ export class BBcEvent{
     this.asset = new BBcAsset(userId, this.version, this.idsLength);
     await this.asset.setAssetBody(assetBody);
     await this.asset.setAssetFile(assetFile);
+    return this;
   }
 
   /**

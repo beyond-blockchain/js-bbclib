@@ -3,8 +3,6 @@ import {getTestEnv} from './prepare.js';
 import {getJscu} from '../src/env.js';
 import * as helper from '../src/helper';
 import {IDsLength} from '../src/bbcClass/idsLength';
-import {BBcWitness} from '../src/bbcClass/BBcWitness';
-import {loadTransaction} from "../src/utils";
 import jseu from "js-encoding-utils";
 const jscu = getJscu();
 const expect = chai.expect;

@@ -52,15 +52,18 @@ export class BBcWitness{
    *
    * set user ids
    * @param {Array<Uint8Array>} _userIds
+   * @return {BBcWitness}
    */
   setUserIds(_userIds){
     this.userIds = _userIds;
+    return this;
   }
 
   /**
    *
    * add witness
    * @param {Uint8Array} _userId
+   * @return {BBcWitness}
    */
   addWitness(_userId) {
     let flag = false;
@@ -74,6 +77,7 @@ export class BBcWitness{
       this.userIds.push(cloneDeep(_userId));
       this.sigIndices.push(this.transaction.getSigIndex(_userId));
     }
+    return this;
   }
 
   /**
@@ -81,9 +85,11 @@ export class BBcWitness{
    * add signature
    * @param {Uint8Array} _userId
    * @param {Uint8Array} _signature
+   * @return {BBcWitness}
    */
   addSignature(_userId, _signature) {
     this.transaction.addSignatureObject(cloneDeep(_userId), cloneDeep(_signature));
+    return this;
   }
 
   /**
@@ -91,56 +97,58 @@ export class BBcWitness{
    * add signature using index
    * @param {Uint8Array} _userId
    * @param {Uint8Array} _signature
+   * @return {BBcWitness}
    */
   addSignatureUsingIndex(_userId, _signature){
-
     for (let i = 0; i < this.userIds.length; i++){
       if(_userId.toString() === this.userIds[i].toString()){
         this.transaction.addSignatureUsingIndex(this.sigIndices[i], _signature);
-        return true;
+        return this;
       }
     }
 
-    return false;
+    return this;
   }
 
   /**
    *
    * set signature index
+   * @return {BBcWitness}
    */
   setSigIndex(){
     if(this.transaction === null || this.userIds.length === 0){
-      return ;
+      return this;
     }
     for (let i = 0; i < this.userIds.length; i++){
       this.transaction.setSigIndex(this.userIds[i], this.sigIndices[i]);
     }
+    return this;
   }
 
   /**
    *
    * add user id
    * @param {Uint8Array} _userId
+   * @return {BBcWitness}
    */
   addUserId(_userId) {
     if (_userId != null) {
       this.userIds.push(cloneDeep(_userId));
-      return true;
     }
-    return false;
+    return this;
   }
 
   /**
    *
    * add signature indices
    * @param {Number} _index
+   * @return {BBcWitness}
    */
   addSigIndices(_index) {
     if (_index != null) {
       this.sigIndices.push(cloneDeep(_index));
-      return true;
     }
-    return false;
+    return this;
   }
 
   /**

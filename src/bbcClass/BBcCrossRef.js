@@ -44,19 +44,23 @@ export class BBcCrossRef{
   /**
    *
    * set domain id
-   * @return {Uint8Array} _domain
+   * @param {Uint8Array} _domain
+   * @return {BBcCrossRef}
    */
   setDomainId(_domainId) {
     this.domainId = cloneDeep(_domainId);
+    return this;
   }
 
   /**
    *
    * set transaction id
-   * @return {Uint8Array} _transactionId
+   * @param {Uint8Array} _transactionId
+   * @return {BBcCrossRef}
    */
   setTransactionId(_transactionId) {
     this.transactionId = cloneDeep(_transactionId);
+    return this;
   }
 
   /**

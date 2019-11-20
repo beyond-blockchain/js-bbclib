@@ -62,23 +62,27 @@ export class BBcPointer{
    *
    * set transaction id
    * @param {Object} _transactionId
+   * @return {BBcPointer}
    */
   setTransactionId(_transactionId) {
     this.transactionId = cloneDeep(_transactionId.slice(0,this.idsLength.transactionId));
+    return this;
   }
 
   /**
    *
    * set asset id
    * @param {Uint8Array} _assetId
+   * @return {BBcPointer}
    */
   setAssetId(_assetId) {
     this.assetId = cloneDeep(_assetId.slice(0, this.idsLength.assetId));
-    if(_assetId != null) {
+    if(_assetId) {
       this.assetIdExistence = 1;
     } else {
       this.assetIdExistence = 0;
     }
+    return this;
   }
 
   /**

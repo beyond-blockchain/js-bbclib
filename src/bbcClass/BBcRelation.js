@@ -52,54 +52,86 @@ export class BBcRelation{
    *
    * set asset
    * @param {BBcAsset} _asset
+   * @return {BBcRelation}
    */
   setAsset(_asset) {
     this.asset = cloneDeep(_asset);
+    return this;
   }
 
   /**
    *
    * set asset group id
    * @param {Uint8Array} _assetGroupId
+   * @return {BBcRelation}
    */
   setAssetGroupId(_assetGroupId) {
     this.assetGroupId = cloneDeep(_assetGroupId);
+    return this;
   }
 
   /**
    *
    * set assetRaw
    * @param {BBcAssetRaw} _assetRaw
+   * @return {BBcRelation}
    */
   setAssetRaw(_assetRaw) {
     if(this.version >= 2){
       this.assetRaw = cloneDeep(_assetRaw);
     }
+    return this;
   }
 
+  /**
+   *
+   * create assetRaw
+   * @param {Uint8Array} assetId
+   * @param {Uint8Array} assetBody
+   * @return {BBcRelation}
+   */
   createAssetRaw(assetId, assetBody){
     this.assetRaw = new BBcAssetRaw(assetId, assetBody, this.version, this.idsLength);
+    return this;
   }
 
+  /**
+   *
+   * create assetHash
+   * @param {Array<Uint8Array>} assetIds
+   * @return {BBcRelation}
+   */
   createAssetHash(assetIds){
     this.assetHash = new BBcAssetHash(assetIds, this.version, this.idsLength);
+    return this;
   }
 
   /**
    *
    * set assetHash
    * @param {BBcAssetHash} _assetHash
+   * @return {BBcRelation}
    */
   setAssetHash(_assetHash) {
     if(this.version >= 2){
       this.assetHash = cloneDeep(_assetHash);
     }
+    return this;
   }
 
+  /**
+   *
+   * crete asset
+   * @param {Uint8Array} userId
+   * @param {Uint8Array} assetBody
+   * @param {Uint8Array} assetFile
+   * @return {BBcRelation}
+   */
   async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0)){
     this.asset = new BBcAsset(userId,this.version, this.idsLength);
     await this.asset.setAssetFile(assetFile);
     await this.asset.setAssetBody(assetBody);
+    return this;
   }
 
 

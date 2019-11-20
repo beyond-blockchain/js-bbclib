@@ -37,6 +37,7 @@ export class BBcAssetHash{
     for(let i = 0; i < _assetIds.length; i++){
       this.assetIds.push(_assetIds[i].slice(0, this.idsLength.assetId));
     }
+    return this;
   }
 
   /**
@@ -58,11 +59,11 @@ export class BBcAssetHash{
    *
    * add asset id
    * @param {Uint8Array} _assetId
-   * @return {Boolean}
+   * @return {BBcAssetHash}
    */
   addAssetId(_assetId) {
     this.assetIds.push(cloneDeep(_assetId));
-    return true;
+    return this;
   }
 
   /**

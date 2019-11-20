@@ -43,9 +43,6 @@ export const loadTransaction = async (_transactionBin, _version=2.0, _idsLength=
 };
 
 
-export const createKeypair = () => {
-  return new KeyPair();
-};
-
+export const createKeypair = () => new KeyPair();
 
 export default { makeTransaction, loadTransaction, createKeypair };

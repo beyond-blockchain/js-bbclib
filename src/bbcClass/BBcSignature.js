@@ -43,6 +43,7 @@ export class BBcSignature{
    * add signature and jwt public key
    * @param {Uint8Array} _signature
    * @param {Object} _pubKey
+   * @return {BBcSignature}
    */
   async addSignatureAndPublicKey(_signature, _pubKey) {
     if (_signature != null) {
@@ -53,17 +54,19 @@ export class BBcSignature{
       this.keypair = new KeyPair();
       this.keypair.setKeyPair('jwk', null, cloneDeep(_pubKey));
     }
-    return true;
+    return this;
   }
 
   /**
    *
    * set signature
    * @param {Uint8Array} _signature
+   * @return {BBcSignature}
    */
   setSignature(_signature) {
     this.notInitialized = false;
     this.signature = cloneDeep(_signature);
+    return this;
   }
 
   /**
