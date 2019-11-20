@@ -40,21 +40,26 @@ export class BBcAsset{
   /**
    *
    * get dump data
+   * @param {number} intentNum
    * @return String
    */
-  dump() {
-    let dump = '--Asset--\n';
-    if (this.assetId != null) {
-      dump += `assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
     }
-    dump += `userId: ${jseu.encoder.arrayBufferToHexString(this.userId)}\n`;
-    dump += `nonce: ${jseu.encoder.arrayBufferToHexString(this.nonce)}\n`;
-    dump += `assetFileSize: ${this.assetFileSize}\n`;
-    dump += `assetFileDigest: ${jseu.encoder.arrayBufferToHexString(this.assetFileDigest)}\n`;
-    dump += `assetBodyType: ${this.assetBodyType}\n`;
-    dump += `assetBodySize: ${this.assetBodySize}\n`;
-    dump += `assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
-    dump += '--end Asset--\n';
+    let dump = `${intent}--Asset--\n`;
+    if (this.assetId != null) {
+      dump += `${intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+    }
+    dump += `${intent}userId: ${jseu.encoder.arrayBufferToHexString(this.userId)}\n`;
+    dump += `${intent}nonce: ${jseu.encoder.arrayBufferToHexString(this.nonce)}\n`;
+    dump += `${intent}assetFileSize: ${this.assetFileSize}\n`;
+    dump += `${intent}assetFileDigest: ${jseu.encoder.arrayBufferToHexString(this.assetFileDigest)}\n`;
+    dump += `${intent}assetBodyType: ${this.assetBodyType}\n`;
+    dump += `${intent}assetBodySize: ${this.assetBodySize}\n`;
+    dump += `${intent}assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
+    dump += `${intent}--end Asset--\n`;
     return dump;
   }
 

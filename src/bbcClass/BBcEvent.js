@@ -28,30 +28,35 @@ export class BBcEvent{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Event--\n';
-    dump += `idsLength: ${this.idsLength} \n`;
-    dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
-    dump += `referenceIndices.length: ${this.referenceIndices.length}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Event--\n`;
+    dump += `${intent}idsLength: ${this.idsLength} \n`;
+    dump += `${intent}assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
+    dump += `${intent}referenceIndices.length: ${this.referenceIndices.length}\n`;
     for (let i = 0; i < this.referenceIndices.length; i++) {
-      dump += `referenceIndices[${i}]: ${this.referenceIndices[i]}\n`;
+      dump += `${intent}referenceIndices[${i}]: ${this.referenceIndices[i]}\n`;
     }
-    dump += `mandatoryApprovers.length: ${this.mandatoryApprovers.length}\n`;
+    dump += `${intent}mandatoryApprovers.length: ${this.mandatoryApprovers.length}\n`;
     for (let i = 0; i < this.mandatoryApprovers.length; i++) {
-      dump += `mandatoryApprovers[${i}]: ${jseu.encoder.arrayBufferToHexString(this.mandatoryApprovers[i])}\n`;
+      dump += `${intent}mandatoryApprovers[${i}]: ${jseu.encoder.arrayBufferToHexString(this.mandatoryApprovers[i])}\n`;
     }
-    dump += `optionApproverNumNumerator: ${this.optionApproverNumNumerator}\n`;
-    dump += `optionApproverNumDenominator: ${this.optionApproverNumDenominator}\n`;
-    dump += `optionApprovers.length: ${this.optionApprovers.length}\n`;
+    dump += `${intent}optionApproverNumNumerator: ${this.optionApproverNumNumerator}\n`;
+    dump += `${intent}optionApproverNumDenominator: ${this.optionApproverNumDenominator}\n`;
+    dump += `${intent}optionApprovers.length: ${this.optionApprovers.length}\n`;
     for (let i = 0; i < this.optionApprovers.length; i++) {
-      dump += `optionApprovers [${i}}]: ${this.optionApprovers[i]}\n`;
+      dump += `${intent}optionApprovers [${i}}]: ${this.optionApprovers[i]}\n`;
     }
     if (this.asset != null) {
-      dump += this.asset.dump();
+      dump += this.asset.dump(intentNum + 1);
     }
-    dump += '--end Event--';
+    dump += `${intent}--end Event--`;
     return dump;
 
   }

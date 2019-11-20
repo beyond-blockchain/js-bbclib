@@ -1,5 +1,6 @@
 import {getJscu} from '../env.js';
 import {KeyType} from '../parameter';
+import jseu from "js-encoding-utils";
 const jscu = getJscu();
 export class KeyPair{
   /**
@@ -11,6 +12,30 @@ export class KeyPair{
     this.keyType = _keyType;
     this.privateKeyObj = null;
     this.publicKeyObj = null;
+  }
+
+  /**
+   *
+   * get dump data
+   * @param {Number} intentNum
+   * @return {String}
+   */
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--KeyPair--\n`;
+    dump += `${intent}keyType: ${this.keyType}\n`;
+    if(this.privateKeyObj != null){
+      dump += `${intent}privateKey: ${jseu.encoder.arrayBufferToHexString(this.exportPrivateKey('oct'))}\n`;
+    }
+    if(this.publicKeyObj != null){
+      dump += `${intent}publicKey: ${jseu.encoder.arrayBufferToHexString(this.exportPublicKey('oct'))}\n`;
+    }
+
+    dump += `${intent}--end KeyPair--`;
+    return dump;
   }
 
   /**

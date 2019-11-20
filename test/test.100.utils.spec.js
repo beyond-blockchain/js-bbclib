@@ -56,17 +56,15 @@ describe(`${envName}: Test BBclib`, () => {
     const assetBody = await jscu.random.getRandomBytes(32);
     const assetFile = await jscu.random.getRandomBytes(32);
     const transaction = await bbclib.makeTransaction(1, 4, true, 2.0, IDsLength);
-    transaction.events[0].setAssetGroupId(assetGroupId);
-    await transaction.events[0].createAsset(userId, assetBody, assetFile);
-    transaction.events[0].addMandatoryApprover(userId);
-    transaction.relations[0].setAssetGroupId(assetGroupId);
-    await transaction.relations[0].createAsset(userId, assetBody, assetFile);
-    transaction.relations[1].setAssetGroupId(assetGroupId);
-    await transaction.relations[1].createPointer(transactionId, assetId);
-    transaction.relations[2].setAssetGroupId(assetGroupId);
-    transaction.relations[2].createAssetRaw(assetId, assetBody);
-    transaction.relations[3].setAssetGroupId(assetGroupId);
-    transaction.relations[3].createAssetHash([assetId]);
+    await transaction.events[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile).then((event) => {
+      event.addMandatoryApprover(userId);
+    });
+    transaction.events[0].setAssetGroupId(assetGroupId).addMandatoryApprover(userId).createAsset(userId, assetBody, assetFile);
+    // console.log(transaction);
+    transaction.relations[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile);
+    transaction.relations[1].setAssetGroupId(assetGroupId).createPointer(transactionId, assetId);
+    transaction.relations[2].setAssetGroupId(assetGroupId).createAssetRaw(assetId, assetBody);
+    transaction.relations[3].setAssetGroupId(assetGroupId).createAssetHash([assetId]);
     transaction.witness.addWitness(userId);
     await transaction.sign(userId, keypair);
     transaction.setTransactionId();

@@ -22,13 +22,18 @@ export class BBcCrossRef{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--CrossRef--\n';
-    dump += `domainId: ${jseu.encoder.arrayBufferToHexString(this.domainId)}\n`;
-    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
-    dump += '--end CrossRef--\n';
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--CrossRef--\n`;
+    dump += `${intent}domainId: ${jseu.encoder.arrayBufferToHexString(this.domainId)}\n`;
+    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    dump += `${intent}--end CrossRef--\n`;
     return dump;
   }
 

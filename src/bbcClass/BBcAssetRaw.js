@@ -33,14 +33,19 @@ export class BBcAssetRaw{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--AssetRaw--\n';
-    dump += `assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
-    dump += `assetBodySize: ${this.assetBodySize}\n`;
-    dump += `assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
-    dump += '--end AssetRaw--\n';
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--AssetRaw--\n`;
+    dump += `${intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+    dump += `${intent}assetBodySize: ${this.assetBodySize}\n`;
+    dump += `${intent}assetBody: ${jseu.encoder.arrayBufferToHexString(this.assetBody)}\n`;
+    dump += `${intent}--end AssetRaw--\n`;
     return dump;
   }
 

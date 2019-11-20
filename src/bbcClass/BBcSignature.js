@@ -21,19 +21,24 @@ export class BBcSignature{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Signature--\n';
-    dump += `keyType: ${this.keyType}\n`;
-    dump += `signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Signature--\n`;
+    dump += `${intent}keyType: ${this.keyType}\n`;
+    dump += `${intent}signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
     if (this.keypair != null) {
       if (this.keypair.publicKeyObj != null){
-        dump += `pubkeyByte: ${jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct'))}\n`;
+        dump += `${intent}pubkey: ${jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct'))}\n`;
       }
-      dump += `keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump())}\n`;
+      dump += `${intent}keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump(intentNum + 1))}\n`;
     }
-    dump += '--end Signature--';
+    dump += `${intent}--end Signature--`;
     return dump;
 
   }

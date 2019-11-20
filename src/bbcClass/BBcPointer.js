@@ -36,16 +36,22 @@ export class BBcPointer{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Pointer--\n';
-    dump += `idsLength: ${this.idsLength} \n`;
-    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
-    if (this.assetId != null) {
-      dump += `assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
     }
-    dump += '--end Pointer--\n';
+    let dump = `${intent}--Pointer--\n`;
+    dump += `${intent}idsLength.transactionId: ${this.idsLength.transactionId} \n`;
+    dump += `${intent}idsLength.assetId: ${this.idsLength.assetId} \n`;
+    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    if (this.assetId != null) {
+      dump += `{intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+    }
+    dump += `${intent}--end Pointer--\n`;
     return dump;
   }
 

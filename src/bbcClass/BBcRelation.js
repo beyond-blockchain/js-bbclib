@@ -138,27 +138,32 @@ export class BBcRelation{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Relation--\n';
-    dump += `idsLength: ${this.idsLength} \n`;
-    dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
-    dump += `pointers.length: ${this.pointers.length}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Relation--\n`;
+    dump += `${intent}idsLength.assetGroupId: ${this.idsLength.assetGroupId} \n`;
+    dump += `${intent}assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
+    dump += `${intent}pointers.length: ${this.pointers.length}\n`;
     for (let i = 0; i < this.pointers.length; i++) {
-      dump += `pointers[${i}]: ${this.pointers[i].dump()}\n`;
+      dump += `${intent}pointers[${i}]: \n${this.pointers[i].dump(intentNum + 1)}\n`;
     }
     if (this.asset != null) {
-      dump += `asset: ${this.asset.dump()}\n`;
+      dump += `${intent}asset: \n${this.asset.dump(intentNum +1 )}\n`;
     }
 
     if (this.version > 1 && this.assetRaw !== null){
-      dump += `assetRaw: ${this.assetRaw.dump()}\n`;
+      dump += `${intent}assetRaw: \n${this.assetRaw.dump(intentNum +1)}\n`;
     }
     if (this.version > 1 && this.assetHash !== null){
-      dump += `assetHash: ${this.assetHash.dump()}\n`;
+      dump += `${intent}assetHash: \n${this.assetHash.dump(intentNum +1)}\n`;
     }
-    dump += '--end Relation--';
+    dump += `${intent}--end Relation--`;
     return dump;
   }
 

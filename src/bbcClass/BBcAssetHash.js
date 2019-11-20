@@ -43,15 +43,20 @@ export class BBcAssetHash{
   /**
    *
    * get dump data
+   *
    * @return {String}
    */
-  dump() {
-    let dump = '--AssetHash--\n';
-    dump += `assetIds.length: ${this.assetIds.length}`;
-    for (let i = 0; i < this.assetIds.length; i++) {
-      dump += `assetIds[${i}]: ${jseu.encoder.arrayBufferToHexString(this.assetIds[i])}`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
     }
-    dump += '--end AssetHash--\n';
+    let dump = `${intent}--AssetHash--\n`;
+    dump += `${intent}assetIds.length: ${this.assetIds.length}`;
+    for (let i = 0; i < this.assetIds.length; i++) {
+      dump += `${intent}assetIds[${i}]: ${jseu.encoder.arrayBufferToHexString(this.assetIds[i])}`;
+    }
+    dump += `${intent}--end AssetHash--\n`;
     return dump;
   }
 

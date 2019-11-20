@@ -40,53 +40,58 @@ export class BBcTransaction {
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Transaction--\n';
-    dump += `idsLength: ${this.idsLength}\n`;
-    dump += `version: ${this.version}\n`;
-    dump += `timestamp: ${this.timestamp}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Transaction--\n`;
+    dump += `${intent}idsLength: ${this.idsLength}\n`;
+    dump += `${intent}version: ${this.version}\n`;
+    dump += `${intent}timestamp: ${this.timestamp}\n`;
 
     if (this.events.length > 0) {
       for (let i = 0; i < this.events.length; i++) {
-        dump += `event[${i}]: ${this.events[i].dump()}\n`;
+        dump += `${intent}event[${i}]: ${this.events[i].dump(intentNum + 1)}\n`;
       }
     }
 
     if (this.references.length > 0) {
       for (let i = 0; i < this.references.length; i++) {
-        dump += `references[${i}]: ${this.references[i].dump()}\n`;
+        dump += `${intent}references[${i}]: ${this.references[i].dump(intentNum + 1)}\n`;
       }
     }
 
     if (this.relations.length > 0) {
       for (let i = 0; i < this.relations.length; i++) {
-        dump += `relations[${i}]: ${this.relations[i].dump()}\n`;
+        dump += `${intent}relations[${i}]: ${this.relations[i].dump(intentNum + 1)}\n`;
       }
     }
 
     if (this.witness !== null) {
-      dump += `witness: ${this.witness.dump()}\n`;
+      dump += `${intent}witness: ${this.witness.dump(intentNum + 1)}\n`;
     }
 
     if (this.crossRef !== null) {
-      dump += `crossRef: ${this.crossRef.dump()}\n`;
+      dump += `${intent}crossRef: ${this.crossRef.dump(intentNum + 1)}\n`;
     }
 
     if (this.signatures.length > 0) {
       for (let i = 0; i < this.signatures.length; i++) {
-        dump += `signatures[${i}]: ${this.signatures[i].dump()}\n`;
+        dump += `${intent}signatures[${i}]: ${this.signatures[i].dump(intentNum + 1)}\n`;
       }
     }
 
     Object.keys(this.useridSigidxMapping).forEach( (key) => {
-      dump += `${key}: ${this.useridSigidxMapping[key]}\n`;
+      dump += `${intent}${key}: ${this.useridSigidxMapping[key]}\n`;
     });
 
-    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
-    dump += `transactionBaseDigest: ${jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest)}\n`;
-    dump += '--end Transaction--';
+    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+    dump += `${intent}transactionBaseDigest: ${jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest)}\n`;
+    dump += `${intent}--end Transaction--`;
 
     return dump;
 

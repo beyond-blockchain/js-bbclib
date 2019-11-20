@@ -36,22 +36,27 @@ export class BBcReference{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump(){
-    let dump = '--Reference--\n';
-    dump += `idsLength: ${this.idsLength} \n`;
-    dump += `assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
-    dump += `transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Reference--\n`;
+    dump += `${intent}idsLength.assetGroupId: ${this.idsLength.assetGroupId} \n`;
+    dump += `${intent}assetGroupId: ${jseu.encoder.arrayBufferToHexString(this.assetGroupId)}\n`;
+    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
     if (this.transaction != null){
-      dump += this.transaction.dump();
+      dump += this.transaction.dump(intentNum + 1);
     }
-    dump += `eventIndexInRef: ${this.eventIndexInRef}\n`;
-    dump += `sigIndices.length: ${this.sigIndices.length}\n`;
+    dump += `${intent}eventIndexInRef: ${this.eventIndexInRef}\n`;
+    dump += `${intent}sigIndices.length: ${this.sigIndices.length}\n`;
     for (let i = 0; i < this.sigIndices.length; i++){
-      dump += `sigIndices[${i}]: ${this.sigIndices[i]}\n`;
+      dump += `${intent}sigIndices[${i}]: ${this.sigIndices[i]}\n`;
     }
-    dump += '--end Reference--\n';
+    dump += `${intent}--end Reference--\n`;
     return dump;
   }
 

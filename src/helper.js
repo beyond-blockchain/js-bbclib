@@ -9,11 +9,6 @@ import {IDsLength} from './bbcClass/idsLength';
 
 const jscu = getJscu();
 
-// export async function signAndAddSignature(transaction, keyPair) {
-//   const sig = await transaction.sign(null, null, keyPair);
-//   transaction.addSignatureObject(transaction.userId, sig);
-// }
-
 export async function getNewTransaction(userId, eventNum, relationNum, witness, version=1.0, idsLength=IDsLength) {
 
   const transaction = new BBcTransaction(version, idsLength);
@@ -64,7 +59,6 @@ export async function createAsset(userId, idsLength=IDsLength) {
   const assetFile = new Uint8Array(32);
   const assetBody = new Uint8Array(32);
   await bbcAsset.setAsset(assetFile, assetBody);
-
   return bbcAsset;
 }
 

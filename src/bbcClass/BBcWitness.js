@@ -22,20 +22,24 @@ export class BBcWitness{
   /**
    *
    * get dump data
+   * @param {Number} intentNum
    * @return {String}
    */
-  dump() {
-    let dump = '--Witness--\n';
-    // dump += `transaction: ${this.transaction.dump()}\n`;
-    dump += `userIds.length: ${this.userIds.length}\n`;
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
+    }
+    let dump = `${intent}--Witness--\n`;
+    dump += `${intent}userIds.length: ${this.userIds.length}\n`;
     for (let i = 0; i < this.userIds.length; i++) {
-      dump += `userIds[${i}]: ${jseu.encoder.arrayBufferToHexString(this.userIds[i])}\n`;
+      dump += `${intent}userIds[${i}]: ${jseu.encoder.arrayBufferToHexString(this.userIds[i])}\n`;
     }
-    dump += `sigIndices.length: ${this.sigIndices.length}\n`;
+    dump += `${intent}sigIndices.length: ${this.sigIndices.length}\n`;
     for (let i = 0; i < this.sigIndices.length; i++) {
-      dump += `sigIndices[${i}]: ${this.sigIndices[i]}\n`;
+      dump += `${intent}sigIndices[${i}]: ${this.sigIndices[i]}\n`;
     }
-    dump += '--end Witness--';
+    dump += `${intent}--end Witness--`;
     return dump;
   }
 
