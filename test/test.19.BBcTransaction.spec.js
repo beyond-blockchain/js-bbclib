@@ -536,7 +536,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await asset.setAsset(assetFile, assetBody);
 
     event.setAsset(asset);
-    event.setAssetGroupId(assetGroupId);
+    event.setAssetGroup(assetGroupId);
     event.addMandatoryApprover(userId);
 
     transaction.addParts([event], refs, [], null, null);
@@ -606,7 +606,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await asset.setAsset(assetFile, assetBody);
 
     event.setAsset(asset);
-    event.setAssetGroupId(assetGroupId);
+    event.setAssetGroup(assetGroupId);
     event.addMandatoryApprover(userId);
 
     transaction.addParts([event], refs, [], null, null);
@@ -748,11 +748,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     expect( jseu.encoder.arrayBufferToHexString(await transactionUnpack.signatures[0].keypair.exportPublicKey('oct'))).to.be.eq("045c0d6779546f198e8e4454263a0279bc8cd2df0607da638fd934020fa383c3c8c67065affc5395523e84e121287b7f2628c7762c817853192fe3fe08cce2756b");
     expect( jseu.encoder.arrayBufferToHexString(transactionUnpack.signatures[0].signature)).to.be.eq("96e1ed7b4c17720b683ba03fd2f1824f52c1cea921b3c1aac2894a8869f5380b58fb9c2dabcdca352013bb302df3aabb24647684ffa13931094d79c8d661ad8a")
-
-    await transactionUnpack.setTransactionId();
-
-    expect( jseu.encoder.arrayBufferToHexString(transactionUnpack.transactionId)).to.be.eq("78a07ce9ee51c3454e9a71c5b0930a85ed091389970f0804b110204c5ec8bdfe");
-
   });
 
   it('load transaction with relations ', async () => {
@@ -788,7 +783,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect( jseu.encoder.arrayBufferToHexString(transactionUnpack.signatures[0].signature)).to.be.eq("46c820b3f758bea877f108e7efda0ba76d1e4a4ac021dd8357dfe423537033f7172f35e23005d51c6011cd93c7d2100cc7cf713e05da3c41df96f1ebe957238c")
     expect( jseu.encoder.arrayBufferToHexString(await transactionUnpack.signatures[1].keypair.exportPublicKey('oct'))).to.be.eq("048d6ba60d212be64213662a08f7b2fe2ec70226b468e3bb1bfa22b6470ef041c1651e4d010a0f9139b06c775901d2cc41786029bd15e362dbe5ea6b7761aca2eb");
     expect( jseu.encoder.arrayBufferToHexString(transactionUnpack.signatures[1].signature)).to.be.eq("7b8157b97564a960df4f26b876b19a83a8f707f05398defa7ee844327e48d015f42ee9827d68ee77ad1617a55b90281037aa9104089a856c34cc6d45d8974748");
-    expect( jseu.encoder.arrayBufferToHexString(transactionUnpack.transactionId)).to.be.eq("2bb8d5690044d5105158ec1094458e5e2d2c6551f0452371a18ff89f68a430b0");
 
   });
 
@@ -821,9 +815,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(transactionUnpack.witness.sigIndices.length).to.be.eq(1);
     expect(transactionUnpack.signatures.length).to.be.eq(1);
     const serialize = await transactionUnpack.getTransactionBase();
-    await transactionUnpack.setTransactionId();
     expect(await transactionUnpack.signatures[0].verify(serialize)).to.be.eq(true);
-    expect(jseu.encoder.arrayBufferToHexString(transactionUnpack.transactionId)).to.be.eq("d79ee6a700717439f4a8ceb1bcd0409f3c4823f25869b41f");
   });
 
   it('load transaction with KeyType == 0 ', async () => {

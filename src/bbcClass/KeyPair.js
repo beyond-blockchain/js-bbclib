@@ -40,6 +40,28 @@ export class KeyPair{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    let privateKey;
+    let publicKey;
+    if(this.privateKeyObj != null){
+      privateKey = jseu.encoder.arrayBufferToHexString(this.exportPrivateKey('oct'));
+    }
+    if(this.publicKeyObj != null){
+      publicKey = jseu.encoder.arrayBufferToHexString(this.exportPublicKey('oct'));
+    }
+    const jsonData = {
+      keyType: this.keyType,
+      privateKey,
+      publicKey
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * generate key
    * @return {Boolean}
    */

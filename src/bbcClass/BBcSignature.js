@@ -44,6 +44,25 @@ export class BBcSignature{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    let keypair;
+    if (this.keypair !== null) {
+      keypair = this.keypair.dumpJSON();
+    }
+    const jsonData = {
+      keyType: this.keyType,
+      signature: jseu.encoder.arrayBufferToHexString(this.signature),
+      publicKey: jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct')),
+      keypair
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * add signature and jwt public key
    * @param {Uint8Array} _signature
    * @param {Object} _pubKey

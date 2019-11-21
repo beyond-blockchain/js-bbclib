@@ -62,6 +62,28 @@ export class BBcReference{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    let transaction;
+    if (this.transaction != null) {
+      transaction = this.transaction.dump();
+    }
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetGroupId: jseu.encoder.arrayBufferToHexString(this.assetGroupId),
+      transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId),
+      transaction,
+      eventIndexInRef: this.eventIndexInRef,
+      sigIndices: this.sigIndices
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * set length
    * @param {Object} _idsLength
    */

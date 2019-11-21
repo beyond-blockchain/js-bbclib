@@ -17,7 +17,7 @@ describe(`${envName}: Test BBcRelation`, () => {
     const transactionId = await jscu.random.getRandomBytes(32);
     const userId = await jscu.random.getRandomBytes(32);
     const relation = new BBcRelation(assetGroupId, 2.0, IDsLength);
-    relation.setAssetGroupId(new Uint8Array(8));
+    relation.setAssetGroup(new Uint8Array(8));
     const assetFile = new Uint8Array(32);
     for(let i = 0; i < 32; i++){
       assetFile[i] = 0xFF & i;

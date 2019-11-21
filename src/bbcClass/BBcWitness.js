@@ -45,6 +45,25 @@ export class BBcWitness{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const userIds = [];
+    for (let i = 0; i < this.userIds.length; i++) {
+      userIds.push(jseu.encoder.arrayBufferToHexString(this.userIds[i]));
+    }
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      userIds,
+      sigIndices: this.sigIndices
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * set length
    * @param {Object} _idsLength
    */

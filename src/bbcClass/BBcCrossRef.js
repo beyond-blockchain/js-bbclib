@@ -39,6 +39,22 @@ export class BBcCrossRef{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      domainId: jseu.encoder.arrayBufferToHexString(this.domainId),
+      transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId)
+    };
+    return jsonData;
+  }
+
+
+  /**
+   *
    * set length
    * @param {Object} _idsLength
    */

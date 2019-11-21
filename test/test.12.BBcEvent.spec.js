@@ -35,7 +35,7 @@ describe(`${envName}: Test BBcEvent`, () => {
     await asset.setAsset(assetFile, assetBody);
 
     event.setAsset(asset);
-    event.setAssetGroupId(assetGroupId);
+    event.setAssetGroup(assetGroupId);
     event.addMandatoryApprover(userId);
 
     const eventBin = event.pack();
@@ -94,7 +94,7 @@ describe(`${envName}: Test BBcEvent`, () => {
     await asset.setAsset(assetFile, assetBody);
 
     event.setAsset(asset);
-    event.setAssetGroupId(assetGroupId);
+    event.setAssetGroup(assetGroupId);
     event.addMandatoryApprover(userId);
 
     const dump = event.dump();

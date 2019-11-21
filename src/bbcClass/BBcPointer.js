@@ -57,6 +57,25 @@ export class BBcPointer{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    let assetId;
+    if (this.assetId != null) {
+      assetId = jseu.encoder.arrayBufferToHexString(this.assetId);
+    }
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId),
+      assetId
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * set length
    * @param {Object} _idsLength
    */

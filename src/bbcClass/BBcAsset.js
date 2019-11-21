@@ -65,6 +65,27 @@ export class BBcAsset{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetId: jseu.encoder.arrayBufferToHexString(this.assetId),
+      nonce: jseu.encoder.arrayBufferToHexString(this.nonce),
+      assetFile: jseu.encoder.arrayBufferToHexString(this.assetFile),
+      assetFileDigest: jseu.encoder.arrayBufferToHexString(this.assetFileDigest),
+      assetFileSize: this.assetFileSize,
+      assetBodyType: this.assetBodyType,
+      assetBodySize: this.assetBodySize,
+      assetBody: jseu.encoder.arrayBufferToHexString(this.assetBody)
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * set random nonce
    * @return {BBcAsset}
    */

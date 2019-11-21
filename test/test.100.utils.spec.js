@@ -1,9 +1,8 @@
 import chai from 'chai';
 import {getTestEnv} from './prepare.js';
 import {getJscu} from '../src/env.js';
-import * as helper from '../src/helper';
 import {IDsLength} from '../src/bbcClass/idsLength';
-import jseu from "js-encoding-utils";
+import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const expect = chai.expect;
 const env = getTestEnv();
@@ -14,23 +13,21 @@ describe(`${envName}: Test BBclib`, () => {
   it('makeTransaction with event and relation', async () => {
     const keypair = bbclib.createKeypair();
     await keypair.generate();
-    // const transaction = bbclib.makeTransaction(_relationNum, _eventNum, _witness, _version=2.0, _idsLength=IDsLength, _assetGroupId=new Uint8Array(0), _userId=new Uint8Array(0));
     const userId = await jscu.random.getRandomBytes(32);
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const assetBody = await jscu.random.getRandomBytes(32);
     const assetFile = await jscu.random.getRandomBytes(32);
     const transaction = await bbclib.makeTransaction(1, 1, true, 2.0, IDsLength);
-    transaction.events[0].setAssetGroupId(assetGroupId);
+    transaction.events[0].setAssetGroup(assetGroupId);
     await transaction.events[0].createAsset(userId, assetBody, assetFile);
     transaction.events[0].addMandatoryApprover(userId);
-    transaction.relations[0].setAssetGroupId(assetGroupId);
+    transaction.relations[0].setAssetGroup(assetGroupId);
     await transaction.relations[0].createAsset(userId, assetBody, assetFile);
     transaction.witness.addWitness(userId);
     await transaction.sign(userId, keypair);
-    transaction.setTransactionId();
 
     const transactionBin = await transaction.pack();
-    const transactionUnpack = await bbclib.loadTransaction(transactionBin , 2.0, IDsLength);
+    const transactionUnpack = await bbclib.loadTransactionBinary(transactionBin , 2.0, IDsLength);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
@@ -56,21 +53,20 @@ describe(`${envName}: Test BBclib`, () => {
     const assetBody = await jscu.random.getRandomBytes(32);
     const assetFile = await jscu.random.getRandomBytes(32);
     const transaction = await bbclib.makeTransaction(1, 4, true, 2.0, IDsLength);
-    await transaction.events[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile).then((event) => {
+    await transaction.events[0].setAssetGroup(assetGroupId).createAsset(userId, assetBody, assetFile).then((event) => {
       event.addMandatoryApprover(userId);
     });
-    transaction.events[0].setAssetGroupId(assetGroupId).addMandatoryApprover(userId).createAsset(userId, assetBody, assetFile);
+    transaction.events[0].setAssetGroup(assetGroupId).addMandatoryApprover(userId).createAsset(userId, assetBody, assetFile);
     // console.log(transaction);
-    transaction.relations[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile);
-    transaction.relations[1].setAssetGroupId(assetGroupId).createPointer(transactionId, assetId);
-    transaction.relations[2].setAssetGroupId(assetGroupId).createAssetRaw(assetId, assetBody);
-    transaction.relations[3].setAssetGroupId(assetGroupId).createAssetHash([assetId]);
-    transaction.witness.addWitness(userId);
+    transaction.relations[0].setAssetGroup(assetGroupId).createAsset(userId, assetBody, assetFile);
+    transaction.relations[1].setAssetGroup(assetGroupId).createPointer(transactionId, assetId);
+    transaction.relations[2].setAssetGroup(assetGroupId).createAssetRaw(assetId, assetBody);
+    transaction.relations[3].setAssetGroup(assetGroupId).createAssetHash([assetId]);
+    transaction.addWitness(userId);
     await transaction.sign(userId, keypair);
-    transaction.setTransactionId();
 
     const transactionBin = await transaction.pack();
-    const transactionUnpack = await bbclib.loadTransaction(transactionBin , 2.0, IDsLength);
+    const transactionUnpack = await bbclib.loadTransactionBinary(transactionBin , 2.0, IDsLength);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));

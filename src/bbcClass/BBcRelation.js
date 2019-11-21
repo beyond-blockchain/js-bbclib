@@ -65,7 +65,7 @@ export class BBcRelation{
    * @param {Uint8Array} _assetGroupId
    * @return {BBcRelation}
    */
-  setAssetGroupId(_assetGroupId) {
+  setAssetGroup(_assetGroupId) {
     this.assetGroupId = cloneDeep(_assetGroupId);
     return this;
   }
@@ -165,6 +165,41 @@ export class BBcRelation{
     }
     dump += `${intent}--end Relation--`;
     return dump;
+  }
+
+  /**
+   *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const pointers = [];
+    let asset;
+    let assetRaw;
+    let assetHash;
+    for (let i = 0; i < this.pointers.length; i++) {
+      pointers.push(this.pointers.dumpJSON());
+    }
+    if (this.asset !== null) {
+      asset = this.asset.dumpJSON();
+    }
+    if (this.version > 1 && this.assetRaw !== null){
+      assetRaw = this.assetRaw.dumpJSON();
+    }
+    if (this.version > 1 && this.assetHash !== null){
+      assetHash = this.assetHash.dumpJSON();
+    }
+
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetGroupId: jseu.encoder.arrayBufferToHexString(this.assetGroupId),
+      pointers,
+      asset,
+      assetHash,
+      assetRaw
+    };
+    return jsonData;
   }
 
   /**

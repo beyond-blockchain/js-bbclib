@@ -63,6 +63,42 @@ export class BBcEvent{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+
+    const mandatoryApprovers = [];
+    const optionApprovers = [];
+    let asset;
+    for (let i = 0; i < this.mandatoryApprovers.length; i++) {
+      mandatoryApprovers.push(jseu.encoder.arrayBufferToHexString(this.mandatoryApprovers[i]));
+    }
+
+    for (let i = 0; i < this.optionApprovers.length; i++) {
+      optionApprovers.push(jseu.encoder.arrayBufferToHexString(this.optionApprovers[i]));
+    }
+    if (this.asset != null) {
+      asset = this.asset.dumpJSON();
+    }
+
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetGroupId: jseu.encoder.arrayBufferToHexString(this.assetGroupId),
+      referenceIndices: this.referenceIndices,
+      mandatoryApprovers,
+      optionApproverNumNumerator: this.optionApproverNumNumerator,
+      optionApproverNumDenominator: this.optionApproverNumDenominator,
+      optionApprovers,
+      asset
+    };
+    return jsonData;
+  }
+
+
+  /**
+   *
    * set length
    * @param {Object} _idsLength
    */
@@ -75,7 +111,7 @@ export class BBcEvent{
    * set asset group id
    * @param {Uint8Array} _assetGroupId
    */
-  setAssetGroupId(_assetGroupId) {
+  setAssetGroup(_assetGroupId) {
     this.assetGroupId = cloneDeep(_assetGroupId.slice(0, this.idsLength.assetGroupId));
     return this;
   }

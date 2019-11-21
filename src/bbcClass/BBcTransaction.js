@@ -32,7 +32,7 @@ export class BBcTransaction {
     this.crossRef = null;
     this.signatures = [];
     this.useridSigidxMapping = {};
-    this.transactionId = new Uint8Array(0);
+
     this.transactionBaseDigest = new Uint8Array(0);
     this.targetSerialize = null;
   }
@@ -89,11 +89,75 @@ export class BBcTransaction {
       dump += `${intent}${key}: ${this.useridSigidxMapping[key]}\n`;
     });
 
-    dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
+
     dump += `${intent}transactionBaseDigest: ${jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest)}\n`;
     dump += `${intent}--end Transaction--`;
 
     return dump;
+
+  }
+
+  /**
+   *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+
+    const events = [];
+    const references = [];
+    const relations = [];
+    let witness = null;
+    let crossRef = null;
+    const signatures = {};
+    const useridSigidxMapping = {};
+
+    if (this.events.length > 0) {
+      for (let i = 0; i < this.events.length; i++) {
+        events.push(this.events[i].dumpJSON());
+      }
+    }
+
+    if (this.references.length > 0) {
+      for (let i = 0; i < this.references.length; i++) {
+        references.push(this.references[i].dumpJSON());
+      }
+    }
+
+    if (this.relations.length > 0) {
+      for (let i = 0; i < this.relations.length; i++) {
+        relations.push(this.relations[i].dumpJSON());
+      }
+    }
+
+    if (this.witness !== null) {
+      witness = this.witness.dumpJSON();
+    }
+
+    if (this.crossRef !== null) {
+      crossRef = this.crossRef.dumpJSON();
+    }
+
+    if (this.signatures.length > 0) {
+      for (let i = 0; i < this.signatures.length; i++) {
+        signatures.push(this.signatures[i].dumpJSON())
+      }
+    }
+
+    const jsonData = {
+          idsLength: this.idsLength,
+          version: this.version,
+          timestamp: this.timestamp,
+          events,
+          references,
+          relations,
+          witness,
+          crossRef,
+          signatures,
+          useridSigidxMapping: this.useridSigidxMapping
+        };
+
+    return jsonData;
 
   }
 
@@ -154,6 +218,19 @@ export class BBcTransaction {
     if (_witness !== null) {
       this.witness = cloneDeep(_witness);
       this.witness.transaction = this;
+    }
+    return this;
+  }
+
+  /**
+   *
+   * add witness
+   * @param {Uint8Array} _userId
+   * @return {BBcTransaction}
+   */
+  addWitness(_userId) {
+    if (_userId !== null) {
+      this.witness.addWitness(_userId)
     }
     return this;
   }
@@ -358,15 +435,11 @@ export class BBcTransaction {
     return new Uint8Array(binaryData);
   }
 
-  /**
-   *
-   * set transaction id
-   * @return {Uint8Array}
-   */
-  async setTransactionId() {
-    const digest = await this.digest();
-    this.transactionId = digest.slice(0, this.idsLength.transactionId);
-    return this.transactionId;
+  async getTransactionId() {
+    this.targetSerialize = await this.getDigestForTransactionId();
+    this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
+    const id = await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
+    return id.slice(0, this.idsLength.transactionId);
   }
 
   /**
@@ -615,7 +688,7 @@ export class BBcTransaction {
         this.signatures.push(sig);
       }
     }
-    await this.setTransactionId();
+
     return true;
   }
 

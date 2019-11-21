@@ -43,9 +43,15 @@ export const makeTransaction = async ( _eventNum, _relationNum, _witness, _versi
  * @param {Object} _idsLength
  * @return {BBcTransaction}
  */
-export const loadTransaction = async (_transactionBin, _version=2.0, _idsLength=IDsLength) => {
+export const loadTransactionBinary = async (_transactionBin, _version=2.0, _idsLength=IDsLength) => {
   const transaction = new BBcTransaction(_version, _idsLength);
   await transaction.unpack(_transactionBin);
+  return transaction;
+};
+
+export const loadTransactionJSON = async (_transactionJSON, _version=2.0, _idsLength=IDsLength) => {
+  const transaction = new BBcTransaction(_version, _idsLength);
+  await transaction.unpack(_transactionJSON);
   return transaction;
 };
 
@@ -56,4 +62,4 @@ export const loadTransaction = async (_transactionBin, _version=2.0, _idsLength=
  */
 export const createKeypair = () => new KeyPair();
 
-export default { makeTransaction, loadTransaction, createKeypair };
+export default { makeTransaction, loadTransactionBinary, loadTransactionJSON, createKeypair };

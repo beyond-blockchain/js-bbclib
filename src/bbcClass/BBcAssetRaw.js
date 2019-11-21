@@ -51,6 +51,22 @@ export class BBcAssetRaw{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetId: jseu.encoder.arrayBufferToHexString(this.assetId),
+      assetBody: jseu.encoder.arrayBufferToHexString(this.assetBody),
+      assetSize: this.assetBodySize
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * set asset data
    * @return {BBcAssetRaw}
    */

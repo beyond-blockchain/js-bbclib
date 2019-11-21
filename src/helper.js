@@ -19,7 +19,7 @@ export async function getNewTransaction(userId, eventNum, relationNum, witness, 
       ast.addUserId(userId);
       await ast.digest();
       evt.setAsset(ast);
-      evt.setAssetGroupId(new Uint8Array(8));
+      evt.setAssetGroup(new Uint8Array(8));
       transaction.addEvent(evt);
     }
   }

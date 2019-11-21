@@ -62,6 +62,24 @@ export class BBcAssetHash{
 
   /**
    *
+   * get dump json data
+   * @return {Object}
+   */
+  dumpJSON() {
+    const assetIds = [];
+    for (let i = 0; i < this.assetIds.length; i++) {
+      assetIds.push(jseu.encoder.arrayBufferToHexString(this.assetIds[i]));
+    }
+    const jsonData = {
+      idsLength: this.idsLength,
+      version: this.version,
+      assetIds,
+    };
+    return jsonData;
+  }
+
+  /**
+   *
    * add asset id
    * @param {Uint8Array} _assetId
    * @return {BBcAssetHash}
