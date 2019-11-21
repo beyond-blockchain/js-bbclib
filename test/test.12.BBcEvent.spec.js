@@ -12,8 +12,6 @@ const env = getTestEnv();
 const envName = env.envName;
 
 describe(`${envName}: Test BBcEvent`, () => {
-
-
   it('pack and unpack', async () => {
 
     const assetGroupId = await jscu.random.getRandomBytes(32);
@@ -42,6 +40,66 @@ describe(`${envName}: Test BBcEvent`, () => {
 
     const eventUnpack = new BBcEvent(assetGroupId,1.0, IDsLength);
     eventUnpack.unpack(eventBin);
+
+    expectUint8Array(event.assetGroupId,eventUnpack.assetGroupId);
+    if (event.referenceIndices.length > 0) {
+      for (let i = 0; i < event.referenceIndices.length; i++) {
+        expectUint8Array(event.referenceIndices[i], eventUnpack.referenceIndices[i]);
+      }
+    }
+    if (event.mandatoryApprovers.length > 0){
+      for (let i = 0; i < event.mandatoryApprovers.length; i++ ) {
+        expectUint8Array(event.mandatoryApprovers[i], eventUnpack.mandatoryApprovers[i]);
+      }
+    }
+    expect(event.optionApproverNumNumerator).to.be.eq(eventUnpack.optionApproverNumNumerator);
+    expect(event.optionApproverNumDenominator).to.be.eq(eventUnpack.optionApproverNumDenominator);
+    if (event.optionApprovers.length > 0){
+      for (let i = 0; i < event.optionApprovers.length; i++ ){
+        expectUint8Array(event.optionApprovers[i], eventUnpack.optionApprovers[i]);
+      }
+    }
+
+    expectUint8Array(event.asset.assetId,eventUnpack.asset.assetId);
+    expectUint8Array(event.asset.userId,eventUnpack.asset.userId);
+    expectUint8Array(event.asset.nonce,eventUnpack.asset.nonce);
+    expectUint8Array(event.asset.assetFileDigest,eventUnpack.asset.assetFileDigest);
+    expectUint8Array(event.asset.assetBody,eventUnpack.asset.assetBody);
+
+    expect(event.asset.assetFileSize).to.be.eq(eventUnpack.asset.assetFileSize);
+    expect(event.asset.assetBodyType).to.be.eq(eventUnpack.asset.assetBodyType);
+    expect(event.asset.assetBodySize).to.be.eq(eventUnpack.asset.assetBodySize);
+
+  });
+
+  it('dumpJSON and loadJSON', async () => {
+
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const event = new BBcEvent(assetGroupId,1.0, IDsLength);
+    const userId = await jscu.random.getRandomBytes(32);
+    const assetFile = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetFile[i] = 0xFF & i;
+    }
+
+    const assetBody = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetBody[i] = 0xFF & (i + 32);
+    }
+
+    const asset = new BBcAsset(userId, 1.0, IDsLength);
+    await asset.setRandomNonce();
+
+    await asset.setAsset(assetFile, assetBody);
+
+    event.setAsset(asset);
+    event.setAssetGroup(assetGroupId);
+    event.addMandatoryApprover(userId);
+
+    const eventJSON = event.dumpJSON();
+
+    const eventUnpack = new BBcEvent(assetGroupId,1.0, IDsLength);
+    eventUnpack.loadJSON(eventJSON);
 
     expectUint8Array(event.assetGroupId,eventUnpack.assetGroupId);
     if (event.referenceIndices.length > 0) {

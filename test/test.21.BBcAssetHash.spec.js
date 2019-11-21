@@ -26,6 +26,22 @@ describe(`${envName}: Test BBcAssetHash`, () => {
     expectUint8Array(assetHash.assetIds[2],assetHashUnpack.assetIds[2]);
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const assetId_1 = await jscu.random.getRandomBytes(32);
+    const assetId_2 = await jscu.random.getRandomBytes(32);
+    const assetId_3 = await jscu.random.getRandomBytes(32);
+    const assetIds= [assetId_1, assetId_2, assetId_3];
+
+    const assetHash = new BBcAssetHash(assetIds, 2.0, IDsLength);
+    const assetHashJSON = assetHash.dumpJSON();
+    const assetHashUnpack = new BBcAssetHash([], 2.0, IDsLength);
+    await assetHashUnpack.loadJSON(assetHashJSON);
+
+    expectUint8Array(assetHash.assetIds[0],assetHashUnpack.assetIds[0]);
+    expectUint8Array(assetHash.assetIds[1],assetHashUnpack.assetIds[1]);
+    expectUint8Array(assetHash.assetIds[2],assetHashUnpack.assetIds[2]);
+  });
+
   it('dump', async () => {
     const assetId_1 = await jscu.random.getRandomBytes(32);
     const assetId_2 = await jscu.random.getRandomBytes(32);

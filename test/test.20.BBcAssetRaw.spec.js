@@ -26,6 +26,21 @@ describe(`${envName}: Test BBcAssetRaw`, () => {
     expect( assetRaw.assetBodySize,assetRawUnpack.assetBodySize);
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const assetId = await jscu.random.getRandomBytes(32);
+    const assetBody = await jscu.random.getRandomBytes(512);
+    const assetRaw = new BBcAssetRaw(assetId, assetBody, 2.0, IDsLength);
+    assetRaw.setAsset(assetId, assetBody);
+    const assetRawJSON = assetRaw.dumpJSON();
+
+    const assetRawUnpack = new BBcAssetRaw(null, null, 2.0, IDsLength);
+    await assetRawUnpack.loadJSON(assetRawJSON);
+
+    expectUint8Array(assetRaw.assetId,assetRawUnpack.assetId);
+    expectUint8Array(assetRaw.assetBody,assetRawUnpack.assetBody);
+    expect( assetRaw.assetBodySize,assetRawUnpack.assetBodySize);
+  });
+
   it('dump', async () => {
     const assetId = await jscu.random.getRandomBytes(32);
     const assetBody = await jscu.random.getRandomBytes(512);

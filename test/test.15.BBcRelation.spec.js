@@ -48,6 +48,41 @@ describe(`${envName}: Test BBcRelation`, () => {
     expect( relation.asset.assetBodyType).to.be.eq(relationUnpack.asset.assetBodyType);
   });
 
+  it('dumpJSON and loadJSON for asset', async () => {
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const transactionId = await jscu.random.getRandomBytes(32);
+    const userId = await jscu.random.getRandomBytes(32);
+    const relation = new BBcRelation(assetGroupId, 2.0, IDsLength);
+    relation.setAssetGroup(new Uint8Array(8));
+    const assetFile = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetFile[i] = 0xFF & i;
+    }
+    const assetBody = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetBody[i] = 0xFF & (i + 32);
+    }
+    await relation.createAsset(userId, assetBody, assetFile);
+    relation.createPointer(transactionId, assetGroupId);
+
+    const relationJSON = relation.dumpJSON();
+    const relationUnpack = new BBcRelation(null, 2.0, IDsLength);
+    relationUnpack.loadJSON(relationJSON);
+
+    expect( relation.version).to.be.eq(relationUnpack.version);
+    expectUint8Array(relation.assetGroupId,relationUnpack.assetGroupId);
+
+    expectUint8Array(relation.pointers[0].transactionId,relationUnpack.pointers[0].transactionId);
+    expectUint8Array(relation.pointers[0].assetId,relationUnpack.pointers[0].assetId);
+    
+    expectUint8Array(relation.asset.nonce,relationUnpack.asset.nonce);
+    expectUint8Array(relation.asset.assetFileDigest,relationUnpack.asset.assetFileDigest);
+    expectUint8Array(relation.asset.assetBody,relationUnpack.asset.assetBody);
+
+    expect( relation.asset.assetBodySize).to.be.eq(relationUnpack.asset.assetBodySize);
+    expect( relation.asset.assetBodyType).to.be.eq(relationUnpack.asset.assetBodyType);
+  });
+
   it('BBcRelation pack and unpack for asset raw', async () => {
     const assetGroupId = await jscu.random.getRandomBytes(32);
     const relation = new BBcRelation(assetGroupId, 2.0, IDsLength);
@@ -66,7 +101,26 @@ describe(`${envName}: Test BBcRelation`, () => {
     expectUint8Array(relation.assetRaw.assetId,relationUnpack.assetRaw.assetId);
     expect(relation.assetRaw.assetBodySize,relationUnpack.assetRaw.assetBodySize);
     expectUint8Array(relation.assetRaw.assetBody,relationUnpack.assetRaw.assetBody);
+  });
 
+  it('dumpJSON and loadJSON for asset raw', async () => {
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const relation = new BBcRelation(assetGroupId, 2.0, IDsLength);
+    const assetId = await jscu.random.getRandomBytes(32);
+    const assetBody = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetBody[i] = 0xFF & (i + 32);
+    }
+    relation.createAssetRaw(assetId, assetBody);
+    const relationJSON = relation.dumpJSON();
+    const relationUnpack = new BBcRelation(assetGroupId, 2.0, IDsLength);
+    relationUnpack.loadJSON(relationJSON);
+
+    expect(relation.version).to.be.eq(relationUnpack.version);
+    expectUint8Array(relation.assetGroupId,relationUnpack.assetGroupId);
+    expectUint8Array(relation.assetRaw.assetId,relationUnpack.assetRaw.assetId);
+    expect(relation.assetRaw.assetBodySize,relationUnpack.assetRaw.assetBodySize);
+    expectUint8Array(relation.assetRaw.assetBody,relationUnpack.assetRaw.assetBody);
   });
 
   it('BBcRelation pack and unpack for asset hash', async () => {
@@ -78,6 +132,23 @@ describe(`${envName}: Test BBcRelation`, () => {
     const relationBin = relation.pack();
     const relationUnpack = new BBcRelation(assetGroupId, 2.0, IDsLength);
     relationUnpack.unpack(relationBin);
+
+    expect(relation.version).to.be.eq(relationUnpack.version);
+    expectUint8Array(relation.assetGroupId,relationUnpack.assetGroupId);
+    expectUint8Array(relation.assetHash.assetIds[0],relationUnpack.assetHash.assetIds[0]);
+    expectUint8Array(relation.assetHash.assetIds[1],relationUnpack.assetHash.assetIds[1]);
+
+  });
+
+  it('dumpJSON and loadJSON for asset hash', async () => {
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const relation = new BBcRelation(assetGroupId, 2.0, IDsLength);
+    const assetId0 = await jscu.random.getRandomBytes(32);
+    const assetId1 = await jscu.random.getRandomBytes(32);
+    relation.createAssetHash([assetId0, assetId1]);
+    const relationJSON = relation.dumpJSON();
+    const relationUnpack = new BBcRelation(assetGroupId, 2.0, IDsLength);
+    relationUnpack.loadJSON(relationJSON);
 
     expect(relation.version).to.be.eq(relationUnpack.version);
     expectUint8Array(relation.assetGroupId,relationUnpack.assetGroupId);

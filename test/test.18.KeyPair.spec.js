@@ -29,6 +29,25 @@ describe(`${envName}: Test KeyPair`, () => {
 
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const keypair = new KeyPair();
+    const keypairUnpack = new KeyPair();
+    await keypair.generate();
+    expect(keypair.publicKey).to.not.equal(null);
+    expect(keypair.privateKey).to.not.equal(null);
+
+    const keypairJSON = await keypair.dumpJSON();
+    keypairUnpack.loadJSON(keypairJSON);
+
+    const jwk_public_key1 =  await keypairUnpack.exportPublicKey('jwk');
+    const jwk_private_key1 =  await keypairUnpack.exportPrivateKey('jwk');
+    const jwk_public_key2 =  await keypair.exportPublicKey('jwk');
+    const jwk_private_key2 =  await keypair.exportPrivateKey('jwk');
+    expect(jwk_public_key1).to.be.not.eq(jwk_public_key2);
+    expect(jwk_private_key1).to.be.not.eq(jwk_private_key2);
+
+  });
+
   it('setKeyPair for pem format', async () => {
     const array = await Promise.all(bits.map(async (bitLen) => {
       const keypair = new KeyPair();

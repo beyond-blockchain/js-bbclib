@@ -13,7 +13,7 @@ const envName = env.envName;
 
 describe(`${envName}: Test BBcSignature`, () => {
 
-  it('serialize and deserialize', async () => {
+  it('pack and unpack', async () => {
     const signature = new BBcSignature(KeyType.ECDSA_P256v1);
     signature.setSignature(new Uint8Array(8));
     const keyPair = new KeyPair();
@@ -24,6 +24,24 @@ describe(`${envName}: Test BBcSignature`, () => {
     const signatureBin = await signature.pack();
     const signatureUnpack = new BBcSignature(KeyType.ECDSA_P256v1);
     await signatureUnpack.unpack(signatureBin);
+
+    expectUint8Array(signature.signature, signatureUnpack.signature);
+    expect(signature.keyType).to.equal(signatureUnpack.keyType);
+    expectUint8Array(await signature.keypair.exportPublicKey('oct'), await signatureUnpack.keypair.exportPublicKey('oct'));
+  });
+
+  it('dumpJSON and loadJSON', async () => {
+    const signature = new BBcSignature(KeyType.ECDSA_P256v1);
+    signature.setSignature(new Uint8Array(8));
+    const keyPair = new KeyPair();
+    await keyPair.generate();
+
+    const sig = new Uint8Array(8);
+    await signature.addSignatureAndPublicKey(sig, await keyPair.exportPublicKey('jwk'));
+    const signatureJSON = await signature.dumpJSON();
+
+    const signatureUnpack = new BBcSignature(KeyType.ECDSA_P256v1);
+    await signatureUnpack.loadJSON(signatureJSON);
 
     expectUint8Array(signature.signature, signatureUnpack.signature);
     expect(signature.keyType).to.equal(signatureUnpack.keyType);

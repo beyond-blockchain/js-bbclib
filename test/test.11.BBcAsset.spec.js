@@ -27,7 +27,23 @@ describe(`${envName}: Test BBcAsset`, () => {
     expect( asset.assetFileSize).to.be.eq(assetUnpack.assetFileSize);
     expect( asset.assetBodySize).to.be.eq(assetUnpack.assetBodySize);
     expect( asset.assetBodyType).to.be.eq(assetUnpack.assetBodyType);
+  });
 
+  it('dumpJSON and loadJSON', async () => {
+    const userId = await jscu.random.getRandomBytes(32);
+    const asset = await helper.createAsset(userId);
+    const assetJSON = await asset.dumpJSON();
+    const assetUnpack = new BBcAsset(userId, 1.0, IDsLength);
+    await assetUnpack.loadJSON(assetJSON);
+
+    expectUint8Array(asset.assetId,assetUnpack.assetId);
+    expectUint8Array(asset.userId,assetUnpack.userId);
+    expectUint8Array(asset.nonce,assetUnpack.nonce);
+    expectUint8Array(asset.assetFileDigest,assetUnpack.assetFileDigest);
+    expectUint8Array(asset.assetBody,assetUnpack.assetBody);
+    expect( asset.assetFileSize).to.be.eq(assetUnpack.assetFileSize);
+    expect( asset.assetBodySize).to.be.eq(assetUnpack.assetBodySize);
+    expect( asset.assetBodyType).to.be.eq(assetUnpack.assetBodyType);
   });
 
   it('dump', async () => {

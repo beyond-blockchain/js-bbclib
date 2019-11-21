@@ -11,11 +11,6 @@ const envName = env.envName;
 
 describe(`${envName}: Test BBcWitness`, () => {
   it('pack and unpack', async () => {
-    // eslint-disable-next-line no-console
-    console.log('***********************');
-    // eslint-disable-next-line no-console
-    console.log('Test for BBcWitness Class');
-
     const witness = new BBcWitness(1.0, IDsLength);
     const witnessUnpack = new BBcWitness(1.0, IDsLength);
 
@@ -29,6 +24,27 @@ describe(`${envName}: Test BBcWitness`, () => {
 
     const witnessBin = witness.pack();
     await witnessUnpack.unpack(witnessBin);
+
+    expect(witnessUnpack.sigIndices[0]).to.be.eq(0);
+    expect(witnessUnpack.userIds[0]).to.be.eql(userId0);
+    expect(witnessUnpack.sigIndices[1]).to.be.eq(1);
+    expect(witnessUnpack.userIds[1]).to.be.eql(userId1);
+  });
+
+  it('dumpJSON and loadJSON', async () => {
+    const witness = new BBcWitness(1.0, IDsLength);
+    const witnessUnpack = new BBcWitness(1.0, IDsLength);
+
+    witness.addSigIndices(0);
+    const userId0 = await jscu.random.getRandomBytes(32);
+    witness.addUserId(userId0);
+
+    witness.addSigIndices(1);
+    const userId1 = await jscu.random.getRandomBytes(32);
+    witness.addUserId(userId1);
+
+    const witnessJSON = witness.dumpJSON();
+    await witnessUnpack.loadJSON(witnessJSON);
 
     expect(witnessUnpack.sigIndices[0]).to.be.eq(0);
     expect(witnessUnpack.userIds[0]).to.be.eql(userId0);

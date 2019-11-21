@@ -33,6 +33,29 @@ describe(`${envName}: Test BBcCrossRef`, () => {
     expectUint8Array(crossRef.transactionId, crossRefUnpack.transactionId);
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const crossRef = new BBcCrossRef(null, null);
+    const domainId = new Uint8Array(8);
+    for (let i = 0; i < 8; i++) {
+      domainId[i] = 0xFF & (i + 8);
+    }
+
+    const transactionId = new Uint8Array(8);
+    for (let i = 0; i < 8; i++) {
+      transactionId[i] = 0xFF & (i + 16);
+    }
+
+    crossRef.setDomainId(domainId);
+    crossRef.setTransactionId(transactionId);
+
+    const crossRefJSON = crossRef.dumpJSON();
+    const crossRefUnpack = new BBcCrossRef(null, null);
+    await crossRefUnpack.loadJSON(crossRefJSON);
+
+    expectUint8Array(crossRef.domainId, crossRefUnpack.domainId);
+    expectUint8Array(crossRef.transactionId, crossRefUnpack.transactionId);
+  });
+
   it('dump', async () => {
 
     const crossRef = new BBcCrossRef(null, null);

@@ -83,6 +83,62 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
   });
 
+  it('dumpJSON and loadJSON only witness', async () => {
+    const transaction = new BBcTransaction(1.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(32);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3);
+      refs.push(bbcReference);
+    }
+
+    const witness = new BBcWitness(IDsLength);
+    witness.addSigIndices(0);
+    witness.addUserId(new Uint8Array(2));
+    transaction.addParts([], refs, [], witness, null);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(1.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+    expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations['idLength']).to.be.eq(relationsUnpack['idLength']);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array(relations.asset.userId,relationsUnpack.asset.userId);
+      expectUint8Array(relations.asset.nonce,relationsUnpack.asset.nonce);
+      expectUint8Array(relations.asset.assetFileDigest,relationsUnpack.asset.assetFileDigest);
+      expectUint8Array(relations.asset.assetBody,relationsUnpack.asset.assetBody);
+      expect( relations.asset.assetBodySize).to.be.eq(relationsUnpack.asset.assetBodySize);
+      expect( relations.asset.assetBodyType).to.be.eq(relationsUnpack.asset.assetBodyType);
+
+    }
+
+    for (let i = 0; i < transaction.witness.sigIndices.length; i++) {
+      const transactionWitness = transaction.witness;
+      const transactionWitnessUnpack = transactionUnpack.witness;
+      expect(transactionWitness.sigIndices[i]).to.be.eq(transactionWitnessUnpack.sigIndices[i]);
+      expectUint8Array(transactionWitness.userIds[i],transactionWitnessUnpack.userIds[i]);
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+  });
+
   it('dump only witness', async () => {
     const transaction = new BBcTransaction(1.0, IDsLength);
     const refs = [];
@@ -171,6 +227,73 @@ describe(`${envName}: Test BBcTransaction`, () => {
     //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
   });
 
+  it('dumpJSON and loadJSON with asset relations', async () => {
+
+    const transaction = new BBcTransaction(1.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(32);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3, 1.0, IDsLength);
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const userId = await jscu.random.getRandomBytes(32);
+
+    const relation = new BBcRelation(assetGroupId, 1.0, IDsLength);
+    const asset = new BBcAsset(userId,  1.0, IDsLength);
+    const transactionId = await jscu.random.getRandomBytes(32);
+
+    await asset.setRandomNonce();
+    const assetFile = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetFile[i] = 0xFF & i;
+    }
+    const assetBody = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetBody[i] = 0xFF & (i + 32);
+    }
+    await asset.setAsset(assetFile, assetBody);
+    relation.setAsset(asset);
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, 1.0, IDsLength));
+
+    transaction.addParts([], refs, [relation], null, null);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(1.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expectUint8Array(new Uint8Array(transaction.timestamp.toArray('lt',8)), new Uint8Array(transactionUnpack.timestamp.toArray('lt',8)));
+
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations.idsLength.assetGroupId).to.be.eq(relationsUnpack.idsLength.assetGroupId);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array(relations.asset.userId,relationsUnpack.asset.userId);
+      expectUint8Array(relations.asset.nonce,relationsUnpack.asset.nonce);
+      expectUint8Array(relations.asset.assetFileDigest,relationsUnpack.asset.assetFileDigest);
+      expectUint8Array(relations.asset.assetBody,relationsUnpack.asset.assetBody);
+      expect( relations.asset.assetBodySize).to.be.eq(relationsUnpack.asset.assetBodySize);
+      expect( relations.asset.assetBodyType).to.be.eq(relationsUnpack.asset.assetBodyType);
+
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+  });
+
   it('dump with asset relations', async () => {
     const idLength = 32;
 
@@ -235,6 +358,60 @@ describe(`${envName}: Test BBcTransaction`, () => {
     const transactionBin = await transaction.pack();
     const transactionUnpack = new BBcTransaction(2.0, IDsLength);
     await transactionUnpack.unpack(transactionBin);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+    expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations.idsLength.assetGroupId).to.be.eq(relationsUnpack.idsLength.assetGroupId);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array(relations.assetRaw.assetId,relationsUnpack.assetRaw.assetId);
+      expectUint8Array(relations.assetRaw.assetBody,relationsUnpack.assetRaw.assetBody);
+      expect( relations.assetRaw.assetBodySize).to.be.eq(relationsUnpack.assetRaw.assetBodySize);
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+    //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
+  });
+
+  it('dumpJSON and loaJSON with assetRaw relations', async () => {
+    const idLength = 32;
+
+    const transaction = new BBcTransaction(2.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(idLength);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3, 2.0, IDsLength);
+
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(idLength);
+    const relation = new BBcRelation(assetGroupId,2.0, IDsLength);
+    const assetId = await jscu.random.getRandomBytes(idLength);
+    const assetBody = await jscu.random.getRandomBytes(512);
+    const assetRaw = new BBcAssetRaw(assetId, assetBody, 2.0, IDsLength);
+    relation.setAssetRaw(assetRaw);
+    const transactionId = await jscu.random.getRandomBytes(idLength);
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, 2.0, IDsLength));
+    transaction.addParts([], refs, [relation], null, null);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(2.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
@@ -351,6 +528,126 @@ describe(`${envName}: Test BBcTransaction`, () => {
     //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
   });
 
+  it('pack and unpack with assetHash relations', async () => {
+    const idLength = 32;
+
+    const transaction = new BBcTransaction(2.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(idLength);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3, IDsLength);
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(idLength);
+    const userId = await jscu.random.getRandomBytes(idLength);
+
+    const relation = new BBcRelation(assetGroupId,  2.0, IDsLength);
+    const assetId_1 = await jscu.random.getRandomBytes(idLength);
+    const assetId_2 = await jscu.random.getRandomBytes(idLength);
+    const assetId_3 = await jscu.random.getRandomBytes(idLength);
+    const assetIds = [assetId_1, assetId_2, assetId_3];
+    const assetHash = new BBcAssetHash(assetIds, 2.0, IDsLength);
+
+    relation.setAssetHash(assetHash);
+    const transactionId = await jscu.random.getRandomBytes(idLength);
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, IDsLength));
+
+    transaction.addParts([], refs, [relation], null, null);
+
+    const transactionBin = await transaction.pack();
+    const transactionUnpack = new BBcTransaction(2.0, IDsLength);
+    await transactionUnpack.unpack(transactionBin);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+    expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations['idLength']).to.be.eq(relationsUnpack['idLength']);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array( relations.assetHash.assetIds[0],relationsUnpack.assetHash.assetIds[0]);
+      expectUint8Array( relations.assetHash.assetIds[1],relationsUnpack.assetHash.assetIds[1]);
+      expectUint8Array( relations.assetHash.assetIds[2],relationsUnpack.assetHash.assetIds[2]);
+
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+    //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
+  });
+
+  it('dumpJSON and loadJSON with assetHash relations', async () => {
+    const idLength = 32;
+
+    const transaction = new BBcTransaction(2.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(idLength);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3, IDsLength);
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(idLength);
+    const userId = await jscu.random.getRandomBytes(idLength);
+
+    const relation = new BBcRelation(assetGroupId,  2.0, IDsLength);
+    const assetId_1 = await jscu.random.getRandomBytes(idLength);
+    const assetId_2 = await jscu.random.getRandomBytes(idLength);
+    const assetId_3 = await jscu.random.getRandomBytes(idLength);
+    const assetIds = [assetId_1, assetId_2, assetId_3];
+    const assetHash = new BBcAssetHash(assetIds, 2.0, IDsLength);
+
+    relation.setAssetHash(assetHash);
+    const transactionId = await jscu.random.getRandomBytes(idLength);
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, IDsLength));
+
+    transaction.addParts([], refs, [relation], null, null);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(2.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+    expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations['idLength']).to.be.eq(relationsUnpack['idLength']);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array( relations.assetHash.assetIds[0],relationsUnpack.assetHash.assetIds[0]);
+      expectUint8Array( relations.assetHash.assetIds[1],relationsUnpack.assetHash.assetIds[1]);
+      expectUint8Array( relations.assetHash.assetIds[2],relationsUnpack.assetHash.assetIds[2]);
+
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+    //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
+  });
+
   it('dump with assetHash relations', async () => {
     const idLength = 32;
 
@@ -429,7 +726,88 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
-    expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      // expect(relations.idsLength).to.be.eq(relationsUnpack.idsLength);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array(relations.asset.userId,relationsUnpack.asset.userId);
+      expectUint8Array(relations.asset.nonce,relationsUnpack.asset.nonce);
+      expectUint8Array(relations.asset.assetFileDigest,relationsUnpack.asset.assetFileDigest);
+      expectUint8Array(relations.asset.assetBody,relationsUnpack.asset.assetBody);
+      expect( relations.asset.assetBodySize).to.be.eq(relationsUnpack.asset.assetBodySize);
+      expect( relations.asset.assetBodyType).to.be.eq(relationsUnpack.asset.assetBodyType);
+
+    }
+
+    for (let i = 0; i < transaction.witness.sigIndices.length; i++) {
+      const transactionWitness = transaction.witness;
+      const transactionWitnessUnpack = transactionUnpack.witness;
+      expect(transactionWitness.sigIndices[i]).to.be.eq(transactionWitnessUnpack.sigIndices[i]);
+      expectUint8Array(transactionWitness.userIds[i],transactionWitnessUnpack.userIds[i]);
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+    //expect(transactionPack.signatures).to.be.eq(transaction_deserialize.signatures);
+  });
+
+  it('dmupJSON and loadJSON with witness and relations', async () => {
+    const idLength = 32;
+
+    const transaction = new BBcTransaction(1.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(idLength);
+      const refTransaction = await jscu.random.getRandomBytes(idLength);
+      const bbcReference = new BBcReference(refAssetGroupId, refTransaction, null, 3, 2.0, IDsLength);
+
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(idLength);
+    const userId = await jscu.random.getRandomBytes(idLength);
+
+    const witness = new BBcWitness(2.0, IDsLength);
+    witness.addSigIndices(0);
+    witness.addUserId(new Uint8Array(2));
+
+    const relation = new BBcRelation(assetGroupId, 1.0, IDsLength);
+    const asset = new BBcAsset(userId, 2.0, IDsLength);
+    const transactionId = await jscu.random.getRandomBytes(idLength);
+
+    await asset.setRandomNonce();
+    const assetFile = new Uint8Array(idLength);
+    for(let i = 0; i < idLength; i++){
+      assetFile[i] = 0xFF & i;
+    }
+    const assetBody = new Uint8Array(idLength);
+    for(let i = 0; i < idLength; i++){
+      assetBody[i] = 0xFF & (i + idLength);
+    }
+    await asset.setAsset(assetFile, assetBody);
+    relation.setAsset(asset);
+    relation.addPointer(new BBcPointer(transactionId, assetGroupId, IDsLength));
+
+    transaction.addParts([], refs, [relation], witness, null);
+    //event reference relation witness crossRef
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(2.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     for (let i = 0; i < transaction.events.length; i++) {
       expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
     }
@@ -576,6 +954,75 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
   });
 
+  it('dumpJSON and loadJSON with Event', async () => {
+    const idLength = 32;
+
+    const transaction = new BBcTransaction(1.0, IDsLength);
+    const refs = [];
+    for (let i = 0; i < 2; i++) {
+      const refAssetGroupId = await jscu.random.getRandomBytes(idLength);
+      const bbcReference = new BBcReference(refAssetGroupId, transaction, null, 3, 1.0, IDsLength);
+
+      refs.push(bbcReference);
+    }
+
+    const assetGroupId = await jscu.random.getRandomBytes(idLength);
+    const userId = await jscu.random.getRandomBytes(idLength);
+    const event = new BBcEvent(assetGroupId, 1.0, IDsLength);
+    const asset = new BBcAsset(userId, 1.0, IDsLength);
+    await asset.setRandomNonce();
+
+    const assetFile = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetFile[i] = 0xFF & i;
+    }
+    const assetBody = new Uint8Array(32);
+    for(let i = 0; i < 32; i++){
+      assetBody[i] = 0xFF & (i + 32);
+    }
+    await asset.setAsset(assetFile, assetBody);
+
+    event.setAsset(asset);
+    event.setAssetGroup(assetGroupId);
+    event.addMandatoryApprover(userId);
+
+    transaction.addParts([event], refs, [], null, null);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = new BBcTransaction(1.0, IDsLength);
+    await transactionUnpack.loadJSON(transactionJSON);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+    expect(transaction.idsLength).to.be.eq(transactionUnpack.idsLength);
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.references.length; i++) {
+      expectUint8Array(transaction.references[i].pack(),transactionUnpack.references[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      const relations = transaction.relations[i];
+      const relationsUnpack = transactionUnpack.relations[i];
+
+      expect(relations.idsLength).to.be.eq(relationsUnpack.idsLength);
+      expectUint8Array(relations.assetGroupId,relationsUnpack.assetGroupId);
+
+      expectUint8Array(relations.pointers[0].transactionId,relationsUnpack.pointers[0].transactionId);
+      expectUint8Array(relations.pointers[0].assetId,relationsUnpack.pointers[0].assetId);
+
+      expectUint8Array(relations.asset.userId,relationsUnpack.asset.userId);
+      expectUint8Array(relations.asset.nonce,relationsUnpack.asset.nonce);
+      expectUint8Array(relations.asset.assetFileDigest,relationsUnpack.asset.assetFileDigest);
+      expectUint8Array(relations.asset.assetBody,relationsUnpack.asset.assetBody);
+      expect( relations.asset.assetBodySize).to.be.eq(relationsUnpack.asset.assetBodySize);
+      expect( relations.asset.assetBodyType).to.be.eq(relationsUnpack.asset.assetBodyType);
+
+    }
+
+    expect(transaction.crossRef).to.be.eq(transactionUnpack.crossRef);
+  });
+
   it('dump with Event', async () => {
     const idLength = 32;
 
@@ -612,7 +1059,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
     transaction.addParts([event], refs, [], null, null);
 
     const dump = await transaction.dump();
-    console.log(dump);
     expect(dump).to.be.not.eq(null);
 
   });

@@ -33,6 +33,27 @@ describe(`${envName}: Test BBcReference`, () => {
     }
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const transaction = await jscu.random.getRandomBytes(32);
+
+    const reference = new BBcReference(assetGroupId, transaction, null, 3, 1.0, IDsLength);
+    await reference.prepareReference(reference.refTransaction);
+    const referenceUnpack = new BBcReference(null, null, null, null, 1.0, IDsLength);
+    await referenceUnpack.prepareReference(referenceUnpack.refTransaction);
+
+    const referenceJSON = reference.dumpJSON();
+    referenceUnpack.loadJSON(referenceJSON);
+
+    expectUint8Array(reference.assetGroupId, referenceUnpack.assetGroupId);
+    expectUint8Array(reference.transactionId, referenceUnpack.transactionId);
+    expect( reference.eventIndexInRef).to.be.eq(referenceUnpack.eventIndexInRef);
+
+    for (let i = 0 ; i < reference.sigIndices.length; i++){
+      expect( reference.sigIndices[i]).to.be.eq(referenceUnpack.sigIndices[i]);
+    }
+  });
+
   it('dump', async () => {
 
     const assetGroupId = await jscu.random.getRandomBytes(32);

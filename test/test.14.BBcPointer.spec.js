@@ -15,9 +15,7 @@ describe(`${envName}: Test BBcPointer`, () => {
   it('pack and unpack', async () => {
     const transactionId = await jscu.random.getRandomBytes(32);
     const assetId = await jscu.random.getRandomBytes(32);
-
     const pointer = new BBcPointer(transactionId, assetId, 2.0, IDsLength);
-
     const pointerBin = pointer.pack();
     const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
     pointerUnpack.unpack(pointerBin);
@@ -28,15 +26,39 @@ describe(`${envName}: Test BBcPointer`, () => {
 
   });
 
+  it('dumpJSON and loadJSON', async () => {
+    const transactionId = await jscu.random.getRandomBytes(32);
+    const assetId = await jscu.random.getRandomBytes(32);
+    const pointer = new BBcPointer(transactionId, assetId, 2.0, IDsLength);
+    const pointerJSON = pointer.dumpJSON();
+    const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
+    pointerUnpack.loadJSON(pointerJSON);
+
+    expectUint8Array(pointer.transactionId,pointerUnpack.transactionId);
+    expect(pointer.assetIdExistence,pointerUnpack.assetIdExistence);
+    expectUint8Array(pointer.assetId,pointerUnpack.assetId);
+  });
+
   it('pack and unpack without asset id', async () => {
 
     const transactionId = await jscu.random.getRandomBytes(32);
-
     const pointer = new BBcPointer(transactionId, null, 2.0, IDsLength);
-
     const pointerBin = pointer.pack();
     const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
     pointerUnpack.unpack(pointerBin);
+
+    expectUint8Array(pointer.transactionId,pointerUnpack.transactionId);
+    expect(pointer.assetIdExistence,pointerUnpack.assetIdExistence);
+
+  });
+
+  it('dumpJSON and loadJSON without asset id', async () => {
+
+    const transactionId = await jscu.random.getRandomBytes(32);
+    const pointer = new BBcPointer(transactionId, null, 2.0, IDsLength);
+    const pointerJSON = pointer.dumpJSON();
+    const pointerUnpack = new BBcPointer(null, null, 2.0, IDsLength);
+    pointerUnpack.loadJSON(pointerJSON);
 
     expectUint8Array(pointer.transactionId,pointerUnpack.transactionId);
     expect(pointer.assetIdExistence,pointerUnpack.assetIdExistence);
