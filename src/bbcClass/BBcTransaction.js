@@ -103,14 +103,14 @@ export class BBcTransaction {
    * get dump json data
    * @return {Object}
    */
-  dumpJSON() {
+  async dumpJSON() {
 
     const events = [];
     const references = [];
     const relations = [];
     let witness = null;
     let crossRef = null;
-    const signatures = {};
+    const signatures = [];
     const useridSigidxMapping = {};
 
     if (this.events.length > 0) {
@@ -141,14 +141,14 @@ export class BBcTransaction {
 
     if (this.signatures.length > 0) {
       for (let i = 0; i < this.signatures.length; i++) {
-        signatures.push(this.signatures[i].dumpJSON())
+        signatures.push(await this.signatures[i].dumpJSON())
       }
     }
 
     const jsonData = {
           idsLength: this.idsLength,
           version: this.version,
-          timestamp: jseu.encoder.arrayBufferToHexString(this.timestamp),
+          timestamp: jseu.encoder.arrayBufferToHexString(new Uint8Array(this.timestamp.toArray('big', 8))),
           events,
           references,
           relations,

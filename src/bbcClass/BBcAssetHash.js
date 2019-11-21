@@ -88,11 +88,11 @@ export class BBcAssetHash{
 
     this.version = _jsonData.version;
     this.idsLength = _jsonData.idsLength;
-    let assetIds=[];
+    let assetIds = [];
     for (let i = 0; i < _jsonData.assetIds.length; i++) {
       assetIds.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.assetIds[i]));
     }
-    this.assetIDs = assetIds;
+    this.assetIds = assetIds;
     return this;
   }
 

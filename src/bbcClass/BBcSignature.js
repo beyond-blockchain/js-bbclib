@@ -50,10 +50,10 @@ export class BBcSignature{
    * get dump json data
    * @return {Object}
    */
-  dumpJSON() {
+  async dumpJSON() {
     let keypair;
     if (this.keypair !== null) {
-      keypair = this.keypair.dumpJSON();
+      keypair = await this.keypair.dumpJSON();
     }
     const jsonData = {
       keyType: this.keyType,
@@ -67,13 +67,13 @@ export class BBcSignature{
    *
    * load json data
    * @param {Object} _jsonData
-   * @return {BBcPointer}
+   * @return {BBcSignature}
    */
-  loadJSON(_jsonData) {
+  async loadJSON(_jsonData) {
     this.keyType = _jsonData.keyType;
     if (_jsonData.keypair !== null) {
       const keypair = new KeyPair();
-      this.keypair = keypair.loadJSON(_jsonData.keypair);
+      this.keypair = await keypair.loadJSON(_jsonData.keypair);
     }
     this.signature = jseu.encoder.hexStringToArrayBuffer(_jsonData.signature);
     return this;

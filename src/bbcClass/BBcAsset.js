@@ -72,6 +72,7 @@ export class BBcAsset{
     const jsonData = {
       idsLength: this.idsLength,
       version: this.version,
+      userId: jseu.encoder.arrayBufferToHexString(this.userId),
       assetId: jseu.encoder.arrayBufferToHexString(this.assetId),
       nonce: jseu.encoder.arrayBufferToHexString(this.nonce),
       assetFile: jseu.encoder.arrayBufferToHexString(this.assetFile),
@@ -94,6 +95,7 @@ export class BBcAsset{
 
     this.version = _jsonData.version;
     this.idsLength = _jsonData.idsLength;
+    this.userId = jseu.encoder.hexStringToArrayBuffer(_jsonData.userId);
     this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
     this.nonce = jseu.encoder.hexStringToArrayBuffer(_jsonData.nonce);
     this.assetFile = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetFile);

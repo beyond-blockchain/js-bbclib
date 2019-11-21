@@ -143,6 +143,16 @@ export class BBcEvent{
    * set asset group id
    * @param {Uint8Array} _assetGroupId
    */
+  setAsset(_asset) {
+    this.asset = cloneDeep(_asset);
+    return this;
+  }
+
+  /**
+   *
+   * set asset group id
+   * @param {Uint8Array} _assetGroupId
+   */
   setAssetGroup(_assetGroupId) {
     this.assetGroupId = cloneDeep(_assetGroupId.slice(0, this.idsLength.assetGroupId));
     return this;

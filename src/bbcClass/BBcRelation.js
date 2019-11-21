@@ -178,7 +178,7 @@ export class BBcRelation{
     let assetRaw;
     let assetHash;
     for (let i = 0; i < this.pointers.length; i++) {
-      pointers.push(this.pointers.dumpJSON());
+      pointers.push(this.pointers[i].dumpJSON());
     }
     if (this.asset !== null) {
       asset = this.asset.dumpJSON();
