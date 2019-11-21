@@ -10,7 +10,8 @@ It provides make transaction function, sign and verify transaction function, ser
 It works on modern browsers(Firefox, Edge, Chrome and Safari) and Node.js. 
 The module is totally written in ES6+ and needed to get transpiled with babel for legacy environments.
 
-※The design and detail of BBc-1 is following.<br>
+※The design and detail of BBc-1 is following.
+
 BBc-1: https://github.com/beyond-blockchain/bbc1
 
   
@@ -47,6 +48,7 @@ BBcRelationにはassetGroupIdを設定し、BBcAsset、BBcPointer、BBcAssetRaw�
 BBcWitnessには２つの署名の格納するユーザ情報としてuserIdsおよびsigIndicesを設定する。
 BBcSignatureにはユーザ情報および署名の内容、公開鍵の情報を設定する。
 
+```
 transaction
   |-events
   |  |-events[0]
@@ -115,7 +117,7 @@ transaction
   |     |-keyPair
   |
   |-transactionId
-
+```
 ```
 import * as bbclib from 'js-bbclib.js'
 
@@ -130,13 +132,14 @@ const IDsLength = {
 const numberOfEvent = 1;
 const numberOfRelation = 4;
 const transaction = await bbclib.makeTransaction(numberOfEvent, numberOfRelation, true, versoin, IDsLength); 
-transaction.relations[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile);　
-transaction.relations[1].setAssetGroupId(assetGroupId).createPointer(transactionId, assetId);
-transaction.relations[2].setAssetGroupId(assetGroupId).createAssetRaw(assetId, assetBody);
-transaction.relations[3].setAssetGroupId(assetGroupId).createAssetHash([assetId]);
-await transaction.events[0].setAssetGroupId(assetGroupId).createAsset(userId, assetBody, assetFile).then((event) => {event.addMandatoryApprover(userId);});
-transaction.witness.addWitness(userId);
-transaction.setTransactionId();
+transaction.relations[0].setAssetGroup(assetGroupId).createAsset(userId, assetBody, assetFile);　
+transaction.relations[1].setAssetGroup(assetGroupId).createPointer(transactionId, assetId);
+transaction.relations[2].setAssetGroup(assetGroupId).createAssetRaw(assetId, assetBody);
+transaction.relations[3].setAssetGroup(assetGroupId).createAssetHash([assetId]);
+transaction.events[0].setAssetGroup(assetGroupId).createAsset(userId, assetBody, assetFile).then((event) => event.addMandatoryApprover(userId)).then((event) => {console.log(event)});
+transaction.addWitness(userId);
+transaction.addWitness(userId);
+await transaction.digest();
 
 ```
 
@@ -155,7 +158,27 @@ transaction.setTransactionId();
  };
  
  const transactionBin = await transaction.pack();
- const transaction = await bbclib.loadTrnasaction(transactionBin versoin, IDsLength); 
+ const transaction = await bbclib.loadTransactionBinary(transactionBin); 
+ console.log(transaction.dump())
+ 
+```
+
+トランザクションのJSONデータの読み込み
+```
+ import * as bbclib from 'js-bbclib.js'
+ 
+ const transactionBin;
+ const versoin = 2.0;
+ const IDsLength = {
+   transactionId: 32,
+   assetGroupId: 32,
+   userId: 32,
+   assetId: 32,
+   nonce: 32
+ };
+ 
+ const transactionJSON = await transaction.dumpJSON();
+ const transaction = await bbclib.loadTransactionJSON(transactionJSON); 
  console.log(transaction.dump())
  
 ```
