@@ -66,20 +66,32 @@ export class BBcReference{
    * @return {Object}
    */
   dumpJSON() {
-    let transaction;
-    if (this.transaction != null) {
-      transaction = this.transaction.dump();
-    }
+
     const jsonData = {
       idsLength: this.idsLength,
       version: this.version,
       assetGroupId: jseu.encoder.arrayBufferToHexString(this.assetGroupId),
       transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId),
-      transaction,
       eventIndexInRef: this.eventIndexInRef,
       sigIndices: this.sigIndices
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcReference}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetGroupId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetGroupId);
+    this.transactionId = jseu.encoder.hexStringToArrayBuffer(_jsonData.transactionId);
+    this.eventIndexInRef = _jsonData.eventIndexInRef;
+    this.sigIndices = _jsonData.sigIndices;
+    return this;
   }
 
   /**

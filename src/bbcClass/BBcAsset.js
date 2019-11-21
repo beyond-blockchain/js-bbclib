@@ -86,6 +86,28 @@ export class BBcAsset{
 
   /**
    *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcAsset}
+   */
+  loadJSON(_jsonData) {
+
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
+    this.nonce = jseu.encoder.hexStringToArrayBuffer(_jsonData.nonce);
+    this.assetFile = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetFile);
+    this.assetFileDigest = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetFileDigest);
+    this.assetFileSize =_jsonData.assetFileSize;
+    this.assetBodyType =_jsonData.assetBodyType;
+    this.assetBodySize =_jsonData.assetBodySize;
+    this.assetBody = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetBody);
+
+    return this;
+  }
+
+  /**
+   *
    * set random nonce
    * @return {BBcAsset}
    */

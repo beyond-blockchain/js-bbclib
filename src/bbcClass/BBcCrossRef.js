@@ -52,6 +52,19 @@ export class BBcCrossRef{
     return jsonData;
   }
 
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcCrossRef}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.domainId = jseu.encoder.hexStringToArrayBuffer(_jsonData.domainId);
+    this.transactionId = jseu.encoder.hexStringToArrayBuffer(_jsonData.transactionId);
+    return this;
+  }
 
   /**
    *

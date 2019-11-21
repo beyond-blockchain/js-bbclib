@@ -60,9 +60,24 @@ export class BBcAssetRaw{
       version: this.version,
       assetId: jseu.encoder.arrayBufferToHexString(this.assetId),
       assetBody: jseu.encoder.arrayBufferToHexString(this.assetBody),
-      assetSize: this.assetBodySize
+      assetBodySize: this.assetBodySize
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcAssetRaw}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
+    this.assetBodySize =_jsonData.assetBodySize;
+    this.assetBody = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetBody);
+    return this;
   }
 
   /**

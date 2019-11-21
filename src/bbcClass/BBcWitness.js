@@ -2,6 +2,7 @@ import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import {IDsLength} from './idsLength';
+import {KeyPair} from "./KeyPair";
 
 export class BBcWitness{
 
@@ -60,6 +61,24 @@ export class BBcWitness{
       sigIndices: this.sigIndices
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcPointer}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    const userIds = [];
+    for (let i = 0; i < _jsonData.userIds.length; i++) {
+      userIds.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.userIds[i]));
+    }
+    this.userIds = userIds;
+    this.sigIndices = _jsonData.sigIndices;
+    return this;
   }
 
   /**

@@ -3,6 +3,7 @@ import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
 import {KeyType} from '../parameter.js';
 import cloneDeep from 'lodash.clonedeep';
+import {IDsLength} from './idsLength';
 
 export class BBcSignature{
   /**
@@ -10,7 +11,9 @@ export class BBcSignature{
    * constructor
    * @param {Number} keyType
    */
-  constructor(keyType) {
+  constructor(keyType, version=1.0, idsLength=IDsLength) {
+    this.version = version;
+    this.setLength(idsLength);
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
     this.keypair = null;
@@ -55,10 +58,34 @@ export class BBcSignature{
     const jsonData = {
       keyType: this.keyType,
       signature: jseu.encoder.arrayBufferToHexString(this.signature),
-      publicKey: jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct')),
       keypair
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcPointer}
+   */
+  loadJSON(_jsonData) {
+    this.keyType = _jsonData.keyType;
+    if (_jsonData.keypair !== null) {
+      const keypair = new KeyPair();
+      this.keypair = keypair.loadJSON(_jsonData.keypair);
+    }
+    this.signature = jseu.encoder.hexStringToArrayBuffer(_jsonData.signature);
+    return this;
+  }
+
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
   }
 
   /**

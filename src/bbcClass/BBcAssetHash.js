@@ -80,6 +80,24 @@ export class BBcAssetHash{
 
   /**
    *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcAssetHash}
+   */
+  loadJSON(_jsonData) {
+
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    let assetIds=[];
+    for (let i = 0; i < _jsonData.assetIds.length; i++) {
+      assetIds.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.assetIds[i]));
+    }
+    this.assetIDs = assetIds;
+    return this;
+  }
+
+  /**
+   *
    * add asset id
    * @param {Uint8Array} _assetId
    * @return {BBcAssetHash}

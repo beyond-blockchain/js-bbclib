@@ -96,6 +96,38 @@ export class BBcEvent{
     return jsonData;
   }
 
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcEvent}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetGroupId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetGroupId);
+    this.referenceIndices = _jsonData.referenceIndices;
+    let mandatoryApprovers = [];
+    for (let i = 0; i < _jsonData.mandatoryApprovers.length; i++) {
+      mandatoryApprovers.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.mandatoryApprovers[i]));
+    }
+    this.mandatoryApprovers = mandatoryApprovers;
+    this.optionApproverNumNumerator = _jsonData.optionApproverNumNumerator;
+    this.optionApproverNumDenominator = _jsonData.optionApproverNumDenominator;
+
+    let optionApprovers = []
+;    for (let i = 0; i < _jsonData.optionApprovers.length; i++) {
+      optionApprovers.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.optionApprovers[i]));
+    }
+    this.optionApprovers = optionApprovers;
+
+    if (_jsonData.asset != null) {
+      const user_id = new Uint8Array(0);
+      const asset = new BBcAsset(user_id, this.idsLength);
+      this.asset = asset.loadJSON(_jsonData.asset);
+    }
+    return this;
+  }
 
   /**
    *
@@ -199,7 +231,7 @@ export class BBcEvent{
    * @param {BBcAsset} _asset
    * @return {BBcEvent}
    */
-  setAsset(_asset) {
+  mandatoryApproverssetAsset(_asset) {
     this.asset = cloneDeep(_asset);
     return this;
   }

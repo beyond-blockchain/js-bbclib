@@ -47,10 +47,10 @@ export class KeyPair{
     let privateKey;
     let publicKey;
     if(this.privateKeyObj != null){
-      privateKey = jseu.encoder.arrayBufferToHexString(this.exportPrivateKey('oct'));
+      privateKey = jseu.encoder.arrayBufferToHexString(this.exportPrivateKey('jwk'));
     }
     if(this.publicKeyObj != null){
-      publicKey = jseu.encoder.arrayBufferToHexString(this.exportPublicKey('oct'));
+      publicKey = jseu.encoder.arrayBufferToHexString(this.exportPublicKey('jwk'));
     }
     const jsonData = {
       keyType: this.keyType,
@@ -58,6 +58,26 @@ export class KeyPair{
       publicKey
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {KeyPair}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.keyType = _jsonData.keyType;
+    if(_jsonData.privateKeyObj != null){
+      this.privateKeyObj = new jscu.Key('jwk', _jsonData.privateKey);
+    }
+    if(_jsonData.publicKeyObj != null){
+      this.publicKeyObj = new jscu.Key('jwk', _jsonData.publicKey);
+    }
+
+    return this;
   }
 
   /**

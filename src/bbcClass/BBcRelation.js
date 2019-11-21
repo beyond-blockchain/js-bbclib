@@ -204,6 +204,39 @@ export class BBcRelation{
 
   /**
    *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcRelation}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetGroupId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetGroupId);
+    let pointers = [];
+    for (let i = 0; i < _jsonData.pointers.length; i++) {
+      const pointer = new BBcPointer(null, null, this.idsLength);
+      pointers.push(pointer.loadJSON(_jsonData.pointers[i]));
+    }
+    this.pointers = pointers;
+
+    if (_jsonData.asset != null) {
+      const user_id = new Uint8Array(0);
+      const asset = new BBcAsset(user_id, this.idsLength);
+      this.asset = asset.loadJSON(_jsonData.asset);
+    }
+    if (_jsonData.assetHash != null) {
+      const assetHash = new BBcAssetHash([], this.version, this.idsLength);
+      this.assetHash = assetHash.loadJSON(_jsonData.assetHash);
+    }
+    if (_jsonData.assetRaw != null) {
+      const assetRaw = new BBcAssetRaw(null, null, this.version, this.idsLength);
+      this.assetRaw = assetRaw.loadJSON(_jsonData.assetRaw);
+    }
+    return this;
+  }
+
+  /**
+   *
    * create pointer
    * @param {BBcPointer} _pointer
    */

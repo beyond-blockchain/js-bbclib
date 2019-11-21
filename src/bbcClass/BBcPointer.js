@@ -61,17 +61,27 @@ export class BBcPointer{
    * @return {Object}
    */
   dumpJSON() {
-    let assetId;
-    if (this.assetId != null) {
-      assetId = jseu.encoder.arrayBufferToHexString(this.assetId);
-    }
     const jsonData = {
       idsLength: this.idsLength,
       version: this.version,
       transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId),
-      assetId
+      assetId: jseu.encoder.arrayBufferToHexString(this.assetId)
     };
     return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcPointer}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
+    this.transactionId = jseu.encoder.hexStringToArrayBuffer(_jsonData.transactionId);
+    return this;
   }
 
   /**

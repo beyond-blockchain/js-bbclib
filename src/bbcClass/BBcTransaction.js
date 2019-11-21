@@ -11,6 +11,7 @@ import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
 import {IDsLength} from './idsLength.js';
 import jseu from 'js-encoding-utils';
+import {BBcAsset} from "./BBcAsset";
 const jscu = getJscu();
 const date = new Date();
 
@@ -147,7 +148,7 @@ export class BBcTransaction {
     const jsonData = {
           idsLength: this.idsLength,
           version: this.version,
-          timestamp: this.timestamp,
+          timestamp: jseu.encoder.arrayBufferToHexString(this.timestamp),
           events,
           references,
           relations,
@@ -156,9 +157,66 @@ export class BBcTransaction {
           signatures,
           useridSigidxMapping: this.useridSigidxMapping
         };
-
     return jsonData;
+  }
 
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcTransaction}
+   */
+  loadJSON(_jsonData) {
+    this.version = _jsonData.version;
+    this.idsLength = _jsonData.idsLength;
+    this.timestamp = new BN(jseu.encoder.hexStringToArrayBuffer(_jsonData.timestamp));
+    const events = [];
+    if (_jsonData.events.length > 0) {
+      for (let i = 0; i < _jsonData.events.length; i++) {
+        const event = new BBcEvent(new Uint8Array(0), this.version, this.idsLength);
+        events.push(event.loadJSON(_jsonData.events[i]));
+      }
+    }
+    this.events = events;
+
+    const references = [];
+    if (_jsonData.references.length > 0) {
+      for (let i = 0; i < _jsonData.references.length; i++) {
+        const refernce = new BBcReference(null, null, null, null, this.version, this.idsLength.transactionId);
+        references.push(refernce.loadJSON(_jsonData.references[i]));
+      }
+    }
+    this.references = references;
+
+    const relations = [];
+    if (_jsonData.relations.length > 0) {
+      for (let i = 0; i < _jsonData.relations.length; i++) {
+        const relation = new BBcRelation( new Uint8Array(0), this.version, this.idsLength);
+        relations.push(relation.loadJSON(_jsonData.relations[i]));
+      }
+    }
+    this.relations = relations;
+
+    if (_jsonData.witness !== null) {
+      const witness = new BBcWitness(this.version, this.idsLength);
+      this.witness = witness.loadJSON(_jsonData.witness);
+    }
+
+    if (_jsonData.crossRef !== null) {
+      const crossRef = new BBcCrossRef(new Uint8Array(0),new Uint8Array(0), this.version, this.idsLength);
+      this.crossRef = crossRef.loadJSON(_jsonData.crossRef);
+    }
+
+    const signatures =[];
+    if (_jsonData.signatures.length > 0) {
+      for (let i = 0; i < _jsonData.signatures.length; i++) {
+        const signature = new BBcSignature(0, this.version, this.idsLength);
+        signatures.push(signature.loadJSON(_jsonData.signatures[i]))
+      }
+    }
+    this.signatures = signatures;
+    this.useridSigidxMapping = _jsonData.useridSigidxMapping;
+    return this;
   }
 
   /**
@@ -340,7 +398,7 @@ export class BBcTransaction {
     if (!(_userId in this.useridSigidxMapping)) {
       const sigIndexObj = Object.keys(this.useridSigidxMapping);
       this.useridSigidxMapping[_userId] = sigIndexObj.length;
-      this.signatures.push(new BBcSignature(para.KeyType.NOT_INITIALIZED));
+      this.signatures.push(new BBcSignature(para.KeyType.NOT_INITIALIZED, this.version, this.idsLength));
     }
     return this.useridSigidxMapping[_userId];
   }
@@ -683,7 +741,7 @@ export class BBcTransaction {
         posEnd = posEnd + signatureLength; // uint16
         const signatureBin = _data.slice(posStart, posEnd);
 
-        const sig = new BBcSignature(0);
+        const sig = new BBcSignature(0, this.version, this.idsLength);
         await sig.unpack(signatureBin);
         this.signatures.push(sig);
       }
@@ -700,7 +758,7 @@ export class BBcTransaction {
    * @return {BBcSignature}
    */
   async sign(_userId, _keyPair) {
-    const sig = new BBcSignature(_keyPair.keyType);
+    const sig = new BBcSignature(_keyPair.keyType, this.version, this.idsLength);
     const s = await _keyPair.sign(await this.getTransactionBase());
     if (s === null) {
       return null;
