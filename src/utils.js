@@ -51,7 +51,7 @@ export const loadTransactionBinary = async (_transactionBin, _version=2.0, _idsL
 
 export const loadTransactionJSON = async (_transactionJSON, _version=2.0, _idsLength=IDsLength) => {
   const transaction = new BBcTransaction(_version, _idsLength);
-  await transaction.unpack(_transactionJSON);
+  await transaction.loadJSON(_transactionJSON);
   return transaction;
 };
 

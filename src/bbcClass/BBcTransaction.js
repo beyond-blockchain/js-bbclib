@@ -166,7 +166,7 @@ export class BBcTransaction {
    * @param {Object} _jsonData
    * @return {BBcTransaction}
    */
-  loadJSON(_jsonData) {
+  async loadJSON(_jsonData) {
     this.version = _jsonData.version;
     this.idsLength = _jsonData.idsLength;
     this.timestamp = new BN(jseu.encoder.hexStringToArrayBuffer(_jsonData.timestamp));
@@ -211,7 +211,7 @@ export class BBcTransaction {
     if (_jsonData.signatures.length > 0) {
       for (let i = 0; i < _jsonData.signatures.length; i++) {
         const signature = new BBcSignature(0, this.version, this.idsLength);
-        signatures.push(signature.loadJSON(_jsonData.signatures[i]))
+        signatures.push(await signature.loadJSON(_jsonData.signatures[i]))
       }
     }
     this.signatures = signatures;

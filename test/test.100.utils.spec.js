@@ -10,7 +10,7 @@ const bbclib = env.library;
 const envName = env.envName;
 
 describe(`${envName}: Test BBclib`, () => {
-  it('makeTransaction with event and relation', async () => {
+  it('makeTransaction with event and relation for binary', async () => {
     const keypair = bbclib.createKeypair();
     await keypair.generate();
     const userId = await jscu.random.getRandomBytes(32);
@@ -80,6 +80,39 @@ describe(`${envName}: Test BBclib`, () => {
     expectUint8Array(transaction.witness.pack(), transactionUnpack.witness.pack());
     expectUint8Array(await transaction.pack(), await transactionUnpack.pack());
   });
+
+  it('makeTransaction with event and relation for JSON', async () => {
+    const keypair = bbclib.createKeypair();
+    await keypair.generate();
+    const userId = await jscu.random.getRandomBytes(32);
+    const assetGroupId = await jscu.random.getRandomBytes(32);
+    const assetBody = await jscu.random.getRandomBytes(32);
+    const assetFile = await jscu.random.getRandomBytes(32);
+    const transaction = await bbclib.makeTransaction(1, 1, true, 2.0, IDsLength);
+    transaction.events[0].setAssetGroup(assetGroupId);
+    await transaction.events[0].createAsset(userId, assetBody, assetFile);
+    transaction.events[0].addMandatoryApprover(userId);
+    transaction.relations[0].setAssetGroup(assetGroupId);
+    await transaction.relations[0].createAsset(userId, assetBody, assetFile);
+    transaction.witness.addWitness(userId);
+    await transaction.sign(userId, keypair);
+
+    const transactionJSON = await transaction.dumpJSON();
+    const transactionUnpack = await bbclib.loadTransactionJSON(transactionJSON , 2.0, IDsLength);
+
+    expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
+
+    for (let i = 0; i < transaction.events.length; i++) {
+      expectUint8Array(transaction.events[i].pack(), transactionUnpack.events[i].pack());
+    }
+    for (let i = 0; i < transaction.relations.length; i++) {
+      expectUint8Array(transaction.relations[i].pack(), transactionUnpack.relations[i].pack());
+    }
+    expectUint8Array(transaction.witness.pack(), transactionUnpack.witness.pack());
+    expectUint8Array(await transaction.pack(), await transactionUnpack.pack());
+  });
+
 
 
 });
