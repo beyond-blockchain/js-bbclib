@@ -36,6 +36,7 @@ The timestamp value in BBcTransaction is defined by 64bit number type. In that c
 bn.js: https://www.npmjs.com/package/bn.js
  
 # Usage
+The detail of usage is coming soon.
 
 ## make transaction sequence
 The example transaction has one event, four relations, witness and a signature. 
@@ -382,36 +383,6 @@ const transaction = await bbclib.makeTransaction(1, 1, true, versoin, IDsLength)
 await transaction.sign(userId, keypair);
 
 ```
-
-
-make transaction load
-Application Interface for js-bbclib 
-js-bbclibのAPIはmakeTransaction、loadTransaction、createKeyの３つである。それぞれの役割は、トランザクションの作成、トランザクションの読込、署名に利用する鍵の生成・読込である。
-トランザクションの中身（eventやasset等）を設定する際には、makeTransactionの戻り値であるBBcTransactionのメソットを利用する。（set、addおよびcreateメソット等）
-BBcTransactionのset、addおよびcreateメソットの一部の戻り値はPromise型となるので、利用する際にはawaitを利用する等注意が必要となる。
-
-Make transaction
-
-The API provides make BBcTransaction 
-
-以下の例で作成するトランザクションはメンバー変数として１つのBBcEvent、４つのBBcRelation、BBcWitnessおよび２つのBBcSignature（署名）を持つことを想定する。
-BBcEventにはassetGroupIdとBBcAssetを設定する。
-BBcRelationにはassetGroupIdを設定し、BBcAsset、BBcPointer、BBcAssetRaw、BBcAssetHashをそれぞれ設定する。
-BBcWitnessには２つの署名の格納するユーザ情報としてuserIdsおよびsigIndicesを設定する。
-BBcSignatureにはユーザ情報および署名の内容、公開鍵の情報を設定する。
-
-
-
-トランザクションのバイナリデータの読み込み
-
-トランザクションのJSONデータの読み込み
-
-
-鍵の読み込みおよびトランザクションへのsign
-
-
-
-
 
 # License
 Licensed under the MIT license, see LICENSE file.
