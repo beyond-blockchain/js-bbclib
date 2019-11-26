@@ -27,7 +27,7 @@ describe(`${envName}: Test BBclib`, () => {
     await transaction.sign(userId, keypair);
 
     const transactionBin = await transaction.pack();
-    const transactionUnpack = await bbclib.loadTransactionBinary(transactionBin , 2.0, IDsLength);
+    const transactionUnpack = await bbclib.loadBinaryTransaction(transactionBin , 2.0, IDsLength);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
@@ -64,9 +64,8 @@ describe(`${envName}: Test BBclib`, () => {
     transaction.relations[3].setAssetGroup(assetGroupId).createAssetHash([assetId]);
     transaction.addWitness(userId);
     await transaction.sign(userId, keypair);
-
     const transactionBin = await transaction.pack();
-    const transactionUnpack = await bbclib.loadTransactionBinary(transactionBin , 2.0, IDsLength);
+    const transactionUnpack = await bbclib.loadBinaryTransaction(transactionBin , 2.0, IDsLength);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
@@ -98,7 +97,8 @@ describe(`${envName}: Test BBclib`, () => {
     await transaction.sign(userId, keypair);
 
     const transactionJSON = await transaction.dumpJSON();
-    const transactionUnpack = await bbclib.loadTransactionJSON(transactionJSON , 2.0, IDsLength);
+
+    const transactionUnpack = await bbclib.loadJSONTransaction(transactionJSON , 2.0, IDsLength);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
@@ -112,8 +112,6 @@ describe(`${envName}: Test BBclib`, () => {
     expectUint8Array(transaction.witness.pack(), transactionUnpack.witness.pack());
     expectUint8Array(await transaction.pack(), await transactionUnpack.pack());
   });
-
-
 
 });
 

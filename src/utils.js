@@ -11,6 +11,8 @@ import { KeyPair } from './bbcClass/KeyPair';
  * @param {Number} _eventNum
  * @param {Number} _relationNum
  * @param {Boolean} _witness
+ * @param {Number} _version
+ * @param {Object} _idsLength
  * @return {Boolean}
  */
 export const makeTransaction = async ( _eventNum, _relationNum, _witness, _version=2.0, _idsLength=IDsLength) => {
@@ -37,20 +39,24 @@ export const makeTransaction = async ( _eventNum, _relationNum, _witness, _versi
 
 /**
  *
- * load transaction data
+ * load Binary transaction data
  * @param {Uint8Array} _transactionBin
- * @param {Number} _version
- * @param {Object} _idsLength
  * @return {BBcTransaction}
  */
-export const loadTransactionBinary = async (_transactionBin, _version=2.0, _idsLength=IDsLength) => {
-  const transaction = new BBcTransaction(_version, _idsLength);
+export const loadBinaryTransaction = async (_transactionBin) => {
+  const transaction = new BBcTransaction(2.0, IDsLength);
   await transaction.unpack(_transactionBin);
   return transaction;
 };
 
-export const loadTransactionJSON = async (_transactionJSON, _version=2.0, _idsLength=IDsLength) => {
-  const transaction = new BBcTransaction(_version, _idsLength);
+/**
+ *
+ * load JSON transaction data
+ * @param {Object} _transactionJSON
+ * @return {BBcTransaction}
+ */
+export const loadJSONTransaction = async (_transactionJSON) => {
+  const transaction = new BBcTransaction(2.0, IDsLength);
   await transaction.loadJSON(_transactionJSON);
   return transaction;
 };
@@ -62,4 +68,4 @@ export const loadTransactionJSON = async (_transactionJSON, _version=2.0, _idsLe
  */
 export const createKeypair = () => new KeyPair();
 
-export default { makeTransaction, loadTransactionBinary, loadTransactionJSON, createKeypair };
+export default { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair };

@@ -2,7 +2,7 @@
  * index.js
  */
 
-import { makeTransaction, loadTransactionBinary, loadTransactionJSON, createKeypair } from './utils.js';
+import { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair } from './utils.js';
 
-export default { makeTransaction, loadTransactionBinary, loadTransactionJSON, createKeypair };
-export { makeTransaction, loadTransactionBinary, loadTransactionJSON,  createKeypair };
+export default { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair };
+export { makeTransaction, loadBinaryTransaction, loadJSONTransaction,  createKeypair };
