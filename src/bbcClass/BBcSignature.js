@@ -1,126 +1,216 @@
 import { KeyPair } from './KeyPair.js';
 import jseu from 'js-encoding-utils';
 import * as helper from '../helper.js';
-import * as para from '../parameter.js';
-import cloneDeep from "lodash.clonedeep";
+import {KeyType} from '../parameter.js';
+import cloneDeep from 'lodash.clonedeep';
+import {IDsLength} from './idsLength';
 
 export class BBcSignature{
-  constructor(keyType) {
+  /**
+   *
+   * constructor
+   * @param {Number} keyType
+   */
+  constructor(keyType, version=1.0, idsLength=IDsLength) {
+    this.version = version;
+    this.setLength(idsLength);
     this.keyType = keyType;
     this.signature = new Uint8Array(0);
-    this.pubkey = null;
-    this.pubkeyByte = new Uint8Array(0);;
     this.keypair = null;
     this.notInitialized = true;
   }
 
-  showSig() {
-    console.log('keyType :',this.keyType);
-    console.log('signature :', jseu.encoder.arrayBufferToHexString(this.signature));
-    if (this.pubkey != null){
-      console.log('pubkey :', this.pubkey);
+  /**
+   *
+   * get dump data
+   * @param {Number} intentNum
+   * @return {String}
+   */
+  dump(intentNum=0) {
+    let intent = '';
+    for(let i = 0; i < intentNum; i++){
+      intent += '  ';
     }
-    console.log('pubkeyByte :', jseu.encoder.arrayBufferToHexString(this.pubkeyByte));
+    let dump = `${intent}--Signature--\n`;
+    dump += `${intent}keyType: ${this.keyType}\n`;
+    dump += `${intent}signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
     if (this.keypair != null) {
-      console.log('keypair :', this.keypair);
+      if (this.keypair.publicKeyObj != null){
+        dump += `${intent}pubkey: ${jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct'))}\n`;
+      }
+      dump += `${intent}keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump(intentNum + 1))}\n`;
     }
-    console.log('notInitialized :',this.notInitialized);
+    dump += `${intent}--end Signature--`;
+    return dump;
+
   }
 
-  async add(signature, pubKey) {
-    if (signature != null) {
+  /**
+   *
+   * get dump json data
+   * @return {Object}
+   */
+  async dumpJSON() {
+    let keypair;
+    if (this.keypair !== null) {
+      keypair = await this.keypair.dumpJSON();
+    }
+    const jsonData = {
+      keyType: this.keyType,
+      signature: jseu.encoder.arrayBufferToHexString(this.signature),
+      keypair
+    };
+    return jsonData;
+  }
+
+  /**
+   *
+   * load json data
+   * @param {Object} _jsonData
+   * @return {BBcSignature}
+   */
+  async loadJSON(_jsonData) {
+    this.keyType = _jsonData.keyType;
+    if (_jsonData.keypair !== null) {
+      const keypair = new KeyPair();
+      this.keypair = await keypair.loadJSON(_jsonData.keypair);
+    }
+    this.signature = jseu.encoder.hexStringToArrayBuffer(_jsonData.signature);
+    return this;
+  }
+
+  /**
+   *
+   * set length
+   * @param {Object} _idsLength
+   */
+  setLength(_idsLength){
+    this.idsLength = cloneDeep(_idsLength);
+  }
+
+  /**
+   *
+   * add signature and jwt public key
+   * @param {Uint8Array} _signature
+   * @param {Object} _pubKey
+   * @return {BBcSignature}
+   */
+  async addSignatureAndPublicKey(_signature, _pubKey) {
+    if (_signature != null) {
       this.notInitialized = false;
-      this.signature = cloneDeep(signature);
+      this.signature = cloneDeep(_signature);
     }
-
-    if (pubKey != null) {
-      this.pubkey = cloneDeep(pubKey);
-      this.pubkeyByte = await helper.createPubkeyByte(cloneDeep(pubKey));
+    if (_pubKey != null) {
       this.keypair = new KeyPair();
-      this.keypair.setKeyPair(null, cloneDeep(pubKey));
+      this.keypair.setKeyPair('jwk', null, cloneDeep(_pubKey));
     }
-
-    return true;
+    return this;
   }
 
-  addSignature(signature) {
-    this.signature = signature;
+  /**
+   *
+   * set signature
+   * @param {Uint8Array} _signature
+   * @return {BBcSignature}
+   */
+  setSignature(_signature) {
+    this.notInitialized = false;
+    this.signature = cloneDeep(_signature);
+    return this;
   }
 
-  pack() {
-
+  /**
+   *
+   * pack signature data
+   * @return {Uint8Array}
+   */
+  async pack() {
     let binaryData = [];
-
-    if (this.keyType === para.KeyType.NOT_INITIALIZED){
+    if (this.keyType === KeyType.NOT_INITIALIZED){
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
-
     }else {
-
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
-      binaryData = binaryData.concat(Array.from(helper.hbo(this.pubkeyByte.length * 8, 4)));
-      binaryData = binaryData.concat(Array.from(this.pubkeyByte));
+      const pubkey = await this.keypair.exportPublicKey('oct');
+      binaryData = binaryData.concat(Array.from(helper.hbo(pubkey.length * 8, 4)));
+      binaryData = binaryData.concat(Array.from(await this.keypair.exportPublicKey('oct')));
       binaryData = binaryData.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
       binaryData = binaryData.concat(Array.from(this.signature));
     }
     return new Uint8Array(binaryData);
   }
 
-  async unpack(data) {
+  /**
+   *
+   * unpack signature data
+   * @param {Uint8Array} _data
+   * @return {Boolean}
+   */
+  async unpack(_data) {
 
     let posStart = 0;
     let posEnd = 4; // uint32
 
-    this.keyType =  helper.hboToInt32(data.slice(posStart,posEnd));
+    this.keyType =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
-    if (this.keyType === para.KeyType.NOT_INITIALIZED){
+    if (this.keyType === KeyType.NOT_INITIALIZED){
       return true;
     }
 
     posStart = posEnd;
     posEnd = posEnd + 4; // uint32
-    let valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
+    let valueLength =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
     if (valueLength > 0) {
       posStart = posEnd;
       posEnd = posEnd + (valueLength / 8);
-      this.pubkeyByte = data.slice(posStart, posEnd);
+      this.keypair = new KeyPair();
+      this.keypair.setKeyPair('oct', null,  _data.slice(posStart, posEnd));
     }
 
     posStart = posEnd;
     posEnd = posEnd + 4; // uint32
-    valueLength =  helper.hboToInt32(data.slice(posStart,posEnd));
+    valueLength =  helper.hboToInt32(_data.slice(posStart,posEnd));
 
     if (valueLength > 0) {
       posStart = posEnd;
-      posEnd = posEnd + (valueLength / 8 );
-      this.signature = data.slice(posStart, posEnd);
-    }
-
-    if (this.pubkeyByte.length > 0 && this.signature.length > 0){
-      //65byteの鍵形式からJwkへ変換してinput
-      await this.add(this.signature, this.convertRawHexKeyToJwk(this.pubkeyByte, 'P-256'));
+      posEnd = posEnd + (valueLength / 8);
+      this.signature = _data.slice(posStart, posEnd);
+      await this.addSignatureAndPublicKey(this.signature,null);
     }
 
     return true;
   }
 
-  async verify(digest) {
+  /**
+   *
+   * verify signature
+   * @param {Uint8Array} _transactionBase
+   * @return {Uint8Array}
+   */
+  async verify(_transactionBase) {
     if (this.keypair === null) {
       return false;
     }
-    return await this.keypair.verify(digest, this.signature);
+    return await this.keypair.verify(_transactionBase, this.signature);
   }
 
-  convertRawHexKeyToJwk(hexKeyObj, algorithm) {
+  /**
+   *
+   * convert hex key string to jwk
+   * @param {Uint8Array} _hexKeyObj
+   * @param {String} _algorithm
+   * @return {Object}
+   */
+  convertRawHexKeyToJwk(_hexKeyObj, _algorithm) {
     const len = 16;
     const offset = 1;
-    const hexX = hexKeyObj.slice(offset, offset + len * 2);
-    const hexY = hexKeyObj.slice(offset + len * 2, offset + len * 4);
+    const hexX = _hexKeyObj.slice(offset, offset + len * 2);
+    const hexY = _hexKeyObj.slice(offset + len * 2, offset + len * 4);
     const b64uX = jseu.encoder.encodeBase64Url(hexX);
     const b64uY = jseu.encoder.encodeBase64Url(hexY);
 
     return { // https://www.rfc-editor.org/rfc/rfc7518.txt
-      crv: algorithm,
+      crv: _algorithm,
       ext: true,
       kty: 'EC', // or "RSA", "oct"
       x: b64uX, // hex to base64url

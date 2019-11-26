@@ -6,6 +6,9 @@ obsolete/
 thumbs.db
 yarn-error.log
 .idea/
+.vscode/
+.coverage/
+.nyc_output/
 test/html/*.html
 test/html/*.bundle.js
 dist/*.js
