@@ -113,6 +113,13 @@ describe(`${envName}: Test BBclib`, () => {
     expectUint8Array(await transaction.pack(), await transactionUnpack.pack());
   });
 
+  it('helper', async () => {
+
+    bbclib.helper.hboToInt64(new Uint8Array(64));
+    bbclib.helper.hboToInt32(new Uint8Array(32));
+    bbclib.helper.hboToInt16(new Uint8Array(16));
+
+  });
 });
 
 function expectUint8Array(bin1, bin2){

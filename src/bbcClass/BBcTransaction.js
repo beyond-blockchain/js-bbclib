@@ -11,7 +11,6 @@ import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
 import {IDsLength} from './idsLength.js';
 import jseu from 'js-encoding-utils';
-import {BBcAsset} from "./BBcAsset";
 const jscu = getJscu();
 const date = new Date();
 
@@ -44,7 +43,7 @@ export class BBcTransaction {
    * @param {Number} intentNum
    * @return {String}
    */
-  dump(intentNum=0) {
+  async dump(intentNum=0) {
     let intent = '';
     for(let i = 0; i < intentNum; i++){
       intent += '  ';
@@ -80,16 +79,13 @@ export class BBcTransaction {
       dump += `${intent}crossRef: ${this.crossRef.dump(intentNum + 1)}\n`;
     }
 
-    if (this.signatures.length > 0) {
-      for (let i = 0; i < this.signatures.length; i++) {
-        dump += `${intent}signatures[${i}]: ${this.signatures[i].dump(intentNum + 1)}\n`;
-      }
+    for (let i = 0; i < this.signatures.length; i++) {
+      dump += `${intent}signatures[${i}]: ${await this.signatures[i].dump(intentNum + 1)}\n`;
     }
 
     Object.keys(this.useridSigidxMapping).forEach( (key) => {
       dump += `${intent}${key}: ${this.useridSigidxMapping[key]}\n`;
     });
-
 
     dump += `${intent}transactionBaseDigest: ${jseu.encoder.arrayBufferToHexString(this.transactionBaseDigest)}\n`;
     dump += `${intent}--end Transaction--`;
@@ -141,22 +137,22 @@ export class BBcTransaction {
 
     if (this.signatures.length > 0) {
       for (let i = 0; i < this.signatures.length; i++) {
-        signatures.push(await this.signatures[i].dumpJSON())
+        signatures.push(await this.signatures[i].dumpJSON());
       }
     }
 
     const jsonData = {
-          idsLength: this.idsLength,
-          version: this.version,
-          timestamp: jseu.encoder.arrayBufferToHexString(new Uint8Array(this.timestamp.toArray('big', 8))),
-          events,
-          references,
-          relations,
-          witness,
-          crossRef,
-          signatures,
-          useridSigidxMapping: this.useridSigidxMapping
-        };
+      idsLength: this.idsLength,
+      version: this.version,
+      timestamp: jseu.encoder.arrayBufferToHexString(new Uint8Array(this.timestamp.toArray('big', 8))),
+      events,
+      references,
+      relations,
+      witness,
+      crossRef,
+      signatures,
+      useridSigidxMapping: this.useridSigidxMapping
+    };
     return jsonData;
   }
 

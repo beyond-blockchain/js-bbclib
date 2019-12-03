@@ -1123,6 +1123,35 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(dump).to.be.not.eq(null);
   });
 
+  it('dump with signature and publickey', async () => {
+    const transaction = new BBcTransaction(1.0, IDsLength);
+
+    const keyPair_0 = await getKeyPair();
+    const keyPair_1 = await getKeyPair();
+    const keyPair_2 = await getKeyPair();
+    const keyPair_3 = await getKeyPair();
+
+    const userId_0 = await jscu.random.getRandomBytes(32);
+    const userId_1 = await jscu.random.getRandomBytes(32);
+    const userId_2 = await jscu.random.getRandomBytes(32);
+    const userId_3 = await jscu.random.getRandomBytes(32);
+
+    const witness = new BBcWitness(1.0, IDsLength);
+    transaction.setWitness(witness);
+    transaction.witness.addWitness(userId_0);
+    transaction.witness.addWitness(userId_1);
+    transaction.witness.addWitness(userId_2);
+    transaction.witness.addWitness(userId_3);
+
+    await transaction.sign(userId_0, keyPair_0);
+    await transaction.sign(userId_1, keyPair_1);
+    await transaction.sign(userId_2, keyPair_2);
+    await transaction.sign(userId_3, keyPair_3);
+
+    const dump = await transaction.dump();
+    expect(dump).to.be.not.eq(null);
+  });
+
   it('transaction add signature after unpack', async () => {
     const transaction = new BBcTransaction(1, IDsLength);
     const transactionUnpack = new BBcTransaction(1, IDsLength);

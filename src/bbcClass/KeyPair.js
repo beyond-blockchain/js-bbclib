@@ -20,7 +20,7 @@ export class KeyPair{
    * @param {Number} intentNum
    * @return {String}
    */
-  dump(intentNum=0) {
+  async dump(intentNum=0) {
     let intent = '';
     for(let i = 0; i < intentNum; i++){
       intent += '  ';
@@ -28,10 +28,10 @@ export class KeyPair{
     let dump = `${intent}--KeyPair--\n`;
     dump += `${intent}keyType: ${this.keyType}\n`;
     if(this.privateKeyObj != null){
-      dump += `${intent}privateKey: ${jseu.encoder.arrayBufferToHexString(this.exportPrivateKey('oct'))}\n`;
+      dump += `${intent}privateKey: ${jseu.encoder.arrayBufferToHexString(await this.exportPrivateKey('oct'))}\n`;
     }
     if(this.publicKeyObj != null){
-      dump += `${intent}publicKey: ${jseu.encoder.arrayBufferToHexString(this.exportPublicKey('oct'))}\n`;
+      dump += `${intent}publicKey: ${jseu.encoder.arrayBufferToHexString(await this.exportPublicKey('oct'))}\n`;
     }
 
     dump += `${intent}--end KeyPair--`;
