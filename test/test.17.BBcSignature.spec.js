@@ -57,7 +57,7 @@ describe(`${envName}: Test BBcSignature`, () => {
 
     const sig = new Uint8Array(8);
     await signature.addSignatureAndPublicKey(sig, await keyPair.exportPublicKey('jwt'));
-    const dump = signature.dump();
+    const dump = await signature.dump();
     expect(dump).to.be.not.eq(null);
   });
 

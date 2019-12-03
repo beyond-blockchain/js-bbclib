@@ -26,7 +26,7 @@ export class BBcSignature{
    * @param {Number} intentNum
    * @return {String}
    */
-  dump(intentNum=0) {
+  async dump(intentNum=0) {
     let intent = '';
     for(let i = 0; i < intentNum; i++){
       intent += '  ';
@@ -36,9 +36,9 @@ export class BBcSignature{
     dump += `${intent}signature: ${jseu.encoder.arrayBufferToHexString(this.signature)}\n`;
     if (this.keypair != null) {
       if (this.keypair.publicKeyObj != null){
-        dump += `${intent}pubkey: ${jseu.encoder.arrayBufferToHexString(this.keypair.exportPublicKey('oct'))}\n`;
+        dump += `${intent}pubkey: ${jseu.encoder.arrayBufferToHexString(await this.keypair.exportPublicKey('oct'))}\n`;
       }
-      dump += `${intent}keypair: ${jseu.encoder.arrayBufferToHexString(this.keypair.dump(intentNum + 1))}\n`;
+      dump += `${intent}keypair: ${await this.keypair.dump(intentNum + 1)}\n`;
     }
     dump += `${intent}--end Signature--`;
     return dump;
