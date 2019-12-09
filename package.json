@@ -1,6 +1,6 @@
 {
   "name": "js-bbclib",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "main": "dist/index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --require @babel/register --recursive $(find test -name '*.spec.js')",
@@ -49,7 +49,7 @@
     "chai-bytes": "0.1.2",
     "circular-json": "0.5.9",
     "cross-env": "6.0.3",
-    "eslint": "6.7.1",
+    "eslint": "6.7.2",
     "gulp-babel": "8.0.0",
     "isparta": "4.1.1",
     "jsdom": "15.2.1",
@@ -73,7 +73,7 @@
     "@babel/runtime": "~7.7.0",
     "bn.js": "~5.0.0",
     "js-crypto-utils": "0.18.1",
-    "js-encoding-utils": "0.5.4",
+    "js-encoding-utils": "0.5.6",
     "lodash.clonedeep": "~4.5.0"
   },
   "description": "",
