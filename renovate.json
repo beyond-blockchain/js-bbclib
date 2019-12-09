@@ -16,6 +16,9 @@
     "automerge": true
   },
   "labels": ["update-dependencies"],
+  "assignees": [
+    "t-hashimoto249"
+  ],
   "schedule": [
     "after 9pm every weekday",
     "every weekend",
