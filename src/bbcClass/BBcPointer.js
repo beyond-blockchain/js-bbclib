@@ -49,7 +49,7 @@ export class BBcPointer{
     dump += `${intent}idsLength.assetId: ${this.idsLength.assetId} \n`;
     dump += `${intent}transactionId: ${jseu.encoder.arrayBufferToHexString(this.transactionId)}\n`;
     if (this.assetId != null) {
-      dump += `{intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
+      dump += `${intent}assetId: ${jseu.encoder.arrayBufferToHexString(this.assetId)}\n`;
     }
     dump += `${intent}--end Pointer--\n`;
     return dump;
