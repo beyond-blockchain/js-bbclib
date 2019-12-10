@@ -355,7 +355,7 @@ export class BBcTransaction {
    * @param {BBcTransaction} _refTransaction
    * @param {Number} _eventIndexInRef
    */
-  createReferences(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef) {
+  createReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef) {
     this.references.push(new BBcReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef, this.version, this.idsLength));
     return this;
   }
@@ -403,6 +403,18 @@ export class BBcTransaction {
     if (_crossRef !== null) {
       this.crossRef = cloneDeep(_crossRef);
     }
+    return this;
+  }
+
+  /**
+   *
+   * create crossRef
+   * @param {Uint8Array} _domainId
+   * @param {Uint8Array} _transactionId
+   */
+  createCrossRef(_domainId, _transactionId) {
+    this.crossRef = new BBcCrossRef(_domainId, _transactionId, this.version, this.idsLength);
+
     return this;
   }
 
