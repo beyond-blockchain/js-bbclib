@@ -242,6 +242,7 @@ export class BBcRelation{
    */
   createPointer(transactionId=null, assetId=null) {
     this.pointers.push( new BBcPointer(transactionId, assetId, this.version, this.idsLength));
+    return this;
   }
 
   /**
@@ -253,6 +254,7 @@ export class BBcRelation{
     if (_pointer != null) {
       this.pointers.push(cloneDeep(_pointer));
     }
+    return this;
   }
 
   /**

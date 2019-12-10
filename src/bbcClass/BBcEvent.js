@@ -115,8 +115,8 @@ export class BBcEvent{
     this.optionApproverNumNumerator = _jsonData.optionApproverNumNumerator;
     this.optionApproverNumDenominator = _jsonData.optionApproverNumDenominator;
 
-    let optionApprovers = []
-;    for (let i = 0; i < _jsonData.optionApprovers.length; i++) {
+    let optionApprovers = [];
+    for (let i = 0; i < _jsonData.optionApprovers.length; i++) {
       optionApprovers.push(jseu.encoder.hexStringToArrayBuffer(_jsonData.optionApprovers[i]));
     }
     this.optionApprovers = optionApprovers;
@@ -140,8 +140,8 @@ export class BBcEvent{
 
   /**
    *
-   * set asset group id
-   * @param {Uint8Array} _assetGroupId
+   * set asset
+   * @param {BBcAsset} _asset
    */
   setAsset(_asset) {
     this.asset = cloneDeep(_asset);

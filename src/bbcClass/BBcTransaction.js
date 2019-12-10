@@ -313,6 +313,16 @@ export class BBcTransaction {
     return this;
   }
 
+   /**
+   *
+   * create event
+   * @param {Uint8Array} _assetGroupId
+   */
+  createEvent(_assetGroupId) {
+    this.events.push(new BBcEvent(_assetGroupId, this.version, this.idsLength));
+    return this;
+  }
+
   /**
    *
    * add reference
@@ -339,6 +349,19 @@ export class BBcTransaction {
 
   /**
    *
+   * create reference
+   * @param {Uint8Array} _assetGroupId
+   * @param {BBcTransaction} _transaction
+   * @param {BBcTransaction} _refTransaction
+   * @param {Number} _eventIndexInRef
+   */
+  createReferences(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef) {
+    this.references.push(new BBcReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef, this.version, this.idsLength));
+    return this;
+  }
+
+  /**
+   *
    * add relation
    * @param {BBcRelation} _relation
    */
@@ -358,6 +381,16 @@ export class BBcTransaction {
     if (_relations != null && Array.isArray(_relations)) {
       this.relations = cloneDeep(_relations);
     }
+    return this;
+  }
+
+  /**
+   *
+   * create relation
+   * @param {Uint8Array} _assetGroupId
+   */
+  createRelation(_assetGroupId) {
+    this.relations.push(new BBcRelation(_assetGroupId, this.version, this.idsLength));
     return this;
   }
 
