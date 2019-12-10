@@ -462,25 +462,6 @@ export class BBcTransaction {
     }
   }
 
-  // /**
-  //  *
-  //  * add signature
-  //  * @param {Uint8Array} _userId
-  //  * @param {Number} _keyType
-  //  * @param {Object} _keyPair
-  //  * @return {Boolean}
-  //  */
-  // addSignature(_userId, _keyType=null, _keyPair=null) {
-  //   _userId = _userId.slice(0, this.idsLength.userId);
-  //   const sig = this.sign(_userId, _keyPair);
-  //   if (!this.addSignatureObject(_userId, sig)){
-  //     for (let i = 0; i < this.references.length; i++){
-  //       if (this.references[i].addSignature(_userId, sig)){
-  //         return true;
-  //       }
-  //     }
-  //   }
-  // }
 
   /**
    *
