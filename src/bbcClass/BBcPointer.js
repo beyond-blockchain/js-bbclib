@@ -18,13 +18,14 @@ export class BBcPointer{
     if (transactionId != null) {
       this.transactionId = cloneDeep(transactionId.slice(0,this.idsLength.transactionId));
     } else {
-      this.transactionId = new Uint8Array( this.idsLength.transactionId );
+      this.transactionId = null;
     }
     if (assetId != null) {
       this.assetId = cloneDeep(assetId.slice(0, this.idsLength.assetId));
-    }else{
-      this.assetId = new Uint8Array( this.idsLength.assetId );
+    } else {
+      this.assetId = null;
     }
+
     this.assetIdExistence = 0;
     if (assetId != null) {
       this.assetIdExistence = 1;
@@ -61,12 +62,18 @@ export class BBcPointer{
    * @return {Object}
    */
   dumpJSON() {
-    const jsonData = {
+
+    let jsonData = {
       idsLength: this.idsLength,
       version: this.version,
-      transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId),
-      assetId: jseu.encoder.arrayBufferToHexString(this.assetId)
     };
+
+    if (this.assetId != null) {
+      jsonData = Object.assign(jsonData, {assetId: jseu.encoder.arrayBufferToHexString(this.assetId)});
+    }
+    if (this.transactionId != null) {
+      jsonData = Object.assign(jsonData, {transactionId: jseu.encoder.arrayBufferToHexString(this.transactionId)});
+    }
     return jsonData;
   }
 
@@ -79,8 +86,19 @@ export class BBcPointer{
   loadJSON(_jsonData) {
     this.version = _jsonData.version;
     this.idsLength = _jsonData.idsLength;
-    this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
-    this.transactionId = jseu.encoder.hexStringToArrayBuffer(_jsonData.transactionId);
+
+    if ('assetId' in _jsonData) {
+      this.assetId = jseu.encoder.hexStringToArrayBuffer(_jsonData.assetId);
+    }else{
+      this.assetId = null;
+    }
+
+    if ('transactionId' in _jsonData) {
+      this.transactionId = jseu.encoder.hexStringToArrayBuffer(_jsonData.transactionId);
+    }else{
+      this.transactionId = null;
+    }
+
     return this;
   }
 

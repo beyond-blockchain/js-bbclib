@@ -355,8 +355,10 @@ export class BBcTransaction {
    * @param {BBcTransaction} _refTransaction
    * @param {Number} _eventIndexInRef
    */
-  createReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef) {
-    this.references.push(new BBcReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef, this.version, this.idsLength));
+  async createReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef) {
+    const ref = new BBcReference(_assetGroupId, _transaction, _refTransaction, _eventIndexInRef, this.version, this.idsLength);
+    await ref.prepareReference(_refTransaction);
+    this.references.push(ref);
     return this;
   }
 
@@ -414,7 +416,6 @@ export class BBcTransaction {
    */
   createCrossRef(_domainId, _transactionId) {
     this.crossRef = new BBcCrossRef(_domainId, _transactionId, this.version, this.idsLength);
-
     return this;
   }
 
@@ -461,28 +462,6 @@ export class BBcTransaction {
     }
   }
 
-  /**
-   *
-   * add signature
-   * @param {Uint8Array} _userId
-   * @param {Number} _keyType
-   * @param {Uint8Array} _privateKey
-   * @param {Uint8Array} _publicKey
-   * @param {Object} _keyPair
-   * @param {Uint8Array} _isPublicKey
-   * @return {Boolean}
-   */
-  addSignature(_userId, _keyType=null, _privateKey=new Uint8Array(0), _publicKey=new Uint8Array(0), _keyPair=null) {
-    _userId = _userId.slice(0, this.idsLength.userId);
-    const sig = this.sign(_keyType, _privateKey, _publicKey, _keyPair);
-    if (!this.addSignatureObject(_userId, sig)){
-      for (let i = 0; i < this.references.length; i++){
-        if (this.references[i].addSignature(_userId, sig)){
-          return true;
-        }
-      }
-    }
-  }
 
   /**
    *
@@ -796,15 +775,20 @@ export class BBcTransaction {
    * sign transaction data
    * @param {Uint8Array} _userId
    * @param {KeyPair} _keyPair
+   * @param {Boolean} _addPubKey
    * @return {BBcSignature}
    */
-  async sign(_userId, _keyPair) {
+  async sign(_userId, _keyPair, _addPubKey=true) {
     const sig = new BBcSignature(_keyPair.keyType, this.version, this.idsLength);
     const s = await _keyPair.sign(await this.getTransactionBase());
     if (s === null) {
       return null;
     }
-    await sig.addSignatureAndPublicKey(s, await _keyPair.exportPublicKey('jwk'));
+    if (_addPubKey){
+      await sig.addSignatureAndPublicKey(s, await _keyPair.exportPublicKey('jwk'));
+    }else{
+      await sig.addSignatureAndPublicKey(s, null);
+    }
     return this.addSignatureObject(_userId, sig);
   }
 }

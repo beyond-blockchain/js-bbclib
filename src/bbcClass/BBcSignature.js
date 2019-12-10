@@ -130,9 +130,13 @@ export class BBcSignature{
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
     }else {
       binaryData = binaryData.concat(Array.from(helper.hbo(this.keyType, 4)));
-      const pubkey = await this.keypair.exportPublicKey('oct');
-      binaryData = binaryData.concat(Array.from(helper.hbo(pubkey.length * 8, 4)));
-      binaryData = binaryData.concat(Array.from(await this.keypair.exportPublicKey('oct')));
+      if (this.keypair == null){
+        binaryData = binaryData.concat(Array.from(helper.hbo(0, 4)));
+      }else{
+        const pubkey = await this.keypair.exportPublicKey('oct');
+        binaryData = binaryData.concat(Array.from(helper.hbo(pubkey.length * 8, 4)));
+        binaryData = binaryData.concat(Array.from(pubkey));
+      }
       binaryData = binaryData.concat(Array.from(helper.hbo(this.signature.length * 8, 4)));
       binaryData = binaryData.concat(Array.from(this.signature));
     }

@@ -18,6 +18,7 @@ import { BBcSignature } from '../src/bbcClass/BBcSignature.js';
 import { BBcRelation } from '../src/bbcClass/BBcRelation.js';
 import { BBcPointer } from '../src/bbcClass/BBcPointer.js';
 import { KeyPair } from '../src/bbcClass/KeyPair.js';
+import { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair } from '../src/utils.js';
 import jseu from 'js-encoding-utils';
 const jscu = getJscu();
 const env = getTestEnv();
@@ -1300,7 +1301,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionData);
   });
 
-  it('test sign transaction', async () => {
+  it('test sign transaction1', async () => {
     const keyPair = await getKeyPair();
     const userId = await jscu.random.getRandomBytes(32);
     const transactionPack = new BBcTransaction(1.0, IDsLength);
@@ -1319,8 +1320,27 @@ describe(`${envName}: Test BBcTransaction`, () => {
     const transactionBase = await transactionUnpack.getTransactionBase();
     const flag = await transactionUnpack.signatures[0].verify(transactionBase);
     expect(flag).to.be.eq(true);
-
   });
+
+  it('test sign transaction2', async () => {
+    const keyPair = await getKeyPair();
+    const userId1 = await jscu.random.getRandomBytes(32);
+    const assetGroupId1 = await jscu.random.getRandomBytes(32);
+
+    const transaction = await makeTransaction(1,1, true, 2.0, IDsLength);
+    const relationBody1 = await jscu.random.getRandomBytes(32);
+    await transaction.relations[0].setAssetGroup(assetGroupId1).createAsset(userId1, relationBody1, null);
+    const eventBody = await jscu.random.getRandomBytes(32);
+    await (transaction.events[0].setAssetGroup(assetGroupId1)).createAsset(userId1, eventBody, null);
+    await transaction.events[0].setAssetGroup(assetGroupId1).createAsset(userId1, eventBody, null);
+    transaction.events[0].addMandatoryApprover(userId1);
+    transaction.addWitness(userId1);
+    await transaction.sign(userId1, keyPair);
+    const flag =  await transaction.signatures[0].verify(await transaction.getTransactionBase());
+    expect(flag).to.be.eq(true);
+  });
+
+
 
 });
 
