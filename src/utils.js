@@ -20,7 +20,6 @@ export const makeTransaction = async ( _eventNum, _relationNum, _witness, _versi
   if (_eventNum > 0){
     for (let i = 0; i < _eventNum; i++){
       const event = new BBcEvent(new Uint8Array(_idsLength.assetGroupId), _version, _idsLength);
-      //event.setAsset(new BBcAsset(new Uint8Array(_idsLength.userId), _version, _idsLength));
       transaction.addEvent(event);
     }
   }
