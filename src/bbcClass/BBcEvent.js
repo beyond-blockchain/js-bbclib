@@ -255,6 +255,7 @@ export class BBcEvent{
    */
   async createAsset(userId, assetBody=null, assetFile=null) {
     this.asset = new BBcAsset(userId, this.version, this.idsLength);
+    await this.asset.setRandomNonce();
     await this.asset.setAssetBody(assetBody);
     await this.asset.setAssetFile(assetFile);
     return this;

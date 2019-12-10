@@ -129,6 +129,7 @@ export class BBcRelation{
    */
   async createAsset(userId=new Uint8Array(0), assetBody=new Uint8Array(0), assetFile=new Uint8Array(0)){
     this.asset = new BBcAsset(userId,this.version, this.idsLength);
+    await this.asset.setRandomNonce();
     await this.asset.setAssetFile(assetFile);
     await this.asset.setAssetBody(assetBody);
     return this;

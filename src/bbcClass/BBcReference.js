@@ -142,7 +142,7 @@ export class BBcReference{
       this.mandatoryApprovers = evt.mandatoryApprovers;
       this.optionApprovers = evt.optionApprovers;
       await _refTransaction.digest();
-      this.transactionId = _refTransaction.transactionId;
+      this.transactionId = await _refTransaction.getTransactionId();
 
     } catch (e) {
       //print(e);
