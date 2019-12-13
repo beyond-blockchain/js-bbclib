@@ -65,6 +65,13 @@ export function hboToInt16(bin){
   return num;
 }
 
+export function sboToInt16(bin){
+  let num = 0;
+  num = num + (bin[0]);
+  num = num + (bin[1] * 256 );
+  return num;
+}
+
 export function fromHexString (hexString){
   return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
 }

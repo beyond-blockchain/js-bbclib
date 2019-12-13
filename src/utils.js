@@ -4,6 +4,9 @@ import { BBcWitness } from './bbcClass/BBcWitness';
 import { BBcRelation } from './bbcClass/BBcRelation';
 import {IDsLength} from './bbcClass/idsLength';
 import { KeyPair } from './bbcClass/KeyPair';
+import * as helper from './helper.js';
+import jseu from 'js-encoding-utils';
+import zlib from 'zlib';
 
 /**
  *
@@ -58,6 +61,16 @@ export const loadJSONTransaction = async (_transactionJSON) => {
   const transaction = new BBcTransaction(2.0, IDsLength);
   await transaction.loadJSON(_transactionJSON);
   return transaction;
+};
+
+export const deserialize = async (serializeTransaction, isBase64=false) => {
+  const transactionBin = isBase64 ? jseu.encoder.decodeBase64(serializeTransaction) : jseu.encoder.hexStringToArrayBuffer(serializeTransaction);
+  const header = helper.hboToInt16(transactionBin.slice(0,2));
+  if (header == 0) {
+    return loadBinaryTransaction(transactionBin.slice(2));
+  }else if(header == 16){
+    return loadBinaryTransaction(zlib.inflateSync(Buffer.from(transactionBin.slice(2))));
+  }
 };
 
 /**

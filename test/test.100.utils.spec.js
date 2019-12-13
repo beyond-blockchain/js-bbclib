@@ -3,11 +3,13 @@ import {getTestEnv} from './prepare.js';
 import {getJscu} from '../src/env.js';
 import {IDsLength} from '../src/bbcClass/idsLength';
 import jseu from 'js-encoding-utils';
+import * as data from './sample';
 const jscu = getJscu();
 const expect = chai.expect;
 const env = getTestEnv();
 const bbclib = env.library;
 const envName = env.envName;
+
 
 describe(`${envName}: Test BBclib`, () => {
   it('makeTransaction with event and relation for binary', async () => {
@@ -113,13 +115,36 @@ describe(`${envName}: Test BBclib`, () => {
     expectUint8Array(await transaction.pack(), await transactionUnpack.pack());
   });
 
-  it('helper', async () => {
+  it('helper hboToInt', async () => {
 
-    bbclib.helper.hboToInt64(new Uint8Array(64));
-    bbclib.helper.hboToInt32(new Uint8Array(32));
-    bbclib.helper.hboToInt16(new Uint8Array(16));
-
+    const number64 = bbclib.helper.hboToInt64(new Uint8Array(64));
+    const number32 = bbclib.helper.hboToInt32(new Uint8Array(32));
+    const number16 = bbclib.helper.hboToInt16(new Uint8Array(16));
+    expect(number64).to.be.eq(0);
+    expect(number32).to.be.eq(0);
+    expect(number16).to.be.eq(0);
   });
+
+  it('deserialize zlib ', async () => {
+    const transaction = await bbclib.deserialize(data.sample.zlib);
+    expect(transaction.version).to.be.eq(2);
+  });
+
+  it('deserialize plain ', async () => {
+    const transaction = await bbclib.deserialize(data.sample.plain);
+    expect(transaction.version).to.be.eq(2);
+  });
+
+  it('deserialize base64-plain ', async () => {
+    const transaction = await bbclib.deserialize(data.sample.base64_plain, true);
+    expect(transaction.version).to.be.eq(2);
+  });
+
+  it('deserialize base64-zlib ', async () => {
+    const transaction = await bbclib.deserialize(data.sample.base64_zlib, true);
+    expect(transaction.version).to.be.eq(2);
+  });
+
 });
 
 function expectUint8Array(bin1, bin2){
