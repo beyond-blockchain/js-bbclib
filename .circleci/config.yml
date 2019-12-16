@@ -41,8 +41,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-
-￿      - run:
+      - run:
           name: Publish package
           command: npm publish
 
@@ -52,8 +51,9 @@ workflows:
   test-publish:
     jobs:
       - test:
-          only:
-            - *
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*/
       - publish:
           requires:
             - test
