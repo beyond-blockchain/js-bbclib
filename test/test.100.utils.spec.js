@@ -126,23 +126,15 @@ describe(`${envName}: Test BBclib`, () => {
   });
 
   it('deserialize zlib ', async () => {
-    const transaction = await bbclib.deserialize(data.sample.zlib);
-    expect(transaction.version).to.be.eq(2);
+    const transaction = await bbclib.deserialize(jseu.encoder.hexStringToArrayBuffer(data.sample.zlib));
+    const serialized = await bbclib.serialize(transaction, true);
+    expect(data.sample.zlib).to.be.eq(jseu.encoder.arrayBufferToHexString(serialized));
   });
 
   it('deserialize plain ', async () => {
-    const transaction = await bbclib.deserialize(data.sample.plain);
-    expect(transaction.version).to.be.eq(2);
-  });
-
-  it('deserialize base64-plain ', async () => {
-    const transaction = await bbclib.deserialize(data.sample.base64_plain, true);
-    expect(transaction.version).to.be.eq(2);
-  });
-
-  it('deserialize base64-zlib ', async () => {
-    const transaction = await bbclib.deserialize(data.sample.base64_zlib, true);
-    expect(transaction.version).to.be.eq(2);
+    const transaction = await bbclib.deserialize(jseu.encoder.hexStringToArrayBuffer(data.sample.plain));
+    const serialized = await bbclib.serialize(transaction);
+    expect(data.sample.plain).to.be.eq(jseu.encoder.arrayBufferToHexString(serialized));
   });
 
 });

@@ -63,14 +63,42 @@ export const loadJSONTransaction = async (_transactionJSON) => {
   return transaction;
 };
 
-export const deserialize = async (serializeTransaction, isBase64=false) => {
-  const transactionBin = isBase64 ? jseu.encoder.decodeBase64(serializeTransaction) : jseu.encoder.hexStringToArrayBuffer(serializeTransaction);
-  const header = helper.hboToInt16(transactionBin.slice(0,2));
+/**
+ *
+ * deserialize
+ * @param {Uint8Array} serializeTrnsaction
+ * @return {BBcTransaction}
+ */
+export const deserialize = async (serializeTransaction) => {
+  const header = helper.hboToInt16(serializeTransaction.slice(0,2));
   if (header == 0) {
-    return loadBinaryTransaction(transactionBin.slice(2));
+    return loadBinaryTransaction(serializeTransaction.slice(2));
   }else if(header == 16){
-    return loadBinaryTransaction(zlib.inflateSync(Buffer.from(transactionBin.slice(2))));
+    return loadBinaryTransaction(zlib.inflateSync(Buffer.from(serializeTransaction.slice(2))));
   }
+};
+
+/**
+ *
+ * serialize
+ * @param {BBcTransaction} transaction
+ * @param {Boolean} isZlib
+ * @return {Uint8Array}
+ */
+export const serialize = async (transaction, isZlib=false) => {
+  let binaryData = [];
+  const header = isZlib ? convertNumberToBinary(0x0010) : convertNumberToBinary(0x0000);
+  console.log(isZlib);
+  console.log(header);
+  console.log(header);
+  binaryData = binaryData.concat(Array.from(helper.hbo(header, 2)));
+  const transactionPacked = isZlib ? zlib.deflateSync(Buffer.from(await transaction.pack())) : await transaction.pack();
+  binaryData = binaryData.concat(Array.from(new Uint8Array(transactionPacked)));
+  return new Uint8Array(binaryData);
+};
+
+const convertNumberToBinary = number =>{
+  return (number >>> 0);
 };
 
 /**
