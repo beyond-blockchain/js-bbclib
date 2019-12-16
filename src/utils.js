@@ -87,19 +87,14 @@ export const deserialize = async (serializeTransaction) => {
  */
 export const serialize = async (transaction, isZlib=false) => {
   let binaryData = [];
-  const header = isZlib ? convertNumberToBinary(0x0010) : convertNumberToBinary(0x0000);
-  console.log(isZlib);
-  console.log(header);
-  console.log(header);
+  const header = isZlib ? helper.convertNumberToBinary(0x0010) : helper.convertNumberToBinary(0x0000);
   binaryData = binaryData.concat(Array.from(helper.hbo(header, 2)));
   const transactionPacked = isZlib ? zlib.deflateSync(Buffer.from(await transaction.pack())) : await transaction.pack();
   binaryData = binaryData.concat(Array.from(new Uint8Array(transactionPacked)));
   return new Uint8Array(binaryData);
 };
 
-const convertNumberToBinary = number =>{
-  return (number >>> 0);
-};
+
 
 /**
  *

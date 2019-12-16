@@ -76,6 +76,10 @@ export function fromHexString (hexString){
   return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
 }
 
+const convertNumberToBinary = (number) => {
+  return (number >>> 0);
+};
+
 export function concat(buf1, buf2) {
   // Checks for truthy values on both arrays
   if(!buf1 && !buf2) throw 'Please specify valid arguments for parameters buf1 and buf2.';
