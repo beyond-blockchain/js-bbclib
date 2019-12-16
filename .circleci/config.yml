@@ -41,19 +41,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      #- run:
-      #    name: Authenticate with registry
-      #    command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
-      #- run:
-      #    name: Build production module
-      #    command: npm run build
-      #- run:
-      #    name: Publish package
-      #    command: npm publish
 
-      #- run:
-      #    name: Build API documentation webpage
-      #    command: npm run docs
+￿      - run:
+          name: Publish package
+          command: npm publish
 
 
 workflows:
@@ -64,11 +55,11 @@ workflows:
           filters:
             tags:
               only: /^v[0-9]+(\.[0-9]+)*/
-      #- publish:
-      #    requires:
-      #    - test
-      #    filters:
-      #      tags:
-      #        only: /^v[0-9]+(\.[0-9]+)*/
-      #      branches:
-      #        ignore: /.*/
+      - publish:
+          requires:
+          - test
+          filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
