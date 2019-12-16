@@ -4,6 +4,9 @@ import { BBcWitness } from './bbcClass/BBcWitness';
 import { BBcRelation } from './bbcClass/BBcRelation';
 import {IDsLength} from './bbcClass/idsLength';
 import { KeyPair } from './bbcClass/KeyPair';
+import * as helper from './helper.js';
+import jseu from 'js-encoding-utils';
+import zlib from 'zlib';
 
 /**
  *
@@ -59,6 +62,39 @@ export const loadJSONTransaction = async (_transactionJSON) => {
   await transaction.loadJSON(_transactionJSON);
   return transaction;
 };
+
+/**
+ *
+ * deserialize
+ * @param {Uint8Array} serializeTrnsaction
+ * @return {BBcTransaction}
+ */
+export const deserialize = async (serializeTransaction) => {
+  const header = helper.hboToInt16(serializeTransaction.slice(0,2));
+  if (header == 0) {
+    return loadBinaryTransaction(serializeTransaction.slice(2));
+  }else if(header == 16){
+    return loadBinaryTransaction(zlib.inflateSync(Buffer.from(serializeTransaction.slice(2))));
+  }
+};
+
+/**
+ *
+ * serialize
+ * @param {BBcTransaction} transaction
+ * @param {Boolean} isZlib
+ * @return {Uint8Array}
+ */
+export const serialize = async (transaction, isZlib=false) => {
+  let binaryData = [];
+  const header = isZlib ? helper.convertNumberToBinary(0x0010) : helper.convertNumberToBinary(0x0000);
+  binaryData = binaryData.concat(Array.from(helper.hbo(header, 2)));
+  const transactionPacked = isZlib ? zlib.deflateSync(Buffer.from(await transaction.pack())) : await transaction.pack();
+  binaryData = binaryData.concat(Array.from(new Uint8Array(transactionPacked)));
+  return new Uint8Array(binaryData);
+};
+
+
 
 /**
  *
