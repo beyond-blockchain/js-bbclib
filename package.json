@@ -1,5 +1,5 @@
 {
-  "name": "js-bbclib",
+  "name": "bbclib",
   "version": "1.6.11",
   "main": "dist/index.js",
   "scripts": {
