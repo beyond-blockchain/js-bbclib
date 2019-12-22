@@ -1,6 +1,6 @@
 {
   "name": "js-bbclib",
-  "version": "1.6.11",
+  "version": "1.6.12",
   "main": "dist/index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --require @babel/register --recursive $(find test -name '*.spec.js')",
