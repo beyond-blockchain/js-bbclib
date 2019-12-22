@@ -4,8 +4,6 @@ import cloneDeep from 'lodash.clonedeep';
 import * as helper from '../helper';
 import {IDsLength} from './idsLength.js';
 
-const jscu = getJscu();
-
 export class BBcAsset{
   /**
    *
@@ -114,6 +112,7 @@ export class BBcAsset{
    * @return {BBcAsset}
    */
   async setRandomNonce() {
+    const jscu = getJscu();
     this.nonce = await jscu.random.getRandomBytes(this.idsLength.nonce);
     return this;
   }
@@ -178,6 +177,7 @@ export class BBcAsset{
    */
   async setAssetFile(_assetFile) {
     if (_assetFile !== null) {
+      const jscu = getJscu();
       this.assetFileSize = _assetFile.length;
       this.assetFileDigest = await jscu.hash.compute(_assetFile, 'SHA-256');
     }
@@ -191,6 +191,7 @@ export class BBcAsset{
    * @return {Uint8Array}
    */
   async digest() {
+    const jscu = getJscu();
     const target = this.getDigest();
     const id = await jscu.hash.compute(target, 'SHA-256');
     this.assetId = id.slice(0, this.idsLength.assetId);
@@ -203,6 +204,7 @@ export class BBcAsset{
    * @return {Uint8Array}
    */
   async addAssetId() {
+    const jscu = getJscu();
     const target = this.getDigest();
     this.assetId = await jscu.hash.compute(target, 'SHA-256');
     return this.assetId;
@@ -233,6 +235,7 @@ export class BBcAsset{
    * @return {Boolean}
    */
   async checkAssetFile(_assetFile) {
+    const jscu = getJscu();
     const digest = await jscu.hash.compute(_assetFile, 'SHA-256');
     return (digest === this.assetFileDigest);
   }

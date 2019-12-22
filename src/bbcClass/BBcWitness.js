@@ -2,7 +2,6 @@ import * as helper from '../helper';
 import jseu from 'js-encoding-utils';
 import cloneDeep from 'lodash.clonedeep';
 import {IDsLength} from './idsLength';
-import {KeyPair} from "./KeyPair";
 
 export class BBcWitness{
 

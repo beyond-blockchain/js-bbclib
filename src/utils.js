@@ -5,7 +5,6 @@ import { BBcRelation } from './bbcClass/BBcRelation';
 import {IDsLength} from './bbcClass/idsLength';
 import { KeyPair } from './bbcClass/KeyPair';
 import * as helper from './helper.js';
-import jseu from 'js-encoding-utils';
 import zlib from 'zlib';
 
 /**

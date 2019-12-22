@@ -1,7 +1,6 @@
 import {getJscu} from '../env.js';
 import {KeyType} from '../parameter';
-import jseu from "js-encoding-utils";
-const jscu = getJscu();
+import jseu from 'js-encoding-utils';
 export class KeyPair{
   /**
    *
@@ -69,6 +68,7 @@ export class KeyPair{
    */
   loadJSON(_jsonData) {
     this.keyType = _jsonData.keyType;
+    const jscu = getJscu();
     if(_jsonData.privateKey != null){
       this.privateKeyObj = new jscu.Key('jwk', _jsonData.privateKey);
     }
@@ -85,6 +85,7 @@ export class KeyPair{
    * @return {Boolean}
    */
   async generate() {
+    const jscu = getJscu();
     const keys = await jscu.pkc.generateKey('EC', {namedCurve: 'P-256'});
     this.setKeyPair('jwk', await keys.privateKey.export(), await keys.publicKey.export());
     return true;
@@ -100,6 +101,7 @@ export class KeyPair{
    * @return {Boolean}
    */
   setKeyPair(_type, _privateKey, _publicKey, _options={namedCurve: 'P-256'}) {
+    const jscu = getJscu();
     if (_type === 'jwk' ||  _type === 'pem' || _type === 'der'){
       if (_privateKey != null) {
         this.privateKeyObj = new jscu.Key(_type, _privateKey);
@@ -125,6 +127,7 @@ export class KeyPair{
    */
   async createPublicKeyFromPrivateKey(){
     if (this.privateKeyObj !== null){
+      const jscu = getJscu();
       this.publicKeyObj =  new jscu.Key('pem', await this.privateKeyObj.export('pem',  {outputPublic: true}));
     }
   }
@@ -160,6 +163,7 @@ export class KeyPair{
    * @return {Uint8Array}
    */
   async sign(_msg) {
+    const jscu = getJscu();
     return jscu.pkc.sign(_msg, this.privateKeyObj, 'SHA-256');
   }
 
@@ -171,6 +175,7 @@ export class KeyPair{
    * @return {Uint8Array}
    */
   async verify(_msg, _sig) {
+    const jscu = getJscu();
     return jscu.pkc.verify(_msg, _sig, this.publicKeyObj, 'SHA-256');
   }
 
