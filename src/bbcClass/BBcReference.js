@@ -3,7 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import {IDsLength} from './idsLength';
 import {getJscu} from '../env.js';
 import jseu from 'js-encoding-utils';
-const jscu = getJscu();
+
 
 export class BBcReference{
   /**
@@ -114,6 +114,7 @@ export class BBcReference{
       return false;
     }
     this.refTransaction = cloneDeep( _refTransaction );
+    const jscu = getJscu();
     try {
       const evt = _refTransaction.events[this.eventIndexInRef];
       if (this.sigIndices.length === 0){

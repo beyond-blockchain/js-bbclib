@@ -11,7 +11,7 @@ import cloneDeep from 'lodash.clonedeep';
 import BN from 'bn.js';
 import {IDsLength} from './idsLength.js';
 import jseu from 'js-encoding-utils';
-const jscu = getJscu();
+
 const date = new Date();
 
 export class BBcTransaction {
@@ -481,6 +481,7 @@ export class BBcTransaction {
    * @return {Uint8Array}
    */
   async getTransactionBase() {
+    const jscu = getJscu();
     this.targetSerialize = await this.getDigestForTransactionId();
     this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
     return helper.concat(this.transactionBaseDigest, this.packCrossRef());
@@ -492,6 +493,7 @@ export class BBcTransaction {
    * @return {Uint8Array}
    */
   async digest() {
+    const jscu = getJscu();
     return await jscu.hash.compute(await this.getTransactionBase(), 'SHA-256');
   }
 
@@ -514,6 +516,7 @@ export class BBcTransaction {
   }
 
   async getTransactionId() {
+    const jscu = getJscu();
     this.targetSerialize = await this.getDigestForTransactionId();
     this.transactionBaseDigest = await jscu.hash.compute(this.targetSerialize, 'SHA-256');
     const id = await jscu.hash.compute(helper.concat(this.transactionBaseDigest, this.packCrossRef()), 'SHA-256');
