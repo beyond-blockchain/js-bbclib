@@ -107,7 +107,6 @@ export class BBcTransaction {
     let witness = null;
     let crossRef = null;
     const signatures = [];
-    const useridSigidxMapping = {};
 
     if (this.events.length > 0) {
       for (let i = 0; i < this.events.length; i++) {
@@ -207,7 +206,7 @@ export class BBcTransaction {
     if (_jsonData.signatures.length > 0) {
       for (let i = 0; i < _jsonData.signatures.length; i++) {
         const signature = new BBcSignature(0, this.version, this.idsLength);
-        signatures.push(await signature.loadJSON(_jsonData.signatures[i]))
+        signatures.push(await signature.loadJSON(_jsonData.signatures[i]));
       }
     }
     this.signatures = signatures;
@@ -284,7 +283,7 @@ export class BBcTransaction {
    */
   addWitness(_userId) {
     if (_userId !== null) {
-      this.witness.addWitness(_userId)
+      this.witness.addWitness(_userId);
     }
     return this;
   }
@@ -313,7 +312,7 @@ export class BBcTransaction {
     return this;
   }
 
-   /**
+  /**
    *
    * create event
    * @param {Uint8Array} _assetGroupId
@@ -639,7 +638,6 @@ export class BBcTransaction {
    * @return {Boolean}
    */
   async unpack(_data) {
-
     let posStart = 0;
     let posEnd = 4; // uint32
     this.version = helper.hboToInt32(_data.slice(posStart, posEnd));
