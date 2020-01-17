@@ -73,7 +73,7 @@ export const deserialize = async (serializeTransaction) => {
   if (header == 0) {
     return loadBinaryTransaction(serializeTransaction.slice(2));
   }else if(header == 16){
-    return loadBinaryTransaction(zlib.inflateSync(Buffer.from(serializeTransaction.slice(2))));
+    return loadBinaryTransaction(new Uint8Array(zlib.inflateSync(Buffer.from(serializeTransaction.slice(2)))));
   }
 };
 
@@ -102,4 +102,4 @@ export const serialize = async (transaction, isZlib=false) => {
  */
 export const createKeypair = () => new KeyPair();
 
-export default { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair };
+export default { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair, deserialize, serialize };

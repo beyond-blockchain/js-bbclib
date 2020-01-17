@@ -155,6 +155,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     transaction.addParts([], refs, [], witness, null);
 
     const dump = await transaction.dump();
+    console.log(dump);
     expect(dump).to.be.not.eq(null);
 
   });
@@ -1340,9 +1341,30 @@ describe(`${envName}: Test BBcTransaction`, () => {
     expect(flag).to.be.eq(true);
   });
 
+  it('test sign transaction with pack and unpack', async () => {
+    const keyPair = await getKeyPair();
+    const userId1 = await jscu.random.getRandomBytes(32);
+    const assetGroupId1 = await jscu.random.getRandomBytes(32);
 
+    const transaction = await makeTransaction(1,1, true, 2.0, IDsLength);
+    const relationBody1 = await jscu.random.getRandomBytes(32);
+    await transaction.relations[0].setAssetGroup(assetGroupId1).createAsset(userId1, relationBody1, null);
+    const eventBody = await jscu.random.getRandomBytes(32);
+    await (transaction.events[0].setAssetGroup(assetGroupId1)).createAsset(userId1, eventBody, null);
+    await transaction.events[0].setAssetGroup(assetGroupId1).createAsset(userId1, eventBody, null);
+    transaction.events[0].addMandatoryApprover(userId1);
+    transaction.addWitness(userId1);
+    const transactionBin = await transaction.pack();
+    const transactionUnpack = new BBcTransaction(2.0, IDsLength);
+    await transactionUnpack.unpack(transactionBin);
 
+    await transactionUnpack.sign(userId1, keyPair);
+    const flag =  await transactionUnpack.signatures[0].verify(await transactionUnpack.getTransactionBase());
+    expect(flag).to.be.eq(true);
+  });
 });
+
+
 
 function expectUint8Array(bin1, bin2){
   expect(jseu.encoder.arrayBufferToHexString(bin1)).to.be.eq(jseu.encoder.arrayBufferToHexString(bin2));

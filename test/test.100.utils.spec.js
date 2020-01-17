@@ -137,6 +137,13 @@ describe(`${envName}: Test BBclib`, () => {
     expect(data.sample.plain).to.be.eq(jseu.encoder.arrayBufferToHexString(serialized));
   });
 
+  it('deserialize base64 ', async () => {
+    const transaction = await bbclib.deserialize(jseu.encoder.decodeBase64(data.sample.base64));
+    transaction.addWitness(transaction.witness.userIds[0]);
+    const serialized = await bbclib.serialize(transaction, true);
+    expect(data.sample.base64).to.be.eq(jseu.encoder.encodeBase64(serialized));
+  });
+
 });
 
 function expectUint8Array(bin1, bin2){

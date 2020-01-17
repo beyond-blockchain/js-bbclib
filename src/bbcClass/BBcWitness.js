@@ -109,7 +109,7 @@ export class BBcWitness{
   addWitness(_userId) {
     let flag = false;
     for (let i = 0; i < this.userIds.length; i++){
-      if(_userId.toString() === this.userIds[i].toString()) {
+      if(jseu.encoder.arrayBufferToHexString(_userId) === jseu.encoder.arrayBufferToHexString(this.userIds[i])) {
         flag = true;
         break;
       }
@@ -142,12 +142,11 @@ export class BBcWitness{
    */
   addSignatureUsingIndex(_userId, _signature){
     for (let i = 0; i < this.userIds.length; i++){
-      if(_userId.toString() === this.userIds[i].toString()){
+      if(jseu.encoder.arrayBufferToHexString(_userId) === jseu.encoder.arrayBufferToHexString(this.userIds[i])){
         this.transaction.addSignatureUsingIndex(this.sigIndices[i], _signature);
         return this;
       }
     }
-
     return this;
   }
 
