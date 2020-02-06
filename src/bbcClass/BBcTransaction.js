@@ -578,7 +578,7 @@ export class BBcTransaction {
     let binaryData = [];
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
-    binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
+    binaryData = binaryData.concat(this.timestamp.toArray('little', 8));
     binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
@@ -645,7 +645,6 @@ export class BBcTransaction {
     posStart = posEnd;
     posEnd = posEnd + 8;
     this.timestamp = new BN(_data.slice(posStart, posEnd));
-
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
     this.idsLength.transactionId = helper.hboToInt16(_data.slice(posStart, posEnd));
