@@ -20,6 +20,7 @@ import { BBcPointer } from '../src/bbcClass/BBcPointer.js';
 import { KeyPair } from '../src/bbcClass/KeyPair.js';
 import { makeTransaction, loadBinaryTransaction, loadJSONTransaction, createKeypair } from '../src/utils.js';
 import jseu from 'js-encoding-utils';
+import BN from 'bn.js';
 const jscu = getJscu();
 const env = getTestEnv();
 const envName = env.envName;
@@ -47,6 +48,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -103,6 +105,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -155,7 +158,6 @@ describe(`${envName}: Test BBcTransaction`, () => {
     transaction.addParts([], refs, [], witness, null);
 
     const dump = await transaction.dump();
-    console.log(dump);
     expect(dump).to.be.not.eq(null);
 
   });
@@ -192,12 +194,12 @@ describe(`${envName}: Test BBcTransaction`, () => {
 
     transaction.addParts([], refs, [relation], null, null);
     //event reference relation witness crossRef
-
     const transactionBin = await transaction.pack();
     const transactionUnpack = new BBcTransaction(1.0, IDsLength);
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expectUint8Array(new Uint8Array(transaction.timestamp.toArray('lt',8)), new Uint8Array(transactionUnpack.timestamp.toArray('lt',8)));
 
     for (let i = 0; i < transaction.events.length; i++) {
@@ -266,6 +268,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expectUint8Array(new Uint8Array(transaction.timestamp.toArray('lt',8)), new Uint8Array(transactionUnpack.timestamp.toArray('lt',8)));
 
     for (let i = 0; i < transaction.events.length; i++) {
@@ -362,6 +365,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -416,6 +420,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength.transactionId).to.be.eq(transactionUnpack.idsLength.transactionId);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -502,6 +507,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -562,6 +568,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -622,6 +629,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idLength).to.be.eq(transactionUnpack.idLength);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -727,6 +735,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     for (let i = 0; i < transaction.events.length; i++) {
       expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
@@ -809,6 +818,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     for (let i = 0; i < transaction.events.length; i++) {
       expectUint8Array(transaction.events[i].pack(),transactionUnpack.events[i].pack());
@@ -926,6 +936,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionBin);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength).to.be.eq(transactionUnpack.idsLength);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -995,6 +1006,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.loadJSON(transactionJSON);
 
     expect(transaction.version).to.be.eq(transactionUnpack.version);
+    expect(transaction.getUnixTime()).to.be.eq(transactionUnpack.getUnixTime());
     expect(jseu.encoder.arrayBufferToHexString(new Uint8Array(transaction.timestamp.toArray('lt',8)))).to.be.eq(jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8))));
     expect(transaction.idsLength).to.be.eq(transactionUnpack.idsLength);
     for (let i = 0; i < transaction.events.length; i++) {
@@ -1196,7 +1208,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionData);
 
     expect( transactionUnpack.version).to.be.eq( 1 );
-    expect( jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8) ))).to.be.eq( "204f8c64bcf77115" );
+    expect( jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8) ))).to.be.eq( "1571f7bc648c4f20" );
     expect( transactionUnpack.idsLength.transactionId).to.be.eq( IDsLength.transactionId );
 
     expect( transactionUnpack.events.length).to.be.eq( 1 );
@@ -1235,7 +1247,7 @@ describe(`${envName}: Test BBcTransaction`, () => {
     await transactionUnpack.unpack(transactionData);
 
     expect( transactionUnpack.version).to.be.eq( 1 );
-    expect( jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8) ))).to.be.eq( "e00c7d64bcf77115" );
+    expect( jseu.encoder.arrayBufferToHexString(new Uint8Array(transactionUnpack.timestamp.toArray('lt',8) ))).to.be.eq( "1571f7bc647d0ce0" );
     expect( transactionUnpack.idsLength.transactionId).to.be.eq( 32 );
     expect( transactionUnpack.events.length).to.be.eq( 0 );
     expect( transactionUnpack.references.length).to.be.eq( 0 );
@@ -1300,6 +1312,14 @@ describe(`${envName}: Test BBcTransaction`, () => {
     const transactionData = helper.fromHexString(transactionHexString);
     const transactionUnpack = new BBcTransaction(1.0, IDsLength);
     await transactionUnpack.unpack(transactionData);
+  });
+
+  it('load transaction for timestamp', async () => {
+    const transactionHexString = '000002000000253c3d1e70010000180001005d0000000600c3f9f38b8756000001000800693792d5850481d3000000003f0000001000e7b00457bca98eafa46ae41be2e6f3220800730201e5f80b4a5709008a596810292bfe190a00000000000010006576656e743a61737365745f332d31390100280000000600c3f9f38b87561800a0a1132e498f072dd70a6482a29df3c63892688353e624a80000010000000400880000000600c3f9f38b875601002e001800a0a1132e498f072dd70a6482a29df3c63892688353e624a80100100020dc0c25b916762a8b894d906b287dd6420000001000950461298819c46cea713d7dd5c1b3920800693792d5850481d30900d287529b274cda521b000000000000130072656c6174696f6e3a61737365745f312d31390000000000000000b800000006001caa82dfdf7102002e001800a0a1132e498f072dd70a6482a29df3c63892688353e624a80100100020dc0c25b916762a8b894d906b287dd62e001800f476a8a94a05af58f4c12fe52ce5c460d292d559ca3fdf47010010001fb9d6cc70f360e634590009d7a03ea6420000001000ff51cc11e99d1f752ca32efb999a51730800730201e5f80b4a570900390f30b5e1f7f6cf71000000000000130072656c6174696f6e3a61737365745f322d313900000000000000008b0000000600c3f9f38b875602002e001800f476a8a94a05af58f4c12fe52ce5c460d292d559ca3fdf47010010001fb9d6cc70f360e634590009d7a03ea61c001800f476a8a94a05af58f4c12fe52ce5c460d292d559ca3fdf47000000000000270000001000a3bcf8ed735ab5f60929a9785d0d7d33130072656c6174696f6e3a61737365745f342d3139000000009000000006001caa82dfdf7101002e001800f476a8a94a05af58f4c12fe52ce5c460d292d559ca3fdf47010010001fb9d6cc70f360e634590009d7a03ea600000000000000004a000000040010003cc20b5c718c28ee4ccf39107a7d2ec91000119ca37c506767c908750f625c0163161000cdee0238d98753e0ffe4d1e04206ceb710006eb4d400b9dced214198210da070bc6301001a00000002000800693792d5850481d300000800730201e5f80b4a57010001003c000000200082f10651e04288b6ffea5c5ea129244dcf887e25bf939ca302d57c87ed6d16591800f476a8a94a05af58f4c12fe52ce5c460d292d559ca3fdf4702004c0000000200000000000000000200000e0de30160200b70cbe84d547f4df8e84ba201657a2a32e691c422bff108c7783def172f39474f483225bf1e4b6b798a742029d0b5397e38fc766a6cd7382e864c0000000200000000000000000200002724da9cede92cd80322576d7b7e8f095403d8d8499ad9b7bd32348ccec6f45389cdc92d355009672dd779845f6d470ab60bfd6777a4b613883ba6504a30c073';
+    const transactionData = helper.fromHexString(transactionHexString);
+    const transactionUnpack = new BBcTransaction(1.0, IDsLength);
+    await transactionUnpack.unpack(transactionData);
+
   });
 
   it('test sign transaction1', async () => {
@@ -1374,5 +1394,5 @@ async function getKeyPair(){
   let keyPair = new KeyPair();
   await keyPair.generate();
   return keyPair;
-};
+}
 

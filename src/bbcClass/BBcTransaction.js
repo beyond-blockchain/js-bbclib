@@ -24,7 +24,8 @@ export class BBcTransaction {
   constructor(version=1.0, idsLengthConf=IDsLength) {
     this.idsLength = idsLengthConf;
     this.version = cloneDeep(version);
-    this.timestamp = (new BN(date.getTime())).mul(new BN(1000000)); //timestampはミリ秒なので nano秒へ変換
+    this.timestamp = (new BN(date.getTime())); //timestampはミリ秒なので nano秒へ変換
+    // this.timestamp = (new BN(date.getTime())).mul(new BN(65536)); //timestampはミリ秒なので nano秒へ変換
     this.events = [];
     this.references = [];
     this.relations = [];
@@ -143,7 +144,7 @@ export class BBcTransaction {
     const jsonData = {
       idsLength: this.idsLength,
       version: this.version,
-      timestamp: jseu.encoder.arrayBufferToHexString(new Uint8Array(this.timestamp.toArray('big', 8))),
+      timestamp: jseu.encoder.arrayBufferToHexString(new Uint8Array(this.timestamp.toArray('le', 8))),
       events,
       references,
       relations,
@@ -164,7 +165,7 @@ export class BBcTransaction {
   async loadJSON(_jsonData) {
     this.version = _jsonData.version;
     this.idsLength = _jsonData.idsLength;
-    this.timestamp = new BN(jseu.encoder.hexStringToArrayBuffer(_jsonData.timestamp));
+    this.timestamp = new BN(jseu.encoder.hexStringToArrayBuffer(_jsonData.timestamp), 'le');
     const events = [];
     if (_jsonData.events.length > 0) {
       for (let i = 0; i < _jsonData.events.length; i++) {
@@ -532,7 +533,7 @@ export class BBcTransaction {
     let binaryData = [];
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
-    binaryData = binaryData.concat(this.timestamp.toArray('big', 8));
+    binaryData = binaryData.concat(this.timestamp.toArray('le', 8));
     binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
@@ -578,7 +579,7 @@ export class BBcTransaction {
     let binaryData = [];
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.version, 4)));
-    binaryData = binaryData.concat(this.timestamp.toArray('little', 8));
+    binaryData = binaryData.concat(this.timestamp.toArray('le', 8));
     binaryData = binaryData.concat(Array.from(helper.hbo(this.idsLength.transactionId, 2)));
 
     binaryData = binaryData.concat(Array.from(helper.hbo(this.events.length, 2)));
@@ -644,7 +645,9 @@ export class BBcTransaction {
 
     posStart = posEnd;
     posEnd = posEnd + 8;
-    this.timestamp = new BN(_data.slice(posStart, posEnd));
+    const number = _data.slice(posStart, posEnd);
+    this.timestamp = new BN(number, 'le');
+
     posStart = posEnd;
     posEnd = posEnd + 2; // uint16
     this.idsLength.transactionId = helper.hboToInt16(_data.slice(posStart, posEnd));
@@ -790,5 +793,9 @@ export class BBcTransaction {
       await sig.addSignatureAndPublicKey(s, null);
     }
     return this.addSignatureObject(_userId, sig);
+  }
+
+  getUnixTime(){
+    return this.timestamp.toNumber();
   }
 }
