@@ -4,7 +4,7 @@
 const common = require('./webpack.common.js');
 const fs = require('fs');
 const webpack = require('webpack');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const jsdom = require('jsdom');
 
 // webpack main configration
@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
   if (argv.mode !== 'development') throw new Error('Not development mode!!');
   ////////////////////////////////////////////////////////////////////////
   // library build setting
-  const config = merge.smart(common.webpackConfig, webpackConfig);
+  const config = merge([common.webpackConfig, webpackConfig]);
 
   ////////////////////////////////////////////////////////////////////////
   // test bundle build setting
