@@ -73,7 +73,7 @@
   "dependencies": {
     "@babel/runtime": "~7.14.0",
     "bn.js": "~5.2.0",
-    "js-crypto-utils": "0.18.3",
+    "js-crypto-utils": "1.0.4",
     "js-encoding-utils": "0.6.2",
     "lodash.clonedeep": "~4.5.0"
   },
